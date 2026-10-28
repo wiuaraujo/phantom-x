@@ -9,7 +9,7 @@ import {
   MATRIX_TECH_HUBS,
   TechHub,
 } from "./worldDotData";
-import { ZoomIn, ZoomOut, RotateCcw, Play, Pause, Globe } from "lucide-react";
+import { ZoomIn, ZoomOut, RotateCcw, Play, Pause } from "lucide-react";
 import { getCountryFlag } from "@/lib/geoFlags";
 
 interface DigitalMatrixWorldMapProps {
@@ -36,13 +36,13 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // 360-degree rotation and zoom state
+  // 360-degree rotation and zoom state (clamped to prevent square cutout)
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isAutoRotate, setIsAutoRotate] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  // High-performance refs for 60 FPS animation loop
+  // High-performance animation refs
   const rotationRef = useRef(0);
   const zoomRef = useRef(1);
   const panRef = useRef({ x: 0, y: 0 });
@@ -104,7 +104,6 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
   }, []);
 
   const [hoveredNode, setHoveredNode] = useState<TechHub | null>(null);
-  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
   // Check if account has active traffic configured
   const hasConfiguredTraffic = useMemo(() => {
@@ -131,21 +130,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     }).filter((h) => h.hasActivity || selectedCountry === h.code);
   }, [geoData, hasConfiguredTraffic, selectedCountry]);
 
-  // 360-degree cylindrical projection position calculator
-  const getProjectedPoint = useCallback(
-    (col: number, row: number, rot: number, cx: number, cy: number, cellW: number, cellH: number, startY: number) => {
-      // 360-degree horizontal wrapping
-      const diff = (((col - rot) % MATRIX_COLS) + MATRIX_COLS) % MATRIX_COLS - MATRIX_COLS / 2;
-      const u = diff / (MATRIX_COLS / 2); // [-1, 1]
-
-      const px = cx + diff * cellW;
-      const py = startY + row * cellH;
-      return { x: px, y: py, u };
-    },
-    []
-  );
-
-  // Wheel zoom listener
+  // Wheel zoom listener: clamped so zoom-out never cuts off or shrinks into a box
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -154,8 +139,9 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       if (!interactive) return;
       e.preventDefault();
       e.stopPropagation();
-      const zoomDelta = e.deltaY > 0 ? -0.12 : 0.12;
-      setZoom((z) => Math.min(Math.max(0.8, z + zoomDelta), 3.5));
+      // Scroll down (para trás / menos): does not shrink below 1.0 (prevents square cutouts)
+      const zoomDelta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom((z) => Math.min(Math.max(1.0, z + zoomDelta), 3.0));
     };
 
     container.addEventListener("wheel", handleNativeWheel, { passive: false });
@@ -164,7 +150,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     };
   }, [interactive]);
 
-  // Main Cyber-Stipple Vector Animation Loop (60 FPS)
+  // Main Cyber-Stipple Vector Animation Loop (60 FPS, Infinite Seamless Tiling)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -196,9 +182,9 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       ctx.save();
       ctx.scale(dpr, dpr);
 
-      // 1. Deep Midnight Cyber Background with Ambient Vignette
+      // 1. Clean Deep Midnight Cyber Background with Soft Ambient Radial Gradient
       const isLight = document.documentElement.classList.contains("light");
-      const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, Math.max(w, h) * 0.8);
+      const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, Math.max(w, h) * 0.85);
       if (isLight) {
         bgGrad.addColorStop(0, "#ffffff");
         bgGrad.addColorStop(0.5, "#fafafa");
@@ -213,58 +199,56 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, w, h);
 
-      // 2. Compute Canvas Bounds & Transforms
-      const currentZoom = zoomRef.current;
+      // 2. Compute Proportional Coordinates with Infinite Scale
+      const currentZoom = Math.max(1.0, zoomRef.current);
       const currentPan = panRef.current;
       const currentRot = rotationRef.current;
 
       const cx = w / 2 + currentPan.x;
       const cy = h / 2 + currentPan.y;
 
-      const usableW = Math.min(w * 0.94, h * 2.05) * currentZoom;
-      const usableH = usableW * (MATRIX_ROWS / MATRIX_COLS);
-      const cellW = usableW / MATRIX_COLS;
-      const cellH = usableH / MATRIX_ROWS;
-      const startY = cy - usableH / 2;
+      // Scale map to comfortably fill the container vertically
+      const cellH = ((h * 0.94) / MATRIX_ROWS) * currentZoom;
+      const cellW = cellH * 1.08;
+      const worldWidth = MATRIX_COLS * cellW;
+      const startY = cy - (MATRIX_ROWS / 2) * cellH;
 
-      // 3. Subtle Cyber Coordinate Horizon & Grid Lines
+      // 3. Subtle Cyber Coordinate Equator Line (Unclipped, spans full width)
       ctx.save();
       ctx.setLineDash([2, 6]);
-      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.06)";
+      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0.05)";
       ctx.lineWidth = 1;
-
-      // Equator line
       const equatorY = startY + (MATRIX_ROWS / 2) * cellH;
       ctx.beginPath();
-      ctx.moveTo(cx - usableW / 2, equatorY);
-      ctx.lineTo(cx + usableW / 2, equatorY);
+      ctx.moveTo(0, equatorY);
+      ctx.lineTo(w, equatorY);
       ctx.stroke();
-
-      // Meridians
-      for (let m = -2; m <= 2; m++) {
-        const mx = cx + m * (usableW / 4);
-        ctx.beginPath();
-        ctx.moveTo(mx, startY);
-        ctx.lineTo(mx, startY + usableH);
-        ctx.stroke();
-      }
       ctx.setLineDash([]);
       ctx.restore();
 
-      // 4. Batch Draw 6,105 Stipple Halftone Dots (Exact reference style!)
+      // 4. Batch Draw 6,105 Stipple Halftone Dots with INFINITE HORIZONTAL REPEAT
+      // No matter how far you drag or zoom, the continents tile infinitely across the entire screen!
       const baseDotSize = Math.max(1.3, Math.min(cellW * 0.72, cellH * 0.72));
-
-      // Draw standard continent dots in single high-performance path
-      ctx.fillStyle = isLight ? "rgba(24, 24, 27, 0.75)" : "rgba(240, 244, 255, 0.78)";
+      ctx.fillStyle = isLight ? "rgba(24, 24, 27, 0.76)" : "rgba(240, 244, 255, 0.78)";
       ctx.beginPath();
+
+      // Calculate how many world copies (tiles) are visible across the screen
+      const minTile = Math.floor((-80 - cx) / worldWidth) - 1;
+      const maxTile = Math.ceil((w + 80 - cx) / worldWidth) + 1;
 
       for (let i = 0; i < WORLD_MATRIX_DOTS.length; i++) {
         const [col, row] = WORLD_MATRIX_DOTS[i];
-        const pt = getProjectedPoint(col, row, currentRot, cx, cy, cellW, cellH, startY);
+        // Relative base X with rotation wrap
+        const relCol = ((((col - currentRot) % MATRIX_COLS) + MATRIX_COLS) % MATRIX_COLS) - MATRIX_COLS / 2;
+        const baseX = cx + relCol * cellW;
+        const py = startY + row * cellH;
 
-        // Render dot if within visible horizontal window (with margin)
-        if (pt.x >= -20 && pt.x <= w + 20) {
-          ctx.rect(pt.x - baseDotSize / 2, pt.y - baseDotSize / 2, baseDotSize, baseDotSize);
+        // Tile horizontally so the map visualizes infinitely without cutouts
+        for (let tile = minTile; tile <= maxTile; tile++) {
+          const px = baseX + tile * worldWidth;
+          if (px >= -15 && px <= w + 15) {
+            ctx.rect(px - baseDotSize / 2, py - baseDotSize / 2, baseDotSize, baseDotSize);
+          }
         }
       }
       ctx.fill();
@@ -289,12 +273,17 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
           const h1 = activeHubNodes.find((h) => h.name === from);
           const h2 = activeHubNodes.find((h) => h.name === to);
           if (h1 && h2) {
-            const pt1 = getProjectedPoint(h1.col, h1.row, currentRot, cx, cy, cellW, cellH, startY);
-            const pt2 = getProjectedPoint(h2.col, h2.row, currentRot, cx, cy, cellW, cellH, startY);
+            const relCol1 = ((((h1.col - currentRot) % MATRIX_COLS) + MATRIX_COLS) % MATRIX_COLS) - MATRIX_COLS / 2;
+            const pt1X = cx + relCol1 * cellW;
+            const pt1Y = startY + h1.row * cellH;
+
+            const relCol2 = ((((h2.col - currentRot) % MATRIX_COLS) + MATRIX_COLS) % MATRIX_COLS) - MATRIX_COLS / 2;
+            const pt2X = cx + relCol2 * cellW;
+            const pt2Y = startY + h2.row * cellH;
 
             // Arc curve
-            const midX = (pt1.x + pt2.x) / 2;
-            const midY = Math.min(pt1.y, pt2.y) - Math.abs(pt2.x - pt1.x) * 0.22;
+            const midX = (pt1X + pt2X) / 2;
+            const midY = Math.min(pt1Y, pt2Y) - Math.abs(pt2X - pt1X) * 0.22;
 
             ctx.save();
             ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.25)" : "rgba(255, 255, 255, 0.3)";
@@ -302,15 +291,15 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
             ctx.setLineDash([3, 4]);
 
             ctx.beginPath();
-            ctx.moveTo(pt1.x, pt1.y);
-            ctx.quadraticCurveTo(midX, midY, pt2.x, pt2.y);
+            ctx.moveTo(pt1X, pt1Y);
+            ctx.quadraticCurveTo(midX, midY, pt2X, pt2Y);
             ctx.stroke();
 
             // Traveling Light Pulse along Arc
             ctx.setLineDash([]);
             const t = particleOffset;
-            const px = Math.pow(1 - t, 2) * pt1.x + 2 * (1 - t) * t * midX + Math.pow(t, 2) * pt2.x;
-            const py = Math.pow(1 - t, 2) * pt1.y + 2 * (1 - t) * t * midY + Math.pow(t, 2) * pt2.y;
+            const px = Math.pow(1 - t, 2) * pt1X + 2 * (1 - t) * t * midX + Math.pow(t, 2) * pt2X;
+            const py = Math.pow(1 - t, 2) * pt1Y + 2 * (1 - t) * t * midY + Math.pow(t, 2) * pt2Y;
 
             ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
             ctx.beginPath();
@@ -321,10 +310,15 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
           }
         });
 
-        // B. Target Nodes with Concentric Sonar Rings & Callout Tags
+        // B. Target Nodes with Concentric Sonar Rings & Callout Tags WITH FLAGS
+        // "mantenha as bandeirinhas também das cidades, dos estados, dos países no caso"
         activeHubNodes.forEach((hub, idx) => {
-          const pt = getProjectedPoint(hub.col, hub.row, currentRot, cx, cy, cellW, cellH, startY);
-          if (pt.x < -60 || pt.x > w + 60) return;
+          const relCol = ((((hub.col - currentRot) % MATRIX_COLS) + MATRIX_COLS) % MATRIX_COLS) - MATRIX_COLS / 2;
+          const ptX = cx + relCol * cellW;
+          const ptY = startY + hub.row * cellH;
+
+          // Only render if near the visible screen
+          if (ptX < -60 || ptX > w + 60) return;
 
           const isSelected = selectedCountry === hub.code;
           const nodeColor = hub.color || (isLight ? "#0f0f12" : "#ffffff");
@@ -332,14 +326,14 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
           // 1. Center glowing dot
           ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+          ctx.arc(ptX, ptY, 3, 0, Math.PI * 2);
           ctx.fill();
 
           // 2. Inner ring
           ctx.strokeStyle = nodeColor;
           ctx.lineWidth = 1.5;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 6.5, 0, Math.PI * 2);
+          ctx.arc(ptX, ptY, 6.5, 0, Math.PI * 2);
           ctx.stroke();
 
           // 3. Concentric Expanding Radar Waves
@@ -351,25 +345,24 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
             : `rgba(255, 255, 255, ${Math.max(0, 0.65 - wave1 * 0.65)})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 8 + wave1 * 14, 0, Math.PI * 2);
+          ctx.arc(ptX, ptY, 8 + wave1 * 14, 0, Math.PI * 2);
           ctx.stroke();
 
           ctx.strokeStyle = isLight
             ? `rgba(15, 15, 18, ${Math.max(0, 0.45 - wave2 * 0.45)})`
             : `rgba(255, 255, 255, ${Math.max(0, 0.5 - wave2 * 0.5)})`;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 14 + wave2 * 18, 0, Math.PI * 2);
+          ctx.arc(ptX, ptY, 14 + wave2 * 18, 0, Math.PI * 2);
           ctx.stroke();
 
-          // 4. Cyber HUD Callout Card with Leader Line (Exact Reference Style!)
-          // Draw callout for selected country or key active hubs
+          // 4. Cyber HUD Callout Card with Leader Line & Country/State Flag
           const shouldShowCard = isSelected || idx % 2 === 0 || w > 1024;
           if (shouldShowCard && w >= 640) {
             const cardW = 148;
             const cardH = 50;
-            const isLeft = pt.x > w * 0.65;
-            const cardX = isLeft ? pt.x - cardW - 35 : pt.x + 35;
-            const cardY = pt.y - (idx % 2 === 0 ? 30 : -10);
+            const isLeft = ptX > w * 0.65;
+            const cardX = isLeft ? ptX - cardW - 35 : ptX + 35;
+            const cardY = ptY - (idx % 2 === 0 ? 30 : -10);
 
             // Angled Leader Line from node to card
             const elbowX = isLeft ? cardX + cardW + 12 : cardX - 12;
@@ -379,12 +372,12 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
             ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.45)";
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(pt.x, pt.y);
+            ctx.moveTo(ptX, ptY);
             ctx.lineTo(elbowX, elbowY);
             ctx.lineTo(isLeft ? cardX + cardW : cardX, elbowY);
             ctx.stroke();
 
-            // Tiny anchor dot at node end of leader
+            // Tiny anchor dot
             ctx.fillStyle = nodeColor;
             ctx.beginPath();
             ctx.arc(elbowX, elbowY, 1.8, 0, Math.PI * 2);
@@ -407,7 +400,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
               ctx.strokeRect(cardX, cardY, cardW, cardH);
             }
 
-            // Flag badge tab on top-right of card
+            // Flag badge tab on top-right of card (MANTIDO!)
             const flag = hub.flag || getCountryFlag(hub.code);
             ctx.font = "11px sans-serif";
             ctx.fillText(flag, isLeft ? cardX + 6 : cardX + cardW - 20, cardY + 14);
@@ -430,52 +423,6 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         });
       }
 
-      // 6. Corner HUD Overlays (Exact replica of Reference Image)
-      // A. Bottom-Left Terminal Ingestion Box
-      ctx.save();
-      const terminalW = 220;
-      const terminalH = 68;
-      const termX = 14;
-      const termY = h - terminalH - 14;
-
-      ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.9)" : "rgba(6, 7, 10, 0.88)";
-      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.18)";
-      ctx.lineWidth = 1;
-
-      if (ctx.roundRect) {
-        ctx.beginPath();
-        ctx.roundRect(termX, termY, terminalW, terminalH, 4);
-        ctx.fill();
-        ctx.stroke();
-      } else {
-        ctx.fillRect(termX, termY, terminalW, terminalH);
-        ctx.strokeRect(termX, termY, terminalW, terminalH);
-      }
-
-      ctx.font = "bold 8.5px 'JetBrains Mono', monospace";
-      ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
-      ctx.fillText("PHANTOM-X EDGE AUDITOR V2.4", termX + 8, termY + 14);
-
-      ctx.font = "8px 'JetBrains Mono', monospace";
-      ctx.fillStyle = isLight ? "#52525b" : "#a1a1aa";
-      ctx.fillText("ORIGIN: IP 177.136.24.*** [SP/BR]", termX + 8, termY + 27);
-      ctx.fillText("DESTINATION: PROXY 200 OK (DIRECT)", termX + 8, termY + 39);
-      ctx.fillText("ASNS BLOQUEADOS: 14 REDES (META/AWS)", termX + 8, termY + 51);
-
-      ctx.fillStyle = isLight ? "#047857" : "#34d399";
-      ctx.fillText("STATUS: ZERO REDIRECTS • < 14ms", termX + 8, termY + 62);
-      ctx.restore();
-
-      // B. Top-Right Telemetry Coordinates Metadata
-      ctx.save();
-      ctx.font = "8px 'JetBrains Mono', monospace";
-      ctx.fillStyle = isLight ? "rgba(15, 15, 18, 0.65)" : "rgba(255, 255, 255, 0.55)";
-      ctx.textAlign = "right";
-      ctx.fillText("CLUSTER: EDGE-PHANTOM-01", w - 14, 20);
-      ctx.fillText("MODE: REVERSE PROXY 200 OK", w - 14, 32);
-      ctx.fillText("ROTATION: 360° CYLINDRICAL WRAP", w - 14, 44);
-      ctx.restore();
-
       ctx.restore();
       animId = requestAnimationFrame(render);
     };
@@ -484,7 +431,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     return () => {
       cancelAnimationFrame(animId);
     };
-  }, [activeHubNodes, hasConfiguredTraffic, selectedCountry, compact, getProjectedPoint]);
+  }, [activeHubNodes, hasConfiguredTraffic, selectedCountry, compact]);
 
   // 360-degree Interactive Mouse & Touch Dragging
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -513,7 +460,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         dragStartRef.current.moved = true;
       }
 
-      // Horizontal dragging smoothly wraps around 360 degrees
+      // Horizontal dragging smoothly wraps around 360 degrees infinitely
       const w = canvas.clientWidth || 900;
       const rotDelta = (dx / (w * 0.8)) * MATRIX_COLS;
       rotationRef.current =
@@ -543,16 +490,16 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     const cx = w / 2 + pan.x;
     const cy = h / 2 + pan.y;
 
-    const usableW = Math.min(w * 0.94, h * 2.05) * zoom;
-    const usableH = usableW * (MATRIX_ROWS / MATRIX_COLS);
-    const cellW = usableW / MATRIX_COLS;
-    const cellH = usableH / MATRIX_ROWS;
-    const startY = cy - usableH / 2;
+    const cellH = ((h * 0.94) / MATRIX_ROWS) * zoom;
+    const cellW = cellH * 1.08;
+    const startY = cy - (MATRIX_ROWS / 2) * cellH;
 
     let matched: TechHub | null = null;
     for (const hub of activeHubNodes) {
-      const pt = getProjectedPoint(hub.col, hub.row, rotationRef.current, cx, cy, cellW, cellH, startY);
-      const dist = Math.hypot(mouseX - pt.x, mouseY - pt.y);
+      const relCol = ((((hub.col - rotationRef.current) % MATRIX_COLS) + MATRIX_COLS) % MATRIX_COLS) - MATRIX_COLS / 2;
+      const ptX = cx + relCol * cellW;
+      const ptY = startY + hub.row * cellH;
+      const dist = Math.hypot(mouseX - ptX, mouseY - ptY);
       if (dist < 22) {
         matched = hub;
         break;
@@ -563,7 +510,6 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       if (hoveredNode?.name !== matched.name) {
         setHoveredNode(matched);
       }
-      setTooltipPos({ x: mouseX, y: mouseY });
     } else if (hoveredNode) {
       setHoveredNode(null);
     }
@@ -640,7 +586,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         e.touches[0].clientY - e.touches[1].clientY
       );
       const ratio = currentDist / touchStartRef.current.dist;
-      setZoom((z) => Math.min(Math.max(0.8, z * ratio), 3.5));
+      setZoom((z) => Math.min(Math.max(1.0, z * ratio), 3.0));
       touchStartRef.current.dist = currentDist;
     } else if (e.touches.length === 1 && isDragging) {
       const touch = e.touches[0];
@@ -680,18 +626,18 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         }`}
       />
 
-      {/* 360° Controls Overlay */}
+      {/* Discrete Controls Overlay (Apenas Zoom, Rotação e Reset - sem escritas extras) */}
       {showControls && (
         <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center space-x-1 bg-brand-surface/90 backdrop-blur-md border border-brand-border p-1 rounded-lg shadow-glow-sm z-20">
           <button
-            onClick={() => setZoom((z) => Math.min(z + 0.3, 3.5))}
+            onClick={() => setZoom((z) => Math.min(z + 0.3, 3.0))}
             title="Aproximar (+)"
             className="p-1 text-brand-secondary hover:text-white transition rounded"
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </button>
           <button
-            onClick={() => setZoom((z) => Math.max(z - 0.3, 0.8))}
+            onClick={() => setZoom((z) => Math.max(z - 0.3, 1.0))}
             title="Afastar (-)"
             className="p-1 text-brand-secondary hover:text-white transition rounded"
           >
@@ -713,24 +659,13 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
               rotationRef.current = 0;
               if (onSelectCountry) onSelectCountry(null);
             }}
-            title="Redefinir visualização 360º"
+            title="Redefinir visualização"
             className="p-1 text-brand-secondary hover:text-white transition rounded"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
-
-      {/* Bottom Telemetry Legend Bar */}
-      <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-4 flex items-center space-x-1.5 sm:space-x-3 bg-brand-surface/85 backdrop-blur-md border border-brand-border px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs text-brand-secondary font-sans z-20 max-w-[65%] sm:max-w-none truncate">
-        <div className="flex items-center space-x-1.5 shrink-0">
-          <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white animate-pulse shrink-0" />
-          <span className="text-white font-medium text-[10px] sm:text-[11px] truncate">Matriz Global 360º</span>
-        </div>
-        <div className="hidden sm:flex items-center space-x-1.5 text-[10px] text-brand-muted">
-          <span>Arraste para girar 360º • Scroll para zoom</span>
-        </div>
-      </div>
     </div>
   );
 };

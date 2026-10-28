@@ -681,7 +681,7 @@ export const SystemPreview: React.FC = () => {
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-3 text-xs">
                           <div className="flex items-center space-x-2 font-medium text-brand-white">
                             <Radio className="w-3.5 h-3.5 text-brand-white" />
-                            <span className="tracking-wide text-xs">MATRIZ DE TELEMETRIA GLOBAL EM TEMPO REAL</span>
+                            <span className="tracking-wide text-xs">TELEMETRIA GLOBAL EM TEMPO REAL</span>
                           </div>
                           <span className="text-brand-muted text-[11px]">
                             {selectedCountry

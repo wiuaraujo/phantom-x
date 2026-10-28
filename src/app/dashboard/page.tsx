@@ -118,27 +118,8 @@ export default function DashboardOverview() {
           ======================================================================
         */}
         <div className="relative w-full h-[380px] sm:h-[480px] lg:h-[620px] rounded-2xl bg-brand-surface border border-brand-border overflow-hidden shadow-sm flex flex-col">
-          {/* Panoramic Map Header Floating Overlay (Compact & responsive on mobile) */}
-          <div className="absolute top-0 inset-x-0 z-20 p-2.5 sm:p-5 flex items-center justify-between gap-2 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none">
-            {/* Title & Live Badge */}
-            <div className="flex items-center space-x-2 pointer-events-auto min-w-0">
-              <div className="flex items-center space-x-1.5 sm:space-x-2 bg-brand-surface/90 backdrop-blur-md border border-brand-border px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-mono shrink-0">
-                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-brand-white font-semibold tracking-wider">MATRIZ GLOBAL 360°</span>
-              </div>
-              <div className="hidden md:flex items-center space-x-2 text-[11px] text-brand-muted font-mono bg-brand-surface/60 px-2.5 py-1 rounded-md border border-brand-border/60">
-                {geoData.length > 0 ? (
-                  <>
-                    <span>{geoData.length} {geoData.length === 1 ? "nó ativo" : "nós ativos"}</span>
-                    <span>•</span>
-                    <span>&lt; 18ms latência</span>
-                  </>
-                ) : (
-                  <span>Aguardando Ingestão de Tráfego • Nós em Standby</span>
-                )}
-              </div>
-            </div>
-
+          {/* Panoramic Map Header Floating Overlay (Limpo, sem textos de matriz global) */}
+          <div className="absolute top-0 inset-x-0 z-20 p-2.5 sm:p-5 flex items-center justify-end gap-2 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none">
             {/* Actions Bar */}
             <div className="flex items-center space-x-1.5 pointer-events-auto shrink-0">
               {selectedCountry && (
