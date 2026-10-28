@@ -8,6 +8,7 @@ export interface RegisteredUser {
   email: string; // normalizado em minúsculas
   phone?: string; // Telefone com DDD/DDI
   phoneCountryCode?: string; // DDI selecionado (ex: +55)
+  emailVerified?: boolean; // Confirmação obrigatória via token de 6 dígitos
   passwordHash: string;
   salt: string;
   role: "admin" | "operator";
@@ -31,6 +32,14 @@ export interface AuthResult {
   session?: AuthSession;
   error?: string;
   accountNotFound?: boolean;
+  requiresEmailVerification?: boolean;
+  unverifiedUser?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    phoneCountryCode?: string;
+  };
 }
 
 const PEPPER = "phantom_x_cybersecurity_layer_2026";
@@ -51,6 +60,7 @@ const SEED_USERS: RegisteredUser[] = [
     email: "admin@phantomx.pro",
     phone: "(11) 99999-9999",
     phoneCountryCode: "+55",
+    emailVerified: false, // Força confirmação no primeiro acesso!
     passwordHash: MASTER_ADMIN_HASH,
     salt: MASTER_ADMIN_SALT,
     role: "admin",
@@ -126,7 +136,10 @@ export const auth = {
         localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(SEED_USERS));
         return SEED_USERS;
       }
-      return parsed;
+      return parsed.map((u: any) => ({
+        ...u,
+        emailVerified: u.emailVerified === true,
+      }));
     } catch {
       return SEED_USERS;
     }
@@ -230,6 +243,22 @@ export const auth = {
       };
     }
 
+    // 3.5. VALIDAÇÃO OBRIGATÓRIA: E-MAIL NÃO CONFIRMADO (EXIGE OTP 6 NÚMEROS)
+    if (user.emailVerified !== true) {
+      return {
+        success: false,
+        requiresEmailVerification: true,
+        unverifiedUser: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          phoneCountryCode: user.phoneCountryCode,
+        },
+        error: "Confirmação de e-mail obrigatória. Insira o token de 6 números enviado para o seu e-mail.",
+      };
+    }
+
     // 4. SUCESSO: Login Válido e Autenticado
     user.failedAttempts = 0;
     user.lockoutUntil = null;
@@ -251,6 +280,73 @@ export const auth = {
         phoneCountryCode: user.phoneCountryCode || "+55",
         role: user.role === "admin" ? "admin" : "member",
         timezone: user.timezone || "America/Sao_Paulo",
+        emailVerified: true,
+        organizationId: user.organizationId,
+        organizationName: user.organizationName,
+        createdAt: user.createdAt,
+      },
+      token,
+      expiresAt,
+    };
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      const maxAge = sessionDurationDays * 86400;
+      document.cookie = `phantom_token=${token}; path=/; max-age=${maxAge}; SameSite=Strict`;
+    }
+
+    return { success: true, session };
+  },
+
+  /**
+   * Confirma o e-mail de um usuário existente utilizando o token de 6 dígitos
+   * e gera a sessão autenticada.
+   */
+  async confirmEmailAndLogin(
+    userId: string,
+    code: string,
+    rememberMe = true
+  ): Promise<AuthResult> {
+    const users = this.getUsers();
+    const userIndex = users.findIndex((u) => u.id === userId);
+    if (userIndex === -1) {
+      return { success: false, error: "Usuário não encontrado no cofre." };
+    }
+
+    const user = users[userIndex];
+    const { verifyOtpCode } = await import("./emailService");
+    const verifyRes = verifyOtpCode(code, user.email);
+
+    if (!verifyRes.success) {
+      return {
+        success: false,
+        error: verifyRes.error || "Código de verificação incorreto.",
+      };
+    }
+
+    // Marca o e-mail como confirmado permanentemente!
+    user.emailVerified = true;
+    user.failedAttempts = 0;
+    user.lockoutUntil = null;
+    user.lastLoginAt = new Date().toISOString();
+    users[userIndex] = user;
+    this.saveUsers(users);
+
+    const sessionDurationDays = rememberMe ? 7 : 1;
+    const expiresAt = new Date(Date.now() + sessionDurationDays * 86400000).toISOString();
+    const token = generateSecureToken();
+
+    const session: AuthSession = {
+      user: {
+        id: user.id,
+        name: user.name,
+        nickname: user.nickname || user.name.split(" ")[0],
+        email: user.email,
+        phone: user.phone,
+        phoneCountryCode: user.phoneCountryCode || "+55",
+        role: user.role === "admin" ? "admin" : "member",
+        timezone: user.timezone || "America/Sao_Paulo",
+        emailVerified: true,
         organizationId: user.organizationId,
         organizationName: user.organizationName,
         createdAt: user.createdAt,
@@ -347,6 +443,7 @@ export const auth = {
       email: cleanEmail,
       phone: cleanPhone,
       phoneCountryCode,
+      emailVerified: true,
       passwordHash,
       salt,
       role: "operator",
@@ -385,6 +482,7 @@ export const auth = {
         phoneCountryCode: newUser.phoneCountryCode,
         role: "member",
         timezone: newUser.timezone,
+        emailVerified: true,
         organizationId: newUser.organizationId,
         organizationName: newUser.organizationName,
         createdAt: newUser.createdAt,
@@ -427,11 +525,14 @@ export const auth = {
 
       // Valida se o usuário ainda consta no cofre de registrados
       const users = this.getUsers();
-      const userExists = users.some((u) => u.id === session.user.id || u.email === session.user.email);
-      if (!userExists) {
+      const matchedUser = users.find((u) => u.id === session.user.id || u.email === session.user.email);
+      if (!matchedUser) {
         this.logout();
         return null;
       }
+
+      // Sincroniza o status real de confirmação de e-mail na sessão ativa
+      session.user.emailVerified = matchedUser.emailVerified === true;
 
       return session;
     } catch {

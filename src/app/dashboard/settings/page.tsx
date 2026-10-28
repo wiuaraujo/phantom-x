@@ -910,7 +910,17 @@ function SettingsPageContent() {
                   <div className="sm:col-span-2">
                     <label className="block text-brand-muted text-[11px] font-mono mb-1.5 flex items-center justify-between">
                       <span>E-MAIL DA CONTA</span>
-                      <span className="text-[10px] text-emerald-500 font-mono">Autenticado</span>
+                      {session?.user?.emailVerified ? (
+                        <span className="text-[10px] text-emerald-400 font-mono flex items-center space-x-1">
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span>E-mail Confirmado (Gmail)</span>
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-amber-400 font-mono flex items-center space-x-1">
+                          <ShieldAlert className="w-3 h-3 text-amber-400" />
+                          <span>Pendente de Confirmação</span>
+                        </span>
+                      )}
                     </label>
                     <input
                       type="email"

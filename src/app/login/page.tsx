@@ -22,6 +22,8 @@ import {
   KeyRound,
   UserPlus,
 } from "lucide-react";
+import { createVerificationToken } from "@/lib/emailService";
+import { EmailVerificationModal } from "@/components/auth/EmailVerificationModal";
 
 function LoginFormInner() {
   const router = useRouter();
@@ -35,6 +37,13 @@ function LoginFormInner() {
   const [error, setError] = useState<string | null>(null);
   const [accountNotFound, setAccountNotFound] = useState(false);
   const [authRequiredNotice, setAuthRequiredNotice] = useState(false);
+
+  // Email Verification OTP Modal State
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [unverifiedUser, setUnverifiedUser] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [activeCode, setActiveCode] = useState("");
+  const [expiresAt, setExpiresAt] = useState(0);
+  const [verificationLoading, setVerificationLoading] = useState(false);
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
@@ -68,6 +77,33 @@ function LoginFormInner() {
       const result = await auth.login(cleanId, password, rememberMe);
 
       if (!result.success) {
+        // Se a conta existe e a senha está correta, mas O E-MAIL AINDA NÃO FOI CONFIRMADO
+        if (result.requiresEmailVerification && result.unverifiedUser) {
+          setUnverifiedUser(result.unverifiedUser);
+
+          // Gera código de 6 números com expiração de 5 min
+          const record = createVerificationToken(result.unverifiedUser.email, result.unverifiedUser.name);
+          setActiveCode(record.code);
+          setExpiresAt(record.expiresAt);
+
+          // Dispara o e-mail de confirmação
+          try {
+            fetch("/api/v1/auth/send-verification", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: result.unverifiedUser.email,
+                name: result.unverifiedUser.name,
+              }),
+            }).catch(() => {});
+          } catch {}
+
+          // Abre o Pop-up Modal imediatamente!
+          setShowVerificationModal(true);
+          setLoading(false);
+          return;
+        }
+
         setError(result.error || "Credenciais inválidas. Verifique os dados e tente novamente.");
         if (result.accountNotFound) {
           setAccountNotFound(true);
@@ -82,6 +118,46 @@ function LoginFormInner() {
       setError("Ocorreu um erro no terminal de autenticação. Tente novamente.");
       setLoading(false);
     }
+  };
+
+  const handleConfirmVerification = async (inputCode: string) => {
+    if (!unverifiedUser) return;
+    setVerificationLoading(true);
+
+    try {
+      const res = await auth.confirmEmailAndLogin(unverifiedUser.id, inputCode, rememberMe);
+      if (!res.success) {
+        setVerificationLoading(false);
+        throw new Error(res.error || "Código de verificação incorreto.");
+      }
+
+      setShowVerificationModal(false);
+      const redirectTarget = searchParams.get("redirect") || "/dashboard";
+      router.push(redirectTarget);
+    } catch (err: any) {
+      setVerificationLoading(false);
+      throw err;
+    }
+  };
+
+  const handleResendVerification = async (): Promise<string> => {
+    if (!unverifiedUser) return "";
+    const record = createVerificationToken(unverifiedUser.email, unverifiedUser.name);
+    setActiveCode(record.code);
+    setExpiresAt(record.expiresAt);
+
+    try {
+      fetch("/api/v1/auth/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: unverifiedUser.email,
+          name: unverifiedUser.name,
+        }),
+      }).catch(() => {});
+    } catch {}
+
+    return record.code;
   };
 
   return (
@@ -298,6 +374,19 @@ function LoginFormInner() {
       <div className="text-center text-[10px] sm:text-[11px] font-mono text-brand-muted">
         Terminal protegido por SHA-256 com Salting e Detecção de Força Bruta
       </div>
+
+      {/* Modal de Verificação de Código de 6 Dígitos (Pop-up do Sistema) */}
+      <EmailVerificationModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        email={unverifiedUser?.email || ""}
+        name={unverifiedUser?.name || ""}
+        activeCode={activeCode}
+        expiresAt={expiresAt}
+        onConfirm={handleConfirmVerification}
+        onResend={handleResendVerification}
+        loading={verificationLoading}
+      />
     </div>
   );
 }

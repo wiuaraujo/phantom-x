@@ -49,6 +49,7 @@ export interface User {
   phoneCountryCode?: string;
   role: "admin" | "member" | "viewer";
   timezone?: string;
+  emailVerified?: boolean;
   organizationId: string;
   organizationName: string;
   createdAt: string;

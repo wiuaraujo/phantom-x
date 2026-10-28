@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { MobileAppNav } from "@/components/dashboard/MobileAppNav";
 import { DashboardNavProvider } from "@/components/dashboard/DashboardNavContext";
+import { EmailVerificationBanner } from "@/components/dashboard/EmailVerificationBanner";
 import { auth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
@@ -39,6 +40,7 @@ export default function DashboardLayout({
 
         {/* Main Content Area (with pb-20 on mobile to leave space for bottom bar) */}
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto pb-20 lg:pb-0">
+          <EmailVerificationBanner />
           {children}
         </div>
 
