@@ -5,6 +5,7 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { Logo } from "@/components/ui/Logo";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useLanguage } from "@/lib/i18n";
 import { ArrowRight, Menu, X } from "lucide-react";
 
@@ -44,6 +45,9 @@ export const Navbar: React.FC = () => {
 
         {/* Action Controls & Language Selector */}
         <div className="hidden md:flex items-center space-x-2.5">
+          {/* Dark / Light Theme Toggle */}
+          <ThemeToggle />
+
           {/* Minimalist Flag Language Selector */}
           <LanguageSelector />
 
@@ -62,8 +66,9 @@ export const Navbar: React.FC = () => {
           </Link>
         </div>
 
-        {/* Mobile Hamburger Button & Language Selector */}
+        {/* Mobile Hamburger Button, Theme Toggle & Language Selector */}
         <div className="flex md:hidden items-center space-x-2">
+          <ThemeToggle />
           <LanguageSelector />
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -90,7 +95,11 @@ export const Navbar: React.FC = () => {
               </Link>
             ))}
           </div>
-          <div className="pt-4 border-t border-brand-border flex flex-col space-y-2">
+          <div className="pt-4 border-t border-brand-border flex items-center justify-between">
+            <span className="text-xs text-brand-secondary">Tema da Interface</span>
+            <ThemeToggle showLabel />
+          </div>
+          <div className="pt-2 flex flex-col space-y-2">
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}

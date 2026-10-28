@@ -19,6 +19,7 @@ import {
   Send,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { MetricCards } from "../dashboard/MetricCards";
 import { DigitalMatrixWorldMap } from "../dashboard/DigitalMatrixWorldMap";
 import { TrafficCharts } from "../dashboard/TrafficCharts";
@@ -101,8 +102,9 @@ export const SystemPreview: React.FC = () => {
               <span className="text-white font-medium">console.phantomx.pro/dashboard</span>
             </div>
 
-            {/* Direct Link to Live Dashboard */}
+            {/* Direct Link to Live Dashboard & Theme Toggle */}
             <div className="flex items-center space-x-2 text-xs font-sans">
+              <ThemeToggle />
               <Link
                 href="/dashboard"
                 className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition"

@@ -20,6 +20,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
@@ -101,6 +102,10 @@ export const Sidebar: React.FC = () => {
 
       {/* Bottom Section */}
       <div className="p-2 md:p-3 border-t border-brand-border space-y-2">
+        <div className="flex items-center">
+          <ThemeToggle className="w-full flex justify-center py-2" showLabel={!collapsed} />
+        </div>
+
         {!collapsed && (
           <div className="px-3 py-2 rounded-xl bg-gradient-to-r from-neutral-900 to-brand-surface border border-brand-borderSubtle text-[11px] font-sans">
             <div className="text-brand-muted text-[10px] uppercase font-mono tracking-wider">Cluster</div>

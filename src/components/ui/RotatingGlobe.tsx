@@ -82,6 +82,7 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
 
       const centerX = size / 2;
       const centerY = size / 2;
+      const isLight = document.documentElement.classList.contains("light");
 
       // 1. Subtle Outer Atmospheric Glow
       const glowGrad = ctx.createRadialGradient(
@@ -92,18 +93,24 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
         centerY,
         radius * 1.25
       );
-      glowGrad.addColorStop(0, "rgba(255, 255, 255, 0.03)");
-      glowGrad.addColorStop(0.6, "rgba(255, 255, 255, 0.01)");
-      glowGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      if (isLight) {
+        glowGrad.addColorStop(0, "rgba(0, 0, 0, 0.04)");
+        glowGrad.addColorStop(0.6, "rgba(0, 0, 0, 0.01)");
+        glowGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
+      } else {
+        glowGrad.addColorStop(0, "rgba(255, 255, 255, 0.03)");
+        glowGrad.addColorStop(0.6, "rgba(255, 255, 255, 0.01)");
+        glowGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      }
       ctx.fillStyle = glowGrad;
       ctx.fillRect(0, 0, size, size);
 
       // 2. Translucent Sphere Silhouette
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(10, 12, 18, 0.45)";
+      ctx.fillStyle = isLight ? "rgba(240, 240, 244, 0.75)" : "rgba(10, 10, 12, 0.65)";
       ctx.fill();
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.08)";
       ctx.lineWidth = 1;
       ctx.stroke();
 
@@ -120,7 +127,7 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
       const frontPoints = rotatedPoints.filter((p) => p.z > 0);
 
       // Draw Back Points (Fainter, smaller)
-      ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+      ctx.fillStyle = isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)";
       ctx.beginPath();
       backPoints.forEach((p) => {
         const px = centerX + p.x;
@@ -135,7 +142,7 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
       ctx.rotate(0.35); // Incline
       ctx.beginPath();
       ctx.ellipse(0, 0, radius * 1.28, radius * 0.38, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)";
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 6]);
       ctx.stroke();
@@ -146,12 +153,12 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
       const orbY = Math.sin(orbitAngle) * (radius * 0.38);
       ctx.beginPath();
       ctx.arc(orbX, orbY, 3, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = isLight ? "#111111" : "#ffffff";
       ctx.fill();
       ctx.restore();
 
-      // Draw Front Points (Crisp, luminous white)
-      ctx.fillStyle = "rgba(240, 245, 255, 0.75)";
+      // Draw Front Points (Crisp titanium / white)
+      ctx.fillStyle = isLight ? "rgba(15, 15, 18, 0.85)" : "rgba(240, 245, 255, 0.75)";
       ctx.beginPath();
       frontPoints.forEach((p) => {
         const px = centerX + p.x;
@@ -173,10 +180,10 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
           const py = centerY + hy;
           const depthAlpha = Math.min(1, hz / (radius * 0.6));
 
-          // Center white pin
+          // Center pin
           ctx.beginPath();
           ctx.arc(px, py, 3, 0, Math.PI * 2);
-          ctx.fillStyle = "#ffffff";
+          ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
           ctx.fill();
 
           // Radar wave
@@ -184,7 +191,9 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
           const ringRadius = 4 + wave * 9;
           ctx.beginPath();
           ctx.arc(px, py, ringRadius, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - wave) * depthAlpha * 0.8})`;
+          ctx.strokeStyle = isLight
+            ? `rgba(15, 15, 18, ${(1 - wave) * depthAlpha * 0.7})`
+            : `rgba(255, 255, 255, ${(1 - wave) * depthAlpha * 0.8})`;
           ctx.lineWidth = 1;
           ctx.stroke();
 
@@ -195,8 +204,8 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
             const textW = ctx.measureText(label).width;
 
             // Mini glass pill
-            ctx.fillStyle = "rgba(10, 12, 18, 0.88)";
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+            ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.94)" : "rgba(10, 10, 12, 0.88)";
+            ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.25)";
             ctx.lineWidth = 0.8;
             ctx.beginPath();
             if (ctx.roundRect) {
@@ -207,7 +216,7 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
             ctx.fill();
             ctx.stroke();
 
-            ctx.fillStyle = "#ffffff";
+            ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
             ctx.fillText(label, px + 10, py + 3);
           }
         }

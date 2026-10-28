@@ -114,11 +114,19 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       ctx.scale(dpr, dpr);
 
       // 1. Deep Obsidian / Graphite Gradient Background (Unscaled, always ultra-smooth)
+      const isLight = document.documentElement.classList.contains("light");
       const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 25, w / 2, h / 2, Math.max(w, h) * 0.75);
-      bgGrad.addColorStop(0, "#141722");
-      bgGrad.addColorStop(0.35, "#0b0d13");
-      bgGrad.addColorStop(0.72, "#040507");
-      bgGrad.addColorStop(1, "#010102");
+      if (isLight) {
+        bgGrad.addColorStop(0, "#ffffff");
+        bgGrad.addColorStop(0.35, "#fafafa");
+        bgGrad.addColorStop(0.72, "#f4f4f5");
+        bgGrad.addColorStop(1, "#ededf0");
+      } else {
+        bgGrad.addColorStop(0, "#141414");
+        bgGrad.addColorStop(0.35, "#0d0d0d");
+        bgGrad.addColorStop(0.72, "#080808");
+        bgGrad.addColorStop(1, "#040404");
+      }
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, w, h);
 
@@ -138,7 +146,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
 
       // 2. Draw all 1,650 continental dots directly as native vector rectangles
       // Single GPU path batch fill: 0.05ms execution, razor-sharp at any zoom level (1x - 3.5x)!
-      ctx.fillStyle = "rgba(238, 244, 255, 0.72)";
+      ctx.fillStyle = isLight ? "rgba(20, 20, 24, 0.65)" : "rgba(238, 244, 255, 0.72)";
       ctx.beginPath();
       WORLD_MATRIX_DOTS.forEach(([col, row]) => {
         const px = marginX + col * cellW;
@@ -351,7 +359,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     <div
       ref={containerRef}
       style={{ touchAction: "none", overscrollBehavior: "contain" }}
-      className={`relative w-full h-full bg-[#010102] overflow-hidden select-none font-sans ${className}`}
+      className={`relative w-full h-full bg-brand-black overflow-hidden select-none font-sans ${className}`}
     >
       <canvas
         ref={canvasRef}
@@ -362,7 +370,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
-        className={`w-full h-full bg-[#010102] ${
+        className={`w-full h-full bg-brand-black ${
           interactive ? "cursor-grab active:cursor-grabbing" : ""
         }`}
       />

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Bell, CheckCircle2, ChevronDown, Radio } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 interface HeaderProps {
   title: string;
@@ -37,6 +38,9 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Action Controls */}
       <div className="flex items-center space-x-3">
+        {/* Theme Toggle (Dark / Light Mode) */}
+        <ThemeToggle />
+
         {/* Real Backend Connection Badge */}
         <div className="hidden sm:flex items-center space-x-2 bg-brand-surface border border-brand-border px-2.5 py-1 rounded-md text-[11px] font-mono">
           <span className="w-2 h-2 rounded-full bg-white animate-pulse" />

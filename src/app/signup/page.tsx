@@ -7,6 +7,7 @@ import { siteConfig } from "@/config/site";
 import { auth } from "@/lib/auth";
 import { Logo } from "@/components/ui/Logo";
 import { RotatingGlobe } from "@/components/ui/RotatingGlobe";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { TIMEZONE_REGIONS, DEFAULT_TIMEZONE } from "@/lib/timezones";
 import {
   Lock,
@@ -72,18 +73,18 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#030304] text-white flex flex-col lg:flex-row font-sans selection:bg-white selection:text-black">
+    <div className="min-h-screen w-full bg-brand-black text-brand-white flex flex-col lg:flex-row font-sans selection:bg-white selection:text-black">
       {/* 
         ========================================================================
         LADO ESQUERDO: SHOWCASE DINÂMICO COM GLOBO 3D, AUTORIDADE E RETENÇÃO
         ========================================================================
       */}
-      <div className="w-full lg:w-1/2 relative bg-gradient-to-br from-[#0c0e14] via-[#06070a] to-[#010102] border-b lg:border-b-0 lg:border-r border-white/10 p-6 sm:p-10 lg:p-12 flex flex-col justify-between overflow-hidden">
+      <div className="w-full lg:w-1/2 relative bg-gradient-to-br from-brand-surface via-brand-dark to-brand-black border-b lg:border-b-0 lg:border-r border-brand-border p-6 sm:p-10 lg:p-12 flex flex-col justify-between overflow-hidden">
         {/* Subtle Ambient Glow Effect */}
-        <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-60 h-60 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-white/[0.03] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-60 h-60 bg-white/[0.02] rounded-full blur-2xl pointer-events-none" />
 
-        {/* Top Header Logo */}
+        {/* Top Header Logo & Theme Toggle */}
         <div className="relative z-10 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group">
             <Logo size={36} className="filter drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]" />
@@ -96,9 +97,12 @@ export default function SignupPage() {
               </span>
             </div>
           </Link>
-          <div className="hidden sm:flex items-center space-x-2 text-[11px] font-mono text-brand-muted bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            <span>PoPs Operacionais Ativos</span>
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            <div className="hidden sm:flex items-center space-x-2 text-[11px] font-mono text-brand-muted bg-brand-surface px-2.5 py-1 rounded-full border border-brand-border">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span>PoPs Operacionais Ativos</span>
+            </div>
           </div>
         </div>
 
@@ -166,7 +170,7 @@ export default function SignupPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 relative overflow-y-auto">
         <div className="w-full max-w-md my-auto space-y-6">
           {/* Box de Cadastro */}
-          <div className="bg-gradient-to-b from-[#13161f]/95 via-[#0c0e14]/95 to-[#06070a]/95 border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-xl ring-1 ring-white/5">
+          <div className="bg-gradient-to-b from-brand-surface/95 via-brand-dark/95 to-brand-black/95 border border-brand-border rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl ring-1 ring-brand-border/40">
             {/* Top Logo & System Brand */}
             <div className="flex flex-col items-center text-center mb-6">
               <div className="relative mb-3">

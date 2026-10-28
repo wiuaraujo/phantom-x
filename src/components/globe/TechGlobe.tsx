@@ -151,6 +151,38 @@ export const TechGlobe: React.FC<{ className?: string }> = ({ className = "" }) 
     const dotsMesh = new THREE.Points(dotsGeo, dotsMat);
     globeGroup.add(dotsMesh);
 
+    // Dynamic Theme Color Updater (Dark / Light Mode Reaction)
+    const updateGlobeTheme = () => {
+      const isLight = document.documentElement.classList.contains("light");
+      coreMat.color.setHex(isLight ? 0xf4f4f6 : 0x050505);
+      coreMat.opacity = isLight ? 0.95 : 0.98;
+      gridMat.color.setHex(isLight ? 0xd4d4d8 : 0x262626);
+      gridMat.opacity = isLight ? 0.35 : 0.28;
+
+      const baseCol = isLight ? new THREE.Color(0x71717a) : new THREE.Color(0xa1a1aa);
+      const brightCol = isLight ? new THREE.Color(0x18181b) : new THREE.Color(0xffffff);
+
+      const colorsAttr = dotsGeo.getAttribute("color") as THREE.BufferAttribute;
+      if (colorsAttr) {
+        for (let i = 0; i < GLOBE_LAND_POINTS.length; i++) {
+          const isBright = i % 5 === 0;
+          const col = isBright ? brightCol : baseCol;
+          colorsAttr.setXYZ(i, col.r, col.g, col.b);
+        }
+        colorsAttr.needsUpdate = true;
+      }
+    };
+
+    updateGlobeTheme();
+
+    const themeObserver = new MutationObserver(() => {
+      updateGlobeTheme();
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme"],
+    });
+
     // 4. Traffic Hub Nodes & Pulsing Rings
     const hubObjects: { pulse: THREE.Mesh; pos: THREE.Vector3; initialScale: number }[] = [];
     TECH_HUBS.forEach((hub) => {
@@ -291,6 +323,7 @@ export const TechGlobe: React.FC<{ className?: string }> = ({ className = "" }) 
 
     return () => {
       cancelAnimationFrame(animId);
+      themeObserver.disconnect();
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("resize", onResize);
       renderer.dispose();

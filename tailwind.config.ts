@@ -11,16 +11,16 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          black: "#050505",
-          dark: "#0A0A0A",
-          surface: "#111111",
-          hover: "#181818",
-          border: "#252525",
-          borderSubtle: "#1c1c1c",
-          borderHighlight: "#383838",
-          white: "#FFFFFF",
-          secondary: "#A1A1AA",
-          muted: "#666666",
+          black: "rgba(var(--bg-page), <alpha-value>)",
+          dark: "rgba(var(--bg-dark), <alpha-value>)",
+          surface: "rgba(var(--bg-surface), <alpha-value>)",
+          hover: "rgba(var(--bg-hover), <alpha-value>)",
+          border: "rgba(var(--border-color), <alpha-value>)",
+          borderSubtle: "rgba(var(--border-subtle), <alpha-value>)",
+          borderHighlight: "rgba(var(--border-highlight), <alpha-value>)",
+          white: "rgba(var(--text-primary), <alpha-value>)",
+          secondary: "rgba(var(--text-secondary), <alpha-value>)",
+          muted: "rgba(var(--text-muted), <alpha-value>)",
         },
       },
       fontFamily: {
