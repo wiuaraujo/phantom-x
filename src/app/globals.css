@@ -69,20 +69,46 @@ html.light body {
    LIGHT MODE TARGETED REFINEMENTS (Clean, high-contrast, zero-bug)
    ========================================================================== */
 
-/* 1. Logo in Light Mode MUST BE SOLID BLACK */
-html.light img[alt="Phantom-X Logo"],
-html.light .phantom-logo img,
-html.light img.phantom-logo {
-  filter: invert(1) brightness(0) drop-shadow(0 0 4px rgba(0, 0, 0, 0.2)) !important;
+/* 1. Logotipo no modo claro:
+   - Em fundos brancos/claros: Novo logotipo preto estilizado (/logo-dark.png)
+   - Em fundos pretos/escuros: Mantém o logotipo branco (/logo.png) */
+html.light .phantom-logo-dark {
+  display: block;
+}
+html.light .phantom-logo-white {
+  display: none;
 }
 
-html.dark img[alt="Phantom-X Logo"],
-html.dark .phantom-logo img,
-html.dark img.phantom-logo {
-  filter: invert(0) brightness(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.45)) !important;
+/* Quando o logotipo estiver sobre qualquer superfície preta/escura no modo claro */
+html.light .bg-black .phantom-logo-dark,
+html.light .bg-neutral-950 .phantom-logo-dark,
+html.light .bg-neutral-900 .phantom-logo-dark,
+html.light .bg-neutral-800 .phantom-logo-dark,
+html.light .bg-zinc-950 .phantom-logo-dark,
+html.light .bg-zinc-900 .phantom-logo-dark,
+html.light .dark-surface .phantom-logo-dark,
+html.light [class~="bg-black"] .phantom-logo-dark,
+html.light [class*="bg-black/"]:not([class*="brand-black"]) .phantom-logo-dark,
+html.light [class*="bg-neutral-950"] .phantom-logo-dark,
+html.light [class*="bg-neutral-900"] .phantom-logo-dark {
+  display: none !important;
 }
 
-/* 2. Headings & General Typography */
+html.light .bg-black .phantom-logo-white,
+html.light .bg-neutral-950 .phantom-logo-white,
+html.light .bg-neutral-900 .phantom-logo-white,
+html.light .bg-neutral-800 .phantom-logo-white,
+html.light .bg-zinc-950 .phantom-logo-white,
+html.light .bg-zinc-900 .phantom-logo-white,
+html.light .dark-surface .phantom-logo-white,
+html.light [class~="bg-black"] .phantom-logo-white,
+html.light [class*="bg-black/"]:not([class*="brand-black"]) .phantom-logo-white,
+html.light [class*="bg-neutral-950"] .phantom-logo-white,
+html.light [class*="bg-neutral-900"] .phantom-logo-white {
+  display: block !important;
+}
+
+/* 2. Tipografia e Títulos no Modo Claro */
 html.light h1,
 html.light h2,
 html.light h3,
@@ -92,12 +118,18 @@ html.light h6 {
   color: #0f0f12;
 }
 
+/* Elementos com text-white em fundos claros viram texto escuro legível (#0f0f12) */
+html.light .text-white {
+  color: #0f0f12;
+}
+
 /* ==========================================================================
    3. ONDE TEM PRETO/ESCURO NO MODO CLARO, A TIPOGRAFIA FICA 100% BRANCA
-   (Zero bug: botões pretos, cards pretos, badges, tooltips e tags)
+   (Botões pretos, cards pretos, badges, tooltips e tags escuras)
+   NOTA: Exclui estritamente bg-brand-black (que é claro no modo claro)
    ========================================================================== */
 
-/* Qualquer container escuro preserva texto puro em branco */
+/* Qualquer container comprovadamente escuro preserva texto puro em branco */
 html.light .bg-black,
 html.light .bg-neutral-950,
 html.light .bg-neutral-900,
@@ -105,86 +137,77 @@ html.light .bg-neutral-800,
 html.light .bg-zinc-950,
 html.light .bg-zinc-900,
 html.light .bg-zinc-800,
-html.light [class*="bg-black"],
+html.light [class~="bg-black"],
+html.light [class*="bg-black/"]:not([class*="brand-black"]),
 html.light [class*="bg-neutral-950"],
 html.light [class*="bg-neutral-900"],
 html.light [class*="bg-neutral-800"],
-html.light [class*="bg-[#0"],
-html.light [class*="bg-[#1"],
-html.light [class*="from-black"],
-html.light [class*="from-[#0"],
-html.light [class*="from-[#1"],
+html.light [class*="bg-[#0"]:not([class*="brand"]),
+html.light [class*="bg-[#1"]:not([class*="brand"]),
+html.light [class*="from-black"]:not([class*="brand-black"]),
 html.light .dark-surface {
   color: #ffffff !important;
 }
 
-/* Títulos h1-h6 dentro de qualquer fundo preto ou escuro */
+/* Títulos h1-h6 dentro de qualquer container preto ou escuro */
 html.light .bg-black h1, html.light .bg-black h2, html.light .bg-black h3, html.light .bg-black h4, html.light .bg-black h5, html.light .bg-black h6,
 html.light .bg-neutral-950 h1, html.light .bg-neutral-950 h2, html.light .bg-neutral-950 h3, html.light .bg-neutral-950 h4, html.light .bg-neutral-950 h5, html.light .bg-neutral-950 h6,
 html.light .bg-neutral-900 h1, html.light .bg-neutral-900 h2, html.light .bg-neutral-900 h3, html.light .bg-neutral-900 h4, html.light .bg-neutral-900 h5, html.light .bg-neutral-900 h6,
 html.light .bg-neutral-800 h1, html.light .bg-neutral-800 h2, html.light .bg-neutral-800 h3, html.light .bg-neutral-800 h4, html.light .bg-neutral-800 h5, html.light .bg-neutral-800 h6,
-html.light [class*="bg-black"] h1, html.light [class*="bg-black"] h2, html.light [class*="bg-black"] h3, html.light [class*="bg-black"] h4, html.light [class*="bg-black"] h5, html.light [class*="bg-black"] h6,
+html.light [class~="bg-black"] h1, html.light [class~="bg-black"] h2, html.light [class~="bg-black"] h3, html.light [class~="bg-black"] h4, html.light [class~="bg-black"] h5, html.light [class~="bg-black"] h6,
+html.light [class*="bg-black/"]:not([class*="brand-black"]) h1, html.light [class*="bg-black/"]:not([class*="brand-black"]) h2, html.light [class*="bg-black/"]:not([class*="brand-black"]) h3, html.light [class*="bg-black/"]:not([class*="brand-black"]) h4, html.light [class*="bg-black/"]:not([class*="brand-black"]) h5, html.light [class*="bg-black/"]:not([class*="brand-black"]) h6,
 html.light [class*="bg-neutral-900"] h1, html.light [class*="bg-neutral-900"] h2, html.light [class*="bg-neutral-900"] h3, html.light [class*="bg-neutral-900"] h4, html.light [class*="bg-neutral-900"] h5, html.light [class*="bg-neutral-900"] h6,
-html.light [class*="bg-neutral-800"] h1, html.light [class*="bg-neutral-800"] h2, html.light [class*="bg-neutral-800"] h3, html.light [class*="bg-neutral-800"] h4, html.light [class*="bg-neutral-800"] h5, html.light [class*="bg-neutral-800"] h6,
-html.light [class*="bg-[#0"] h1, html.light [class*="bg-[#0"] h2, html.light [class*="bg-[#0"] h3, html.light [class*="bg-[#0"] h4, html.light [class*="bg-[#0"] h5, html.light [class*="bg-[#0"] h6,
-html.light [class*="bg-[#1"] h1, html.light [class*="bg-[#1"] h2, html.light [class*="bg-[#1"] h3, html.light [class*="bg-[#1"] h4, html.light [class*="bg-[#1"] h5, html.light [class*="bg-[#1"] h6,
-html.light [class*="from-black"] h1, html.light [class*="from-black"] h2, html.light [class*="from-black"] h3, html.light [class*="from-black"] h4, html.light [class*="from-black"] h5, html.light [class*="from-black"] h6,
-html.light [class*="from-[#0"] h1, html.light [class*="from-[#0"] h2, html.light [class*="from-[#0"] h3, html.light [class*="from-[#0"] h4, html.light [class*="from-[#0"] h5, html.light [class*="from-[#0"] h6,
-html.light [class*="from-[#1"] h1, html.light [class*="from-[#1"] h2, html.light [class*="from-[#1"] h3, html.light [class*="from-[#1"] h4, html.light [class*="from-[#1"] h5, html.light [class*="from-[#1"] h6 {
+html.light .dark-surface h1, html.light .dark-surface h2, html.light .dark-surface h3, html.light .dark-surface h4, html.light .dark-surface h5, html.light .dark-surface h6 {
   color: #ffffff !important;
 }
 
-/* Spans, textos, valores numéricos e badges dentro de elementos pretos/escuros */
+/* Spans, textos, valores e badges dentro de containers pretos/escuros */
 html.light .bg-black span,
 html.light .bg-neutral-950 span,
 html.light .bg-neutral-900 span,
 html.light .bg-neutral-800 span,
-html.light [class*="bg-black"] span,
+html.light [class~="bg-black"] span,
+html.light [class*="bg-black/"]:not([class*="brand-black"]) span,
 html.light [class*="bg-neutral-900"] span,
 html.light [class*="bg-neutral-800"] span,
-html.light [class*="bg-[#0"] span,
-html.light [class*="bg-[#1"] span,
-html.light [class*="from-black"] span,
-html.light [class*="from-[#0"] span,
-html.light [class*="from-[#1"] span,
+html.light .dark-surface span,
 html.light .bg-black p,
 html.light .bg-neutral-900 p,
-html.light [class*="bg-[#0"] p,
-html.light [class*="bg-[#1"] p,
-html.light [class*="bg-black"] .text-white,
+html.light [class~="bg-black"] p,
+html.light [class*="bg-black/"]:not([class*="brand-black"]) p,
+html.light .dark-surface p,
+html.light .bg-black .text-white,
+html.light .bg-neutral-950 .text-white,
+html.light .bg-neutral-900 .text-white,
+html.light .bg-neutral-800 .text-white,
+html.light [class~="bg-black"] .text-white,
+html.light [class*="bg-black/"]:not([class*="brand-black"]) .text-white,
 html.light [class*="bg-neutral-900"] .text-white,
 html.light [class*="bg-neutral-800"] .text-white,
-html.light [class*="bg-[#0"] .text-white,
-html.light [class*="bg-[#1"] .text-white,
-html.light [class*="from-black"] .text-white,
-html.light [class*="from-[#0"] .text-white,
-html.light [class*="from-[#1"] .text-white,
-html.light button[class*="bg-black"] *,
+html.light .dark-surface .text-white,
+html.light button[class~="bg-black"] *,
 html.light button[class*="bg-neutral-900"] *,
 html.light button[class*="bg-neutral-800"] *,
-html.light a[class*="bg-black"] *,
+html.light a[class~="bg-black"] *,
 html.light a[class*="bg-neutral-900"] *,
 html.light a[class*="bg-neutral-800"] * {
   color: #ffffff !important;
 }
 
-/* Ícones SVG em fundos escuros */
+/* Ícones SVG em containers escuros */
 html.light .bg-black svg,
 html.light .bg-neutral-950 svg,
 html.light .bg-neutral-900 svg,
 html.light .bg-neutral-800 svg,
-html.light [class*="bg-black"] svg,
+html.light [class~="bg-black"] svg,
+html.light [class*="bg-black/"]:not([class*="brand-black"]) svg,
 html.light [class*="bg-neutral-900"] svg,
 html.light [class*="bg-neutral-800"] svg,
-html.light [class*="bg-[#0"] svg,
-html.light [class*="bg-[#1"] svg,
-html.light [class*="from-black"] svg,
-html.light [class*="from-[#0"] svg,
-html.light [class*="from-[#1"] svg,
-html.light button[class*="bg-black"] svg,
+html.light .dark-surface svg,
+html.light button[class~="bg-black"] svg,
 html.light button[class*="bg-neutral-900"] svg,
 html.light button[class*="bg-neutral-800"] svg,
-html.light a[class*="bg-black"] svg,
+html.light a[class~="bg-black"] svg,
 html.light a[class*="bg-neutral-900"] svg,
 html.light a[class*="bg-neutral-800"] svg {
   color: #ffffff !important;
@@ -196,20 +219,14 @@ html.light .bg-black .text-brand-secondary,
 html.light .bg-black .text-brand-muted,
 html.light .bg-neutral-900 .text-brand-secondary,
 html.light .bg-neutral-900 .text-brand-muted,
-html.light [class*="bg-black"] .text-brand-secondary,
-html.light [class*="bg-black"] .text-brand-muted,
+html.light [class~="bg-black"] .text-brand-secondary,
+html.light [class~="bg-black"] .text-brand-muted,
+html.light [class*="bg-black/"]:not([class*="brand-black"]) .text-brand-secondary,
+html.light [class*="bg-black/"]:not([class*="brand-black"]) .text-brand-muted,
 html.light [class*="bg-neutral-900"] .text-brand-secondary,
 html.light [class*="bg-neutral-900"] .text-brand-muted,
-html.light [class*="bg-[#0"] .text-brand-secondary,
-html.light [class*="bg-[#0"] .text-brand-muted,
-html.light [class*="bg-[#1"] .text-brand-secondary,
-html.light [class*="bg-[#1"] .text-brand-muted,
-html.light [class*="from-black"] .text-brand-secondary,
-html.light [class*="from-black"] .text-brand-muted,
-html.light [class*="from-[#0"] .text-brand-secondary,
-html.light [class*="from-[#0"] .text-brand-muted,
-html.light [class*="from-[#1"] .text-brand-secondary,
-html.light [class*="from-[#1"] .text-brand-muted {
+html.light .dark-surface .text-brand-secondary,
+html.light .dark-surface .text-brand-muted {
   color: #a1a1aa !important;
 }
 
@@ -226,12 +243,6 @@ html.light .bg-white\/10,
 html.light .bg-white\/\[0\.03\],
 html.light .bg-white\/\[0\.04\] {
   background-color: rgba(0, 0, 0, 0.03) !important;
-}
-
-html.light .bg-black\/60,
-html.light .bg-black\/80,
-html.light .bg-black\/90 {
-  background-color: rgba(255, 255, 255, 0.95) !important;
 }
 
 /* 5. Transform any dark card hex gradients to pure surface in light mode */

@@ -37,13 +37,13 @@ export const RoutingDiagram: React.FC = () => {
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center space-x-1 sm:space-x-1.5 bg-brand-black/70 border border-brand-border p-1 rounded-xl text-[11px] sm:text-xs font-mono overflow-x-auto max-w-full">
+          <div className="flex items-center space-x-1 sm:space-x-1.5 bg-brand-surface/80 border border-brand-border p-1 rounded-xl text-[11px] sm:text-xs font-mono overflow-x-auto max-w-full">
             <button
               onClick={() => setActiveTab("all")}
               className={`px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
                 activeTab === "all"
-                  ? "bg-white text-black font-semibold shadow-sm"
-                  : "text-brand-secondary hover:text-white"
+                  ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
+                  : "text-brand-secondary hover:text-brand-white"
               }`}
             >
               Fluxo Completo
@@ -52,8 +52,8 @@ export const RoutingDiagram: React.FC = () => {
               onClick={() => setActiveTab("human")}
               className={`px-3 py-1.5 rounded-lg transition flex items-center space-x-1 whitespace-nowrap ${
                 activeTab === "human"
-                  ? "bg-white text-black font-semibold shadow-sm"
-                  : "text-brand-secondary hover:text-white"
+                  ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
+                  : "text-brand-secondary hover:text-brand-white"
               }`}
             >
               <span>Visitante Real</span>
@@ -62,8 +62,8 @@ export const RoutingDiagram: React.FC = () => {
               onClick={() => setActiveTab("bot")}
               className={`px-3 py-1.5 rounded-lg transition flex items-center space-x-1 whitespace-nowrap ${
                 activeTab === "bot"
-                  ? "bg-white text-black font-semibold shadow-sm"
-                  : "text-brand-secondary hover:text-white"
+                  ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
+                  : "text-brand-secondary hover:text-brand-white"
               }`}
             >
               <span>Crawlers & Bots</span>
@@ -77,7 +77,7 @@ export const RoutingDiagram: React.FC = () => {
             {/* STAGE 1: INGRESSO MULTI-CANAL (Left 3 cols) */}
             <div className="lg:col-span-3 space-y-4">
               <div className="text-[11px] font-mono text-brand-muted uppercase tracking-wider flex items-center space-x-1.5">
-                <Globe2 className="w-3.5 h-3.5 text-white" />
+                <Globe2 className="w-3.5 h-3.5 text-brand-white" />
                 <span>1. Origens de Tráfego</span>
               </div>
 
@@ -85,17 +85,17 @@ export const RoutingDiagram: React.FC = () => {
               <div
                 className={`relative p-4 rounded-2xl border transition-all ${
                   activeTab === "all" || activeTab === "human"
-                    ? "bg-brand-surface border-brand-borderHighlight shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
-                    : "bg-brand-black/40 border-brand-borderSubtle opacity-40"
+                    ? "bg-brand-surface border-brand-borderHighlight shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+                    : "bg-brand-surface/40 border-brand-borderSubtle opacity-40"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-white font-semibold border border-brand-border">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-brand-white font-semibold border border-brand-border">
                     TRÁFEGO PAGO
                   </span>
                   <span className="text-[10px] font-mono text-brand-secondary">4G/5G / WiFi</span>
                 </div>
-                <div className="text-xs font-bold text-white">Visitante Humano Real</div>
+                <div className="text-xs font-bold text-brand-white">Visitante Humano Real</div>
                 <div className="text-[11px] text-brand-secondary mt-1.5 leading-snug">
                   Meta Ads, TikTok, Google Search. Dispositivo móvel/desktop residencial.
                 </div>
@@ -105,17 +105,17 @@ export const RoutingDiagram: React.FC = () => {
               <div
                 className={`relative p-4 rounded-2xl border transition-all ${
                   activeTab === "all" || activeTab === "bot"
-                    ? "bg-brand-surface border-brand-borderHighlight shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
-                    : "bg-brand-black/40 border-brand-borderSubtle opacity-40"
+                    ? "bg-brand-surface border-brand-borderHighlight shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+                    : "bg-brand-surface/40 border-brand-borderSubtle opacity-40"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-neutral-300 font-semibold border border-brand-border">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-brand-secondary font-semibold border border-brand-border">
                     INSPEÇÃO
                   </span>
                   <span className="text-[10px] font-mono text-brand-muted">Datacenter ASN</span>
                 </div>
-                <div className="text-xs font-bold text-neutral-200">Bots & Review Crawlers</div>
+                <div className="text-xs font-bold text-brand-secondary">Bots & Review Crawlers</div>
                 <div className="text-[11px] text-brand-secondary mt-1.5 leading-snug">
                   Google-InspectionTool, Facebot, ByteSpider, headless scrapers.
                 </div>
@@ -123,21 +123,21 @@ export const RoutingDiagram: React.FC = () => {
             </div>
 
             {/* STAGE 2: PHANTOM-X CORE PROCESSOR (Center 6 cols - Clean with no wire clutter) */}
-            <div className="lg:col-span-6 relative flex flex-col items-center justify-center p-6 sm:p-8 rounded-3xl bg-brand-black/60 border border-brand-border shadow-inner">
+            <div className="lg:col-span-6 relative flex flex-col items-center justify-center p-6 sm:p-8 rounded-3xl bg-brand-surface/60 border border-brand-border shadow-inner">
               {/* Concentric Telemetry Radar Rings */}
               <div className="absolute w-48 h-48 rounded-full border border-brand-border/40 animate-ping pointer-events-none opacity-20" />
               <div className="absolute w-64 h-64 rounded-full border border-brand-border/30 pointer-events-none" />
 
               {/* Central Vault com a Logomarca da Phantom (Paleta do Sistema) */}
-              <div className="relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-b from-brand-hover via-brand-surface to-brand-black border border-brand-borderHighlight p-2 shadow-glow flex items-center justify-center group hover:scale-105 transition-transform duration-300">
-                <div className="w-full h-full rounded-2xl bg-brand-black/90 flex items-center justify-center p-3 border border-brand-border">
-                  <Logo size={62} className="filter drop-shadow-[0_0_12px_rgba(255,255,255,0.7)]" />
+              <div className="relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-b from-brand-hover via-brand-surface to-brand-surface border border-brand-borderHighlight p-2 shadow-glow flex items-center justify-center group hover:scale-105 transition-transform duration-300">
+                <div className="w-full h-full rounded-2xl bg-brand-surface flex items-center justify-center p-3 border border-brand-border">
+                  <Logo size={62} />
                 </div>
               </div>
 
               {/* Processor Title */}
               <div className="relative z-10 mt-5 text-center">
-                <span className="font-mono text-sm font-bold text-white tracking-widest uppercase">
+                <span className="font-mono text-sm font-bold text-brand-white tracking-widest uppercase">
                   Motor de Decisão em Borda
                 </span>
                 <p className="text-xs text-brand-secondary mt-1 font-sans">
@@ -148,19 +148,19 @@ export const RoutingDiagram: React.FC = () => {
               {/* Live Real-Time Telemetry Tags */}
               <div className="relative z-10 mt-5 grid grid-cols-2 gap-2.5 w-full max-w-sm text-[10px] sm:text-[11px] font-mono">
                 <div className="p-2.5 rounded-xl bg-brand-surface/70 border border-brand-border flex items-center space-x-2">
-                  <Fingerprint className="w-3.5 h-3.5 text-white shrink-0" />
+                  <Fingerprint className="w-3.5 h-3.5 text-brand-white shrink-0" />
                   <span className="text-brand-secondary truncate">Click ID Assinado</span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-brand-surface/70 border border-brand-border flex items-center space-x-2">
-                  <Zap className="w-3.5 h-3.5 text-white shrink-0" />
+                  <Zap className="w-3.5 h-3.5 text-brand-white shrink-0" />
                   <span className="text-brand-secondary truncate">Latência &lt; 18ms</span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-brand-surface/70 border border-brand-border flex items-center space-x-2">
-                  <Cpu className="w-3.5 h-3.5 text-white shrink-0" />
+                  <Cpu className="w-3.5 h-3.5 text-brand-white shrink-0" />
                   <span className="text-brand-secondary truncate">ASN IP Filtering</span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-brand-surface/70 border border-brand-border flex items-center space-x-2">
-                  <Lock className="w-3.5 h-3.5 text-white shrink-0" />
+                  <Lock className="w-3.5 h-3.5 text-brand-white shrink-0" />
                   <span className="text-brand-secondary truncate">Anti-Open Redirect</span>
                 </div>
               </div>
@@ -169,7 +169,7 @@ export const RoutingDiagram: React.FC = () => {
             {/* STAGE 3: DESTINOS AUTORIZADOS (Right 3 cols) */}
             <div className="lg:col-span-3 space-y-4">
               <div className="text-[11px] font-mono text-brand-muted uppercase tracking-wider flex items-center space-x-1.5">
-                <ArrowRight className="w-3.5 h-3.5 text-white" />
+                <ArrowRight className="w-3.5 h-3.5 text-brand-white" />
                 <span>3. Entrega Determinística</span>
               </div>
 
@@ -177,20 +177,20 @@ export const RoutingDiagram: React.FC = () => {
               <div
                 className={`relative p-4 rounded-2xl border transition-all ${
                   activeTab === "all" || activeTab === "human"
-                    ? "bg-brand-surface border-brand-borderHighlight shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
-                    : "bg-brand-black/40 border-brand-borderSubtle opacity-40"
+                    ? "bg-brand-surface border-brand-borderHighlight shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+                    : "bg-brand-surface/40 border-brand-borderSubtle opacity-40"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-white font-semibold border border-brand-border">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-brand-white font-semibold border border-brand-border">
                     ROTA DE OFERTA
                   </span>
-                  <span className="text-[10px] font-mono text-white flex items-center space-x-1">
-                    <CheckCircle2 className="w-3 h-3 text-white" />
+                  <span className="text-[10px] font-mono text-brand-white flex items-center space-x-1">
+                    <CheckCircle2 className="w-3 h-3 text-brand-white" />
                     <span>Liberado</span>
                   </span>
                 </div>
-                <div className="text-xs font-bold text-white">Página de Conversão</div>
+                <div className="text-xs font-bold text-brand-white">Página de Conversão</div>
                 <div className="text-[11px] text-brand-secondary mt-1.5 leading-snug">
                   Checkout direto com preservação integral de UTMs e Click ID atribuído.
                 </div>
@@ -200,12 +200,12 @@ export const RoutingDiagram: React.FC = () => {
               <div
                 className={`relative p-4 rounded-2xl border transition-all ${
                   activeTab === "all" || activeTab === "bot"
-                    ? "bg-brand-surface border-brand-borderHighlight shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
-                    : "bg-brand-black/40 border-brand-borderSubtle opacity-40"
+                    ? "bg-brand-surface border-brand-borderHighlight shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+                    : "bg-brand-surface/40 border-brand-borderSubtle opacity-40"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-neutral-300 font-semibold border border-brand-border">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-brand-secondary font-semibold border border-brand-border">
                     ROTA SEGURA
                   </span>
                   <span className="text-[10px] font-mono text-brand-muted flex items-center space-x-1">
@@ -213,7 +213,7 @@ export const RoutingDiagram: React.FC = () => {
                     <span>Mitigado</span>
                   </span>
                 </div>
-                <div className="text-xs font-bold text-neutral-200">Safe Page / Verificação</div>
+                <div className="text-xs font-bold text-brand-secondary">Safe Page / Verificação</div>
                 <div className="text-[11px] text-brand-secondary mt-1.5 leading-snug">
                   Artigo neutro ou verificação institucional. Zero risco de reprovação ou bloqueio.
                 </div>

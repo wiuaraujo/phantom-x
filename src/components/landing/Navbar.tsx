@@ -25,7 +25,7 @@ export const Navbar: React.FC = () => {
         {/* Brand Logo & Name */}
         <Link href="/" className="flex items-center space-x-3 group">
           <Logo size={28} className="group-hover:scale-105 transition-transform" />
-          <span className="font-mono text-sm font-bold text-white tracking-widest">
+          <span className="font-mono text-sm font-bold text-brand-white tracking-widest">
             {siteConfig.name}
           </span>
         </Link>
@@ -36,7 +36,7 @@ export const Navbar: React.FC = () => {
             <Link
               key={item.href}
               href={item.href}
-              className="hover:text-white transition-colors tracking-wide"
+              className="hover:text-brand-white transition-colors tracking-wide"
             >
               {item.label}
             </Link>
@@ -53,7 +53,7 @@ export const Navbar: React.FC = () => {
 
           <Link
             href="/login"
-            className="px-3.5 py-1.5 rounded-full text-xs font-medium text-brand-secondary hover:text-white hover:bg-brand-surface border border-transparent hover:border-brand-border transition"
+            className="px-3.5 py-1.5 rounded-full text-xs font-medium text-brand-secondary hover:text-brand-white hover:bg-brand-surface border border-transparent hover:border-brand-border transition"
           >
             {t.nav.signIn}
           </Link>
@@ -72,7 +72,7 @@ export const Navbar: React.FC = () => {
           <LanguageSelector />
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 text-brand-secondary hover:text-white"
+            className="p-1.5 text-brand-secondary hover:text-brand-white"
             aria-label="Abrir menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -89,7 +89,7 @@ export const Navbar: React.FC = () => {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-brand-secondary hover:text-white py-1 transition"
+                className="text-brand-secondary hover:text-brand-white py-1 transition"
               >
                 {item.label}
               </Link>
@@ -103,14 +103,14 @@ export const Navbar: React.FC = () => {
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center py-2.5 rounded-lg text-xs font-medium text-white bg-brand-surface border border-brand-border"
+              className="w-full text-center py-2.5 rounded-lg text-xs font-medium text-brand-white bg-brand-surface border border-brand-border"
             >
               {t.nav.signIn}
             </Link>
             <Link
               href="/signup"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center py-2.5 rounded-lg text-xs font-semibold bg-white text-black"
+              className="w-full text-center py-2.5 rounded-lg text-xs font-semibold bg-neutral-900 text-white dark:bg-white dark:text-black"
             >
               {t.nav.getStarted}
             </Link>

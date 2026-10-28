@@ -70,9 +70,9 @@ export default function LoginPage() {
         {/* Top Header Logo & Theme Toggle */}
         <div className="relative z-10 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group">
-            <Logo size={36} className="filter drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]" />
+            <Logo size={36} />
             <div className="flex flex-col">
-              <span className="font-mono text-sm font-bold text-white tracking-widest leading-none">
+              <span className="font-mono text-sm font-bold text-brand-white tracking-widest leading-none">
                 {siteConfig.name}
               </span>
               <span className="text-[10px] text-brand-muted tracking-wider font-mono uppercase mt-0.5">
@@ -83,7 +83,7 @@ export default function LoginPage() {
           <div className="flex items-center space-x-2">
             <ThemeToggle />
             <div className="hidden sm:flex items-center space-x-2 text-[11px] font-mono text-brand-muted bg-brand-surface px-2.5 py-1 rounded-full border border-brand-border">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Console Seguro</span>
             </div>
           </div>
@@ -157,13 +157,13 @@ export default function LoginPage() {
             {/* Top Logo & System Brand */}
             <div className="flex flex-col items-center text-center mb-6">
               <div className="relative mb-3">
-                <div className="absolute inset-0 bg-white/15 rounded-2xl blur-lg animate-pulse" />
-                <div className="relative w-14 h-14 rounded-2xl bg-black border border-white/20 p-2 flex items-center justify-center shadow-lg">
-                  <Logo size={42} className="filter drop-shadow-[0_0_10px_rgba(255,255,255,0.7)]" />
+                <div className="absolute inset-0 bg-neutral-200/50 dark:bg-white/10 rounded-2xl blur-lg animate-pulse" />
+                <div className="relative w-14 h-14 rounded-2xl bg-brand-surface border border-brand-border p-2 flex items-center justify-center shadow-lg">
+                  <Logo size={42} />
                 </div>
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center space-x-2">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white flex items-center space-x-2">
                 <span>Entrar no</span>
                 <span className="font-mono tracking-widest">PHANTOM X</span>
               </h1>
@@ -229,7 +229,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-brand-muted hover:text-white"
+                    className="absolute right-3 top-3 text-brand-muted hover:text-brand-white"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -269,9 +269,9 @@ export default function LoginPage() {
             </form>
 
             {/* Alternar para Cadastro */}
-            <div className="mt-5 pt-4 border-t border-white/10 text-center text-xs text-brand-secondary font-mono">
+            <div className="mt-5 pt-4 border-t border-brand-border text-center text-xs text-brand-secondary font-mono">
               Não possui uma conta?{" "}
-              <Link href="/signup" className="text-white font-semibold underline hover:text-neutral-300">
+              <Link href="/signup" className="text-brand-white font-semibold underline hover:text-brand-secondary">
                 Criar conta de operador
               </Link>
             </div>

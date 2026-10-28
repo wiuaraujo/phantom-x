@@ -27,7 +27,7 @@ export const InteractiveDemo: React.FC = () => {
         {/* Section Header (Clean, professional, without generic AI sparkle badges) */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
           <div>
-            <h2 className="text-3xl font-bold text-white tracking-tight">
+            <h2 className="text-3xl font-bold text-brand-white tracking-tight">
               {t.demo.title}
             </h2>
             <p className="text-sm text-brand-secondary mt-1">
@@ -43,7 +43,7 @@ export const InteractiveDemo: React.FC = () => {
 
             <Link
               href="/signup"
-              className="px-4 py-1.5 rounded-lg bg-white text-black text-xs font-semibold hover:bg-neutral-200 transition shadow-glow-sm"
+              className="px-4 py-1.5 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black text-xs font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm"
             >
               {t.demo.createAccount}
             </Link>
