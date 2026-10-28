@@ -60,13 +60,13 @@ export default function ReportsPage() {
               ].map((ref, i) => (
                 <div key={i} className="space-y-1">
                   <div className="flex justify-between text-brand-secondary">
-                    <span className="text-white">{ref.source}</span>
+                    <span className="text-brand-white">{ref.source}</span>
                     <span>
                       {ref.count} reqs ({ref.pct}%)
                     </span>
                   </div>
                   <div className="w-full bg-brand-black h-1.5 rounded-full overflow-hidden border border-brand-borderSubtle">
-                    <div style={{ width: `${ref.pct}%` }} className="bg-white h-full" />
+                    <div style={{ width: `${ref.pct}%` }} className="bg-neutral-900 dark:bg-white h-full" />
                   </div>
                 </div>
               ))}
@@ -75,7 +75,7 @@ export default function ReportsPage() {
 
           {/* Bot Heuristics & Mitigation breakdown */}
           <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm">
-            <h3 className="text-sm font-bold text-white mb-1">Motivos de Classificação de Risco</h3>
+            <h3 className="text-sm font-bold text-brand-white mb-1">Motivos de Classificação de Risco</h3>
             <p className="text-brand-secondary text-[11px] mb-4">
               Assinaturas que acionaram proteção e limites de requisição
             </p>
@@ -105,10 +105,10 @@ export default function ReportsPage() {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="p-3 rounded-lg bg-brand-black border border-brand-borderSubtle flex items-center justify-between"
+                  className="p-3 rounded-lg bg-brand-surface border border-brand-borderSubtle flex items-center justify-between"
                 >
                   <div>
-                    <div className="text-white font-medium">{item.reason}</div>
+                    <div className="text-brand-white font-medium">{item.reason}</div>
                     <div className="text-brand-muted text-[10px]">{item.count}</div>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] bg-neutral-900 border border-neutral-700 text-white font-bold">

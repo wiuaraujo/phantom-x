@@ -56,7 +56,7 @@ export default function DomainsPage() {
         {/* Action Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold text-white tracking-wide">
+            <h2 className="text-base font-semibold text-brand-white tracking-wide">
               Domínios Conectados ({domains.length})
             </h2>
             <p className="text-xs text-brand-secondary">
@@ -66,9 +66,9 @@ export default function DomainsPage() {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-glow-sm flex items-center space-x-1.5"
+            className="px-4 py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center space-x-1.5"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-white dark:text-black" />
             <span>Adicionar Domínio</span>
           </button>
         </div>
@@ -77,18 +77,18 @@ export default function DomainsPage() {
         <div className="space-y-4">
           {domains.length === 0 ? (
             <div className="bg-brand-surface border border-brand-border rounded-xl p-12 text-center space-y-3 font-sans">
-              <div className="w-12 h-12 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center mx-auto text-brand-secondary">
-                <Globe2 className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-brand-surface border border-brand-border flex items-center justify-center mx-auto text-brand-secondary">
+                <Globe2 className="w-6 h-6 text-brand-white" />
               </div>
-              <h3 className="text-sm font-semibold text-white">Nenhum domínio configurado</h3>
+              <h3 className="text-sm font-semibold text-brand-white">Nenhum domínio configurado</h3>
               <p className="text-xs text-brand-secondary max-w-md mx-auto">
                 Adicione o primeiro domínio ou subdomínio para rotear seu tráfego através do cluster Phantom-X com certificação TLS instantânea.
               </p>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-glow-sm"
+                className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 text-white dark:text-black" />
                 <span>Adicionar Primeiro Domínio</span>
               </button>
             </div>
@@ -103,11 +103,11 @@ export default function DomainsPage() {
               >
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-lg bg-brand-black border border-brand-border flex items-center justify-center text-white">
+                    <div className="w-8 h-8 rounded-lg bg-brand-surface border border-brand-border flex items-center justify-center text-brand-white">
                       <Globe2 className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-white tracking-tight">{dom.name}</div>
+                      <div className="text-sm font-bold text-brand-white tracking-tight">{dom.name}</div>
                       <div className="text-[11px] text-brand-muted">
                         Criado em: {new Date(dom.createdAt).toLocaleDateString("pt-BR")}
                       </div>
@@ -118,14 +118,14 @@ export default function DomainsPage() {
                   <div className="space-y-1.5 pt-1">
                     {dom.dnsRecords.map((rec, i) => (
                       <div key={i} className="flex items-center space-x-2 text-[11px] text-brand-secondary">
-                        <span className="px-1.5 py-0.5 rounded bg-brand-black border border-brand-borderSubtle text-[10px] text-white">
+                        <span className="px-1.5 py-0.5 rounded bg-brand-surface border border-brand-borderSubtle text-[10px] text-brand-white">
                           {rec.type}
                         </span>
                         <span>Host: <strong>{rec.host}</strong></span>
                         <span className="text-brand-muted">→</span>
-                        <span>Valor: <code className="text-white">{rec.expected}</code></span>
+                        <span>Valor: <code className="text-brand-white">{rec.expected}</code></span>
                         {rec.verified ? (
-                          <span className="inline-flex items-center text-white">
+                          <span className="inline-flex items-center text-brand-white">
                             <CheckCircle2 className="w-3.5 h-3.5 ml-1" />
                           </span>
                         ) : (
@@ -144,8 +144,8 @@ export default function DomainsPage() {
                     <span
                       className={`px-2.5 py-1 rounded-md text-[11px] font-semibold flex items-center space-x-1 ${
                         isVerified
-                          ? "bg-white text-black"
-                          : "bg-neutral-900 text-neutral-300 border border-neutral-700"
+                          ? "bg-neutral-900 text-white dark:bg-white dark:text-black"
+                          : "bg-neutral-800 text-neutral-200 border border-neutral-700"
                       }`}
                     >
                       {isVerified ? (
@@ -162,7 +162,7 @@ export default function DomainsPage() {
                     </span>
 
                     <span className="text-[11px] text-brand-muted flex items-center space-x-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-white" />
+                      <ShieldCheck className="w-3.5 h-3.5 text-brand-white" />
                       <span>SSL: {dom.sslStatus.toUpperCase()}</span>
                     </span>
                   </div>
@@ -172,7 +172,7 @@ export default function DomainsPage() {
                       <button
                         onClick={() => handleVerifyDNS(dom.id)}
                         disabled={verifyingId === dom.id}
-                        className="px-3 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition flex items-center space-x-1.5"
+                        className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition flex items-center space-x-1.5"
                       >
                         <RefreshCw className={`w-3.5 h-3.5 ${verifyingId === dom.id ? "animate-spin" : ""}`} />
                         <span>{verifyingId === dom.id ? "Checando DNS..." : "Verificar DNS"}</span>

@@ -23,8 +23,8 @@ export default function GlobalMapPage() {
         {/* Full-width Digital Matrix Map Canvas */}
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-mono">
-            <div className="flex items-center space-x-2 text-white">
-              <Globe2 className="w-4 h-4 text-white" />
+            <div className="flex items-center space-x-2 text-brand-white">
+              <Globe2 className="w-4 h-4 text-brand-white" />
               <span className="font-semibold">NÓS DE TELEMETRIA POR PAÍS E CIDADE</span>
             </div>
             <span className="text-brand-muted text-[11px]">
@@ -47,7 +47,7 @@ export default function GlobalMapPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-brand-surface border border-brand-border rounded-xl p-5 shadow-glow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white tracking-wide">
+              <h3 className="text-sm font-semibold text-brand-white tracking-wide">
                 Volume e Penetração por País
               </h3>
               <span className="text-xs font-mono text-brand-muted">

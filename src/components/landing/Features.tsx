@@ -62,7 +62,7 @@ export const Features: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-3 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-brand-white tracking-tight mt-3 mb-4">
             Controle absoluto sobre cada requisição.
           </h2>
           <p className="text-sm sm:text-base text-brand-secondary font-normal">
@@ -82,7 +82,7 @@ export const Features: React.FC = () => {
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-brand-hover border border-brand-border flex items-center justify-center text-white group-hover:border-brand-borderHighlight transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-brand-hover border border-brand-border flex items-center justify-center text-brand-white group-hover:border-brand-borderHighlight transition-colors">
                       <Icon className="w-5 h-5" />
                     </div>
                     <span className="text-[11px] font-mono text-brand-muted uppercase tracking-wider">
@@ -90,7 +90,7 @@ export const Features: React.FC = () => {
                     </span>
                   </div>
 
-                  <h3 className="text-base font-semibold text-white mb-2 tracking-tight">
+                  <h3 className="text-base font-semibold text-brand-white mb-2 tracking-tight">
                     {item.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-brand-secondary leading-relaxed">

@@ -73,7 +73,7 @@ export const SystemPreview: React.FC = () => {
     <section id="how-it-works" className="relative py-20 px-4 sm:px-6 bg-brand-black overflow-hidden border-t border-brand-border">
       {/* Section Title (Minimalist, without AI shields or sparkles) */}
       <div className="max-w-4xl mx-auto text-center mb-12 flex flex-col items-center">
-        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white mb-3 font-sans">
+        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-brand-white mb-3 font-sans">
           Console Operacional
         </h2>
         <p className="max-w-2xl text-sm sm:text-base text-brand-secondary leading-relaxed font-sans font-normal">
@@ -88,7 +88,7 @@ export const SystemPreview: React.FC = () => {
 
         <div className="relative rounded-2xl bg-brand-black border border-brand-border shadow-glow-lg overflow-hidden font-sans">
           {/* 1. macOS Window Chrome Top Bar */}
-          <div className="h-11 bg-[#0c0c0c] border-b border-brand-border px-4 flex items-center justify-between z-40">
+          <div className="h-11 bg-neutral-900 dark:bg-[#0c0c0c] border-b border-brand-border px-4 flex items-center justify-between z-40">
             {/* macOS Window Controls */}
             <div className="flex items-center space-x-2">
               <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -97,8 +97,8 @@ export const SystemPreview: React.FC = () => {
             </div>
 
             {/* Address Bar */}
-            <div className="text-[11px] font-mono text-brand-secondary flex items-center space-x-1.5 bg-brand-surface/80 px-3.5 py-1 rounded-full border border-brand-border">
-              <span className="text-brand-muted">https://</span>
+            <div className="text-[11px] font-mono text-neutral-300 dark:text-brand-secondary flex items-center space-x-1.5 bg-black/40 dark:bg-brand-surface/80 px-3.5 py-1 rounded-full border border-white/10 dark:border-brand-border">
+              <span className="text-neutral-400 dark:text-brand-muted">https://</span>
               <span className="text-white font-medium">console.phantomx.pro/dashboard</span>
             </div>
 
@@ -110,7 +110,7 @@ export const SystemPreview: React.FC = () => {
                 className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition"
               >
                 <span>Abrir Console</span>
-                <Maximize2 className="w-3 h-3" />
+                <Maximize2 className="w-3 h-3 text-black" />
               </Link>
             </div>
           </div>
@@ -123,7 +123,7 @@ export const SystemPreview: React.FC = () => {
                 {/* Brand Header */}
                 <div className="h-14 flex items-center px-4 border-b border-brand-border space-x-3">
                   <Logo size={26} />
-                  <span className="font-sans text-sm font-bold text-white tracking-wider">
+                  <span className="font-sans text-sm font-bold text-brand-white tracking-wider">
                     Phantom-X
                   </span>
                   <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-mono bg-brand-surface border border-brand-border text-brand-muted">
@@ -140,12 +140,12 @@ export const SystemPreview: React.FC = () => {
                         key={idx}
                         className={`flex items-center px-3 py-2 rounded-lg text-xs font-medium transition cursor-default select-none ${
                           item.active
-                            ? "bg-white text-black font-semibold shadow-glow-sm"
-                            : "text-brand-secondary hover:text-white hover:bg-brand-surface"
+                            ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
+                            : "text-brand-secondary hover:text-brand-white hover:bg-brand-surface"
                         }`}
                       >
                         <div className="relative shrink-0 mr-3">
-                          <Icon className={`w-4 h-4 ${item.active ? "text-black" : "text-brand-secondary"}`} />
+                          <Icon className={`w-4 h-4 ${item.active ? "text-white dark:text-black" : "text-brand-secondary"}`} />
                           {item.pulse && (
                             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-white animate-ping" />
                           )}
@@ -161,8 +161,8 @@ export const SystemPreview: React.FC = () => {
               <div className="p-3 border-t border-brand-border space-y-2">
                 <div className="px-3 py-2 rounded-lg bg-brand-surface border border-brand-borderSubtle text-[11px] font-sans">
                   <div className="text-brand-muted text-[10px] font-mono uppercase tracking-wider">Cluster de Borda</div>
-                  <div className="text-white font-medium flex items-center space-x-1.5 mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  <div className="text-brand-white font-medium flex items-center space-x-1.5 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-900 dark:bg-white animate-pulse" />
                     <span>edge-phantom-01</span>
                   </div>
                   <div className="text-[10px] text-brand-secondary mt-1">14 PoPs operacionais</div>
@@ -175,7 +175,7 @@ export const SystemPreview: React.FC = () => {
               {/* Top Header of the Dashboard */}
               <div className="h-14 border-b border-brand-border bg-brand-surface/40 px-5 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h1 className="text-sm font-semibold text-white tracking-wide">
+                  <h1 className="text-sm font-semibold text-brand-white tracking-wide">
                     Visão Geral da Operação
                   </h1>
                   <p className="text-[11px] text-brand-secondary">
@@ -186,14 +186,14 @@ export const SystemPreview: React.FC = () => {
                 <div className="flex items-center space-x-2 text-xs font-sans">
                   {/* Real Live Indicator */}
                   <div className="hidden sm:flex items-center space-x-1.5 bg-brand-surface border border-brand-border px-2 py-1 rounded text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    <span className="text-white font-bold">LIVE</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-900 dark:bg-white animate-pulse" />
+                    <span className="text-brand-white font-bold">LIVE</span>
                     <span className="text-brand-muted">|</span>
                     <span className="text-brand-secondary font-mono">&lt; 18ms</span>
                   </div>
 
                   {/* Domain Selector */}
-                  <div className="px-2.5 py-1 rounded bg-brand-surface border border-brand-border text-white text-[11px] flex items-center space-x-1.5">
+                  <div className="px-2.5 py-1 rounded bg-brand-surface border border-brand-border text-brand-white text-[11px] flex items-center space-x-1.5">
                     <span className="truncate max-w-[120px]">{selectedDomain}</span>
                     <ChevronDown className="w-3 h-3 text-brand-secondary" />
                   </div>
@@ -201,16 +201,16 @@ export const SystemPreview: React.FC = () => {
                   {/* Simulate Test Request Button */}
                   <button
                     onClick={handleSimulateBurst}
-                    className="hover:bg-brand-hover flex items-center space-x-1 text-[11px] bg-brand-surface px-2.5 py-1 rounded-lg border border-brand-border text-white transition font-medium"
+                    className="hover:bg-brand-hover flex items-center space-x-1 text-[11px] bg-brand-surface px-2.5 py-1 rounded-lg border border-brand-border text-brand-white transition font-medium"
                     title="Injetar evento de tráfego teste no cluster"
                   >
-                    <Send className="w-3 h-3 text-white" />
+                    <Send className="w-3 h-3 text-brand-white" />
                     <span className="hidden sm:inline">Simular</span>
                   </button>
 
                   <button
                     onClick={loadData}
-                    className="p-1 rounded bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-secondary hover:text-white transition"
+                    className="p-1 rounded bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-secondary hover:text-brand-white transition"
                     title="Atualizar dados"
                   >
                     <RefreshCw className="w-3 h-3" />
@@ -230,13 +230,13 @@ export const SystemPreview: React.FC = () => {
 
                     <div className="bg-brand-surface border border-brand-border rounded-xl p-3 flex items-center justify-between text-xs">
                       <div className="flex items-center space-x-2.5">
-                        <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                        <span className="w-2 h-2 rounded-full bg-neutral-900 dark:bg-white animate-pulse" />
                         <div>
-                          <div className="font-semibold text-white text-xs">Cluster Phantom-X</div>
+                          <div className="font-semibold text-brand-white text-xs">Cluster Phantom-X</div>
                           <div className="text-[10px] text-brand-muted font-mono">14 PoPs operacionais • &lt; 18ms</div>
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono bg-brand-surface border border-brand-border px-2 py-0.5 rounded text-white font-medium">
+                      <span className="text-[10px] font-mono bg-neutral-900 text-white dark:bg-brand-surface dark:text-white border border-brand-border px-2 py-0.5 rounded font-medium">
                         100% OPERACIONAL
                       </span>
                     </div>
@@ -245,8 +245,8 @@ export const SystemPreview: React.FC = () => {
                   {/* Right Column: Digital Matrix World Map STRETCHED WIDE */}
                   <div className="lg:col-span-7 xl:col-span-8 flex flex-col bg-brand-surface border border-brand-border rounded-2xl p-4 sm:p-5 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-3 text-xs">
-                      <div className="flex items-center space-x-2 font-medium text-white">
-                        <Radio className="w-3.5 h-3.5 text-white" />
+                      <div className="flex items-center space-x-2 font-medium text-brand-white">
+                        <Radio className="w-3.5 h-3.5 text-brand-white" />
                         <span className="tracking-wide text-xs">MATRIZ DE TELEMETRIA GLOBAL EM TEMPO REAL</span>
                       </div>
                       <span className="text-brand-muted text-[11px]">
@@ -274,8 +274,8 @@ export const SystemPreview: React.FC = () => {
                 <div className="bg-brand-surface border border-brand-border rounded-xl p-4 sm:p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-xs sm:text-sm font-semibold text-white tracking-wide flex items-center space-x-2">
-                        <Activity className="w-4 h-4 text-white" />
+                      <h3 className="text-xs sm:text-sm font-semibold text-brand-white tracking-wide flex items-center space-x-2">
+                        <Activity className="w-4 h-4 text-brand-white" />
                         <span>Últimas Requisições Auditadas na Borda</span>
                       </h3>
                       <p className="text-[11px] text-brand-secondary mt-0.5">
@@ -306,7 +306,7 @@ export const SystemPreview: React.FC = () => {
                             <td className="py-2.5 text-brand-secondary font-mono">
                               {new Date(evt.timestamp).toLocaleTimeString()}
                             </td>
-                            <td className="py-2.5 text-white font-medium">{evt.domain}</td>
+                            <td className="py-2.5 text-brand-white font-medium">{evt.domain}</td>
                             <td className="py-2.5 text-brand-secondary">
                               {evt.city}, {evt.countryCode}
                             </td>
@@ -316,9 +316,9 @@ export const SystemPreview: React.FC = () => {
                               <span
                                 className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                                   evt.riskScore > 70
-                                    ? "bg-neutral-800 text-white border border-neutral-700"
+                                    ? "bg-neutral-900 text-white border border-neutral-700"
                                     : evt.riskScore > 35
-                                    ? "bg-neutral-900 text-brand-secondary border border-neutral-800"
+                                    ? "bg-neutral-800 text-neutral-200 border border-neutral-700"
                                     : "text-brand-secondary"
                                 }`}
                               >
@@ -328,7 +328,7 @@ export const SystemPreview: React.FC = () => {
                             <td className="py-2.5 text-right">
                               <span
                                 className={`text-[11px] font-semibold ${
-                                  evt.isThreat ? "text-neutral-400" : "text-white"
+                                  evt.isThreat ? "text-neutral-400" : "text-brand-white"
                                 }`}
                               >
                                 {evt.isThreat ? "Mitigado (Safe)" : "Roteado (Oferta)"}
@@ -346,10 +346,10 @@ export const SystemPreview: React.FC = () => {
                   <span>Status Operacional: 100% dos nós ativos sem perda de pacotes</span>
                   <Link
                     href="/dashboard"
-                    className="px-4 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition shadow-glow-sm flex items-center space-x-1.5"
+                    className="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center space-x-1.5"
                   >
                     <span>Entrar no Painel Completo</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <ArrowRight className="w-3.5 h-3.5 text-white dark:text-black" />
                   </Link>
                 </div>
               </div>

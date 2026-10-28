@@ -65,14 +65,14 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
               </div>
 
               <div className="flex items-baseline justify-between mt-1">
-                <span className="text-xl sm:text-2xl font-bold font-sans text-white tracking-tight">
+                <span className="text-xl sm:text-2xl font-bold font-sans text-brand-white tracking-tight">
                   {card.value}
                 </span>
 
                 {card.growth !== 0 && (
                   <div className="flex items-center text-[10px] font-sans text-brand-secondary font-medium">
                     {isPositive ? (
-                      <ArrowUpRight className="w-3 h-3 text-white mr-0.5" />
+                      <ArrowUpRight className="w-3 h-3 text-brand-white mr-0.5" />
                     ) : (
                       <ArrowDownRight className="w-3 h-3 text-brand-muted mr-0.5" />
                     )}
@@ -99,7 +99,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
               Cobertura cartográfica ativa no cluster
             </div>
           </div>
-          <div className="text-2xl font-bold font-sans text-white">
+          <div className="text-2xl font-bold font-sans text-brand-white">
             {cards[4].value}
           </div>
         </div>
@@ -125,7 +125,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
             </div>
 
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-sans text-white tracking-tight">
+              <span className="text-2xl font-bold font-sans text-brand-white tracking-tight">
                 {card.value}
               </span>
 
@@ -135,9 +135,9 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
                     isThreatCard
                       ? isPositive
                         ? "text-brand-secondary"
-                        : "text-white"
+                        : "text-brand-white"
                       : isPositive
-                      ? "text-white font-semibold"
+                      ? "text-brand-white font-semibold"
                       : "text-brand-secondary"
                   }`}
                 >

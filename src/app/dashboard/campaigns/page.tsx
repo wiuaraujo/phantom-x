@@ -81,7 +81,7 @@ export default function CampaignsPage() {
         {/* Top Action Bar */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold text-white tracking-wide">
+            <h2 className="text-base font-semibold text-brand-white tracking-wide">
               Campanhas Configuradas ({campaigns.length})
             </h2>
             <p className="text-xs text-brand-secondary">
@@ -91,9 +91,9 @@ export default function CampaignsPage() {
 
           <button
             onClick={() => setShowModal(true)}
-            className="px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-glow-sm flex items-center space-x-1.5"
+            className="px-4 py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center space-x-1.5"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-white dark:text-black" />
             <span>Nova Campanha</span>
           </button>
         </div>
@@ -120,15 +120,15 @@ export default function CampaignsPage() {
                     <td colSpan={8} className="py-12 text-center">
                       <div className="flex flex-col items-center justify-center space-y-2 font-sans">
                         <Layers className="w-8 h-8 text-brand-muted" />
-                        <div className="text-white font-medium text-xs">Nenhuma campanha cadastrada</div>
+                        <div className="text-brand-white font-medium text-xs">Nenhuma campanha cadastrada</div>
                         <div className="text-[11px] text-brand-secondary max-w-sm">
                           Crie campanhas para monitorar tráfego de anúncios, UTMs e filtrar tráfego automatizado.
                         </div>
                         <button
                           onClick={() => setShowModal(true)}
-                          className="mt-2 inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition"
+                          className="mt-2 inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm"
                         >
-                          <Plus className="w-3.5 h-3.5" />
+                          <Plus className="w-3.5 h-3.5 text-white dark:text-black" />
                           <span>Criar Primeira Campanha</span>
                         </button>
                       </div>
@@ -145,8 +145,8 @@ export default function CampaignsPage() {
                           onClick={() => handleToggleStatus(camp)}
                           className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold transition ${
                             camp.status === "active"
-                              ? "bg-white text-black"
-                              : "bg-brand-black text-brand-muted border border-brand-border"
+                              ? "bg-neutral-900 text-white dark:bg-white dark:text-black"
+                              : "bg-brand-surface text-brand-muted border border-brand-border"
                           }`}
                         >
                           <Power className="w-3 h-3" />
@@ -154,7 +154,7 @@ export default function CampaignsPage() {
                         </button>
                       </td>
                       <td className="py-3">
-                        <div className="text-white font-medium">{camp.name}</div>
+                        <div className="text-brand-white font-medium">{camp.name}</div>
                         <div className="text-brand-muted text-[10px] truncate max-w-[220px]">
                           {camp.targetUrl}
                         </div>
@@ -169,11 +169,11 @@ export default function CampaignsPage() {
                           "Padrão"
                         )}
                       </td>
-                      <td className="py-3 text-white font-bold">
+                      <td className="py-3 text-brand-white font-bold">
                         {camp.totalEvents.toLocaleString("pt-BR")}
                       </td>
                       <td className="py-3 text-brand-secondary">{botRate}%</td>
-                      <td className="py-3 text-white font-semibold">{camp.conversionRate}%</td>
+                      <td className="py-3 text-brand-white font-semibold">{camp.conversionRate}%</td>
                       <td className="py-3 text-right">
                         <button
                           onClick={() => handleDelete(camp.id)}

@@ -82,44 +82,135 @@ html.dark img.phantom-logo {
   filter: invert(0) brightness(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.45)) !important;
 }
 
-/* 2. Headings & Typography */
+/* 2. Headings & General Typography */
 html.light h1,
 html.light h2,
 html.light h3,
 html.light h4,
 html.light h5,
 html.light h6 {
-  color: #0f0f12 !important;
-}
-
-html.light .text-white {
   color: #0f0f12;
 }
 
-html.light .text-neutral-200 {
-  color: #18181b !important;
-}
+/* ==========================================================================
+   3. ONDE TEM PRETO/ESCURO NO MODO CLARO, A TIPOGRAFIA FICA 100% BRANCA
+   (Zero bug: botões pretos, cards pretos, badges, tooltips e tags)
+   ========================================================================== */
 
-html.light .text-neutral-300 {
-  color: #27272a !important;
-}
-
-html.light .text-neutral-400 {
-  color: #52525b !important;
-}
-
-/* 3. Primary Buttons (inverted in light mode for elegance) */
-html.light .bg-white.text-black {
-  background-color: #0f0f12 !important;
+/* Qualquer container escuro preserva texto puro em branco */
+html.light .bg-black,
+html.light .bg-neutral-950,
+html.light .bg-neutral-900,
+html.light .bg-neutral-800,
+html.light .bg-zinc-950,
+html.light .bg-zinc-900,
+html.light .bg-zinc-800,
+html.light [class*="bg-black"],
+html.light [class*="bg-neutral-950"],
+html.light [class*="bg-neutral-900"],
+html.light [class*="bg-neutral-800"],
+html.light [class*="bg-[#0"],
+html.light [class*="bg-[#1"],
+html.light [class*="from-black"],
+html.light [class*="from-[#0"],
+html.light [class*="from-[#1"],
+html.light .dark-surface {
   color: #ffffff !important;
 }
 
-html.light .bg-white.text-black * {
+/* Títulos h1-h6 dentro de qualquer fundo preto ou escuro */
+html.light .bg-black h1, html.light .bg-black h2, html.light .bg-black h3, html.light .bg-black h4, html.light .bg-black h5, html.light .bg-black h6,
+html.light .bg-neutral-950 h1, html.light .bg-neutral-950 h2, html.light .bg-neutral-950 h3, html.light .bg-neutral-950 h4, html.light .bg-neutral-950 h5, html.light .bg-neutral-950 h6,
+html.light .bg-neutral-900 h1, html.light .bg-neutral-900 h2, html.light .bg-neutral-900 h3, html.light .bg-neutral-900 h4, html.light .bg-neutral-900 h5, html.light .bg-neutral-900 h6,
+html.light .bg-neutral-800 h1, html.light .bg-neutral-800 h2, html.light .bg-neutral-800 h3, html.light .bg-neutral-800 h4, html.light .bg-neutral-800 h5, html.light .bg-neutral-800 h6,
+html.light [class*="bg-black"] h1, html.light [class*="bg-black"] h2, html.light [class*="bg-black"] h3, html.light [class*="bg-black"] h4, html.light [class*="bg-black"] h5, html.light [class*="bg-black"] h6,
+html.light [class*="bg-neutral-900"] h1, html.light [class*="bg-neutral-900"] h2, html.light [class*="bg-neutral-900"] h3, html.light [class*="bg-neutral-900"] h4, html.light [class*="bg-neutral-900"] h5, html.light [class*="bg-neutral-900"] h6,
+html.light [class*="bg-neutral-800"] h1, html.light [class*="bg-neutral-800"] h2, html.light [class*="bg-neutral-800"] h3, html.light [class*="bg-neutral-800"] h4, html.light [class*="bg-neutral-800"] h5, html.light [class*="bg-neutral-800"] h6,
+html.light [class*="bg-[#0"] h1, html.light [class*="bg-[#0"] h2, html.light [class*="bg-[#0"] h3, html.light [class*="bg-[#0"] h4, html.light [class*="bg-[#0"] h5, html.light [class*="bg-[#0"] h6,
+html.light [class*="bg-[#1"] h1, html.light [class*="bg-[#1"] h2, html.light [class*="bg-[#1"] h3, html.light [class*="bg-[#1"] h4, html.light [class*="bg-[#1"] h5, html.light [class*="bg-[#1"] h6,
+html.light [class*="from-black"] h1, html.light [class*="from-black"] h2, html.light [class*="from-black"] h3, html.light [class*="from-black"] h4, html.light [class*="from-black"] h5, html.light [class*="from-black"] h6,
+html.light [class*="from-[#0"] h1, html.light [class*="from-[#0"] h2, html.light [class*="from-[#0"] h3, html.light [class*="from-[#0"] h4, html.light [class*="from-[#0"] h5, html.light [class*="from-[#0"] h6,
+html.light [class*="from-[#1"] h1, html.light [class*="from-[#1"] h2, html.light [class*="from-[#1"] h3, html.light [class*="from-[#1"] h4, html.light [class*="from-[#1"] h5, html.light [class*="from-[#1"] h6 {
   color: #ffffff !important;
 }
 
-html.light .bg-white.text-black:hover {
-  background-color: #27272a !important;
+/* Spans, textos, valores numéricos e badges dentro de elementos pretos/escuros */
+html.light .bg-black span,
+html.light .bg-neutral-950 span,
+html.light .bg-neutral-900 span,
+html.light .bg-neutral-800 span,
+html.light [class*="bg-black"] span,
+html.light [class*="bg-neutral-900"] span,
+html.light [class*="bg-neutral-800"] span,
+html.light [class*="bg-[#0"] span,
+html.light [class*="bg-[#1"] span,
+html.light [class*="from-black"] span,
+html.light [class*="from-[#0"] span,
+html.light [class*="from-[#1"] span,
+html.light .bg-black p,
+html.light .bg-neutral-900 p,
+html.light [class*="bg-[#0"] p,
+html.light [class*="bg-[#1"] p,
+html.light [class*="bg-black"] .text-white,
+html.light [class*="bg-neutral-900"] .text-white,
+html.light [class*="bg-neutral-800"] .text-white,
+html.light [class*="bg-[#0"] .text-white,
+html.light [class*="bg-[#1"] .text-white,
+html.light [class*="from-black"] .text-white,
+html.light [class*="from-[#0"] .text-white,
+html.light [class*="from-[#1"] .text-white,
+html.light button[class*="bg-black"] *,
+html.light button[class*="bg-neutral-900"] *,
+html.light button[class*="bg-neutral-800"] *,
+html.light a[class*="bg-black"] *,
+html.light a[class*="bg-neutral-900"] *,
+html.light a[class*="bg-neutral-800"] * {
+  color: #ffffff !important;
+}
+
+/* Ícones SVG em fundos escuros */
+html.light .bg-black svg,
+html.light .bg-neutral-950 svg,
+html.light .bg-neutral-900 svg,
+html.light .bg-neutral-800 svg,
+html.light [class*="bg-black"] svg,
+html.light [class*="bg-neutral-900"] svg,
+html.light [class*="bg-neutral-800"] svg,
+html.light [class*="bg-[#0"] svg,
+html.light [class*="bg-[#1"] svg,
+html.light [class*="from-black"] svg,
+html.light [class*="from-[#0"] svg,
+html.light [class*="from-[#1"] svg,
+html.light button[class*="bg-black"] svg,
+html.light button[class*="bg-neutral-900"] svg,
+html.light button[class*="bg-neutral-800"] svg,
+html.light a[class*="bg-black"] svg,
+html.light a[class*="bg-neutral-900"] svg,
+html.light a[class*="bg-neutral-800"] svg {
+  color: #ffffff !important;
+  stroke: currentColor;
+}
+
+/* Textos secundários e atenuados dentro de superfícies pretas */
+html.light .bg-black .text-brand-secondary,
+html.light .bg-black .text-brand-muted,
+html.light .bg-neutral-900 .text-brand-secondary,
+html.light .bg-neutral-900 .text-brand-muted,
+html.light [class*="bg-black"] .text-brand-secondary,
+html.light [class*="bg-black"] .text-brand-muted,
+html.light [class*="bg-neutral-900"] .text-brand-secondary,
+html.light [class*="bg-neutral-900"] .text-brand-muted,
+html.light [class*="bg-[#0"] .text-brand-secondary,
+html.light [class*="bg-[#0"] .text-brand-muted,
+html.light [class*="bg-[#1"] .text-brand-secondary,
+html.light [class*="bg-[#1"] .text-brand-muted,
+html.light [class*="from-black"] .text-brand-secondary,
+html.light [class*="from-black"] .text-brand-muted,
+html.light [class*="from-[#0"] .text-brand-secondary,
+html.light [class*="from-[#0"] .text-brand-muted,
+html.light [class*="from-[#1"] .text-brand-secondary,
+html.light [class*="from-[#1"] .text-brand-muted {
+  color: #a1a1aa !important;
 }
 
 /* 4. Glass and Border Overrides in Light Mode */

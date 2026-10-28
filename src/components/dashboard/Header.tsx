@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="h-16 border-b border-brand-border bg-brand-black/80 backdrop-blur-md px-6 flex items-center justify-between z-20">
       {/* Page Title & Subtitle */}
       <div>
-        <h1 className="text-base font-semibold text-white tracking-wide">{title}</h1>
+        <h1 className="text-base font-semibold text-brand-white tracking-wide">{title}</h1>
         {subtitle && <p className="text-xs text-brand-secondary">{subtitle}</p>}
       </div>
 
@@ -43,8 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Real Backend Connection Badge */}
         <div className="hidden sm:flex items-center space-x-2 bg-brand-surface border border-brand-border px-2.5 py-1 rounded-md text-[11px] font-mono">
-          <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-          <span className="text-white font-medium">LIVE</span>
+          <span className="w-2 h-2 rounded-full bg-neutral-900 dark:bg-white animate-pulse" />
+          <span className="text-brand-white font-medium">LIVE</span>
           <span className="text-brand-muted">|</span>
           <span className="text-brand-secondary">Edge sync</span>
         </div>
@@ -54,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="relative">
             <button
               onClick={() => setDomainDropdown(!domainDropdown)}
-              className="flex items-center space-x-2 bg-brand-surface hover:bg-brand-hover border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono text-white transition"
+              className="flex items-center space-x-2 bg-brand-surface hover:bg-brand-hover border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono text-brand-white transition"
             >
               <span className="truncate max-w-[140px]">{selectedDomain}</span>
               <ChevronDown className="w-3.5 h-3.5 text-brand-secondary" />
@@ -70,11 +70,11 @@ export const Header: React.FC<HeaderProps> = ({
                       setDomainDropdown(false);
                     }}
                     className={`w-full text-left px-3 py-2 hover:bg-brand-hover transition flex items-center justify-between ${
-                      selectedDomain === dom ? "text-white font-bold" : "text-brand-secondary"
+                      selectedDomain === dom ? "text-brand-white font-bold" : "text-brand-secondary"
                     }`}
                   >
                     <span className="truncate">{dom}</span>
-                    {selectedDomain === dom && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                    {selectedDomain === dom && <CheckCircle2 className="w-3.5 h-3.5 text-brand-white" />}
                   </button>
                 ))}
               </div>
@@ -91,8 +91,8 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => onSelectPeriod(p)}
                 className={`px-2.5 py-1 rounded-md transition ${
                   selectedPeriod === p
-                    ? "bg-white text-black font-semibold"
-                    : "text-brand-secondary hover:text-white"
+                    ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold"
+                    : "text-brand-secondary hover:text-brand-white"
                 }`}
               >
                 {p}

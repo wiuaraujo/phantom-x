@@ -89,8 +89,8 @@ export default function DashboardOverview() {
             {/* Title & Live Badge */}
             <div className="flex items-center space-x-3 pointer-events-auto">
               <div className="flex items-center space-x-2 bg-brand-surface/90 backdrop-blur-md border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono">
-                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                <span className="text-white font-semibold tracking-wider">MATRIZ DE TELEMETRIA GLOBAL</span>
+                <span className="w-2 h-2 rounded-full bg-neutral-900 dark:bg-white animate-pulse" />
+                <span className="text-brand-white font-semibold tracking-wider">MATRIZ DE TELEMETRIA GLOBAL</span>
               </div>
               <div className="hidden md:flex items-center space-x-2 text-[11px] text-brand-muted font-mono bg-brand-surface/60 px-2.5 py-1 rounded-md border border-brand-border/60">
                 <span>14 PoPs operacionais</span>
@@ -102,12 +102,12 @@ export default function DashboardOverview() {
             {/* Actions Bar */}
             <div className="flex items-center space-x-2 pointer-events-auto">
               {selectedCountry && (
-                <div className="flex items-center space-x-1.5 bg-brand-surface border border-brand-border px-2.5 py-1 rounded-lg text-xs font-mono text-white">
+                <div className="flex items-center space-x-1.5 bg-brand-surface border border-brand-border px-2.5 py-1 rounded-lg text-xs font-mono text-brand-white">
                   <span className="text-sm select-none">{getCountryFlag(selectedCountry)}</span>
                   <span>Filtrando: [{selectedCountry}]</span>
                   <button
                     onClick={() => setSelectedCountry(null)}
-                    className="text-brand-muted hover:text-white ml-1"
+                    className="text-brand-muted hover:text-brand-white ml-1"
                   >
                     ✕
                   </button>
@@ -224,8 +224,8 @@ export default function DashboardOverview() {
         <div className="bg-brand-surface border border-brand-border rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-semibold text-white tracking-wide flex items-center space-x-2">
-                <Activity className="w-4 h-4 text-white" />
+              <h3 className="text-sm font-semibold text-brand-white tracking-wide flex items-center space-x-2">
+                <Activity className="w-4 h-4 text-brand-white" />
                 <span>Atividade Recente de Tráfego</span>
               </h3>
               <p className="text-xs text-brand-secondary mt-0.5">
@@ -257,7 +257,7 @@ export default function DashboardOverview() {
                     <td colSpan={8} className="py-12 text-center">
                       <div className="flex flex-col items-center justify-center space-y-2 text-brand-secondary">
                         <Activity className="w-7 h-7 text-brand-muted" />
-                        <div className="text-white font-medium text-xs">
+                        <div className="text-brand-white font-medium text-xs">
                           Nenhum evento registrado ainda
                         </div>
                         <div className="text-[11px] text-brand-muted max-w-sm">
@@ -272,11 +272,11 @@ export default function DashboardOverview() {
                       <td className="py-3 text-brand-secondary font-mono">
                         {new Date(evt.timestamp).toLocaleTimeString()}
                       </td>
-                      <td className="py-3 text-white font-medium">{evt.domain}</td>
+                      <td className="py-3 text-brand-white font-medium">{evt.domain}</td>
                       <td className="py-3 text-brand-secondary truncate max-w-[150px]">
                         {evt.campaignName || "Acesso Direto"}
                       </td>
-                      <td className="py-3 text-white">
+                      <td className="py-3 text-brand-white">
                         <LocationBadge
                           countryCode={evt.countryCode}
                           cityName={evt.city}
@@ -290,9 +290,9 @@ export default function DashboardOverview() {
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                             evt.riskScore > 70
-                              ? "bg-neutral-800 text-white border border-neutral-700"
+                              ? "bg-neutral-900 text-white border border-neutral-700"
                               : evt.riskScore > 35
-                              ? "bg-neutral-900 text-brand-secondary border border-neutral-800"
+                              ? "bg-neutral-800 text-neutral-200 border border-neutral-700"
                               : "text-brand-secondary"
                           }`}
                         >
@@ -301,11 +301,11 @@ export default function DashboardOverview() {
                       </td>
                       <td className="py-3 text-right">
                         {evt.decision === "routed_offer" ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/10 text-white border border-white/20">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-neutral-900 text-white dark:bg-white/10 dark:text-white border border-neutral-700 dark:border-white/20">
                             OFERTA
                           </span>
                         ) : evt.decision === "mitigated_safe" ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-neutral-900 text-neutral-300 border border-neutral-800">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-neutral-800 text-neutral-200 border border-neutral-700">
                             SAFE PAGE
                           </span>
                         ) : evt.decision === "blocked" ? (

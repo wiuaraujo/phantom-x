@@ -71,7 +71,7 @@ export default function EventsExplorerPage() {
                 setPage(1);
               }}
               placeholder="Buscar por cidade, país, domínio ou IP..."
-              className="w-full pl-9 pr-3 py-2 bg-brand-black border border-brand-border rounded-lg text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-white transition"
+              className="w-full pl-9 pr-3 py-2 bg-brand-surface border border-brand-border rounded-lg text-xs font-mono text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition"
             />
           </div>
 
@@ -85,7 +85,7 @@ export default function EventsExplorerPage() {
                   setSelectedRisk(e.target.value as any);
                   setPage(1);
                 }}
-                className="bg-brand-black border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-white"
+                className="bg-brand-surface border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-brand-white focus:outline-none focus:border-brand-borderHighlight"
               >
                 <option value="all">Todos</option>
                 <option value="clean">Limpos (0-35)</option>
@@ -97,7 +97,7 @@ export default function EventsExplorerPage() {
             {/* Export Button */}
             <button
               onClick={handleExportCSV}
-              className="px-3.5 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition flex items-center space-x-1.5"
+              className="px-3.5 py-2 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition flex items-center space-x-1.5"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Exportar CSV</span>
@@ -131,12 +131,12 @@ export default function EventsExplorerPage() {
                 ) : (
                   currentEvents.map((evt) => (
                     <tr key={evt.id} className="hover:bg-brand-hover/40 transition">
-                      <td className="py-3 text-white font-medium">{evt.id.substring(0, 14)}...</td>
+                      <td className="py-3 text-brand-white font-medium">{evt.id.substring(0, 14)}...</td>
                       <td className="py-3 text-brand-secondary">
                         {new Date(evt.timestamp).toLocaleString("pt-BR")}
                       </td>
-                      <td className="py-3 text-white">{evt.domain}</td>
-                      <td className="py-3 text-white">
+                      <td className="py-3 text-brand-white">{evt.domain}</td>
+                      <td className="py-3 text-brand-white">
                         <LocationBadge
                           countryCode={evt.countryCode}
                           cityName={evt.city}

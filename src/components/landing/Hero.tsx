@@ -28,7 +28,7 @@ export const Hero: React.FC = () => {
         </div>
 
         {/* Main Headline */}
-        <h1 className="relative z-10 text-3xl xs:text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white leading-[1.12] mb-4 sm:mb-6 font-sans drop-shadow-md">
+        <h1 className="relative z-10 text-3xl xs:text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-brand-white leading-[1.12] mb-4 sm:mb-6 font-sans drop-shadow-md">
           {t.hero.titleLine1} <br />
           <span className="text-brand-secondary font-medium">{t.hero.titleLine2}</span>
         </h1>
@@ -66,13 +66,13 @@ export const Hero: React.FC = () => {
       {/* Live Micro Ticker at bottom */}
       <div className="relative z-20 mt-8 w-full max-w-4xl px-4 flex items-center justify-between text-[11px] font-mono text-brand-secondary border-t border-brand-borderSubtle pt-4">
         <div className="flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-          <span className="text-white">{t.hero.latency}</span>
+          <span className="w-2 h-2 rounded-full bg-neutral-900 dark:bg-white animate-pulse" />
+          <span className="text-brand-white">{t.hero.latency}</span>
         </div>
         <div className="hidden sm:block text-brand-muted">
           {t.hero.cluster}
         </div>
-        <div className="text-white">
+        <div className="text-brand-white">
           {t.hero.cleanTraffic}
         </div>
       </div>

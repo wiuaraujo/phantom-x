@@ -68,8 +68,8 @@ export default function LiveMonitoringPage() {
               onClick={() => setIsPaused(!isPaused)}
               className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold font-mono transition ${
                 isPaused
-                  ? "bg-white text-black hover:bg-neutral-200"
-                  : "bg-brand-black text-white border border-brand-border hover:bg-brand-hover"
+                  ? "bg-neutral-900 text-white dark:bg-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200"
+                  : "bg-brand-surface text-brand-white border border-brand-border hover:bg-brand-hover"
               }`}
             >
               {isPaused ? (
@@ -87,7 +87,7 @@ export default function LiveMonitoringPage() {
 
             <button
               onClick={() => setEvents([])}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-brand-secondary hover:text-white bg-brand-black border border-brand-border transition"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-brand-secondary hover:text-brand-white bg-brand-surface border border-brand-border transition"
               title="Limpar buffer de eventos"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -96,9 +96,9 @@ export default function LiveMonitoringPage() {
 
             <button
               onClick={handleSimulateBurst}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-white bg-brand-black border border-brand-border hover:bg-brand-hover transition"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-brand-white bg-brand-surface border border-brand-border hover:bg-brand-hover transition"
             >
-              <Send className="w-3.5 h-3.5 text-white" />
+              <Send className="w-3.5 h-3.5 text-brand-white" />
               <span>Injetar Carga (+3)</span>
             </button>
           </div>
@@ -114,8 +114,8 @@ export default function LiveMonitoringPage() {
                 onClick={() => setSelectedRisk(r)}
                 className={`px-2.5 py-1 rounded transition text-xs ${
                   selectedRisk === r
-                    ? "bg-white text-black font-bold"
-                    : "text-brand-secondary hover:text-white bg-brand-black border border-brand-border"
+                    ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-bold"
+                    : "text-brand-secondary hover:text-brand-white bg-brand-surface border border-brand-border"
                 }`}
               >
                 {r === "all" ? "Todos" : r === "clean" ? "Limpos" : r === "suspicious" ? "Suspeitos" : "Bots"}
@@ -130,10 +130,10 @@ export default function LiveMonitoringPage() {
             <div className="flex items-center space-x-2">
               <span
                 className={`w-2.5 h-2.5 rounded-full ${
-                  isPaused ? "bg-neutral-500" : "bg-white animate-ping"
+                  isPaused ? "bg-neutral-500" : "bg-neutral-900 dark:bg-white animate-ping"
                 }`}
               />
-              <span className="text-xs font-mono text-white font-semibold uppercase">
+              <span className="text-xs font-mono text-brand-white font-semibold uppercase">
                 {isPaused ? "STREAM EM PAUSA" : "STREAM DE REQUISIÇÕES CONECTADO"}
               </span>
             </div>
@@ -166,9 +166,9 @@ export default function LiveMonitoringPage() {
                     <td className="py-3 text-brand-secondary whitespace-nowrap">
                       {new Date(evt.timestamp).toLocaleTimeString()}
                     </td>
-                    <td className="py-3 text-white font-medium whitespace-nowrap">{evt.domain}</td>
+                    <td className="py-3 text-brand-white font-medium whitespace-nowrap">{evt.domain}</td>
                     <td className="py-3 text-brand-muted whitespace-nowrap">{evt.ipMasked}</td>
-                    <td className="py-3 text-white whitespace-nowrap">
+                    <td className="py-3 text-brand-white whitespace-nowrap">
                       <LocationBadge
                         countryCode={evt.countryCode}
                         cityName={evt.city}
@@ -186,9 +186,9 @@ export default function LiveMonitoringPage() {
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                           evt.riskScore > 70
-                            ? "bg-neutral-800 text-white border border-neutral-700"
+                            ? "bg-neutral-900 text-white border border-neutral-700"
                             : evt.riskScore > 35
-                            ? "bg-neutral-900 text-brand-secondary border border-neutral-800"
+                            ? "bg-neutral-800 text-neutral-200 border border-neutral-700"
                             : "text-brand-secondary"
                         }`}
                       >
@@ -196,7 +196,7 @@ export default function LiveMonitoringPage() {
                       </span>
                     </td>
                     <td className="py-3 text-right">
-                      <span className="text-brand-muted group-hover:text-white transition">
+                      <span className="text-brand-muted group-hover:text-brand-white transition">
                         Inspecionar →
                       </span>
                     </td>
@@ -215,11 +215,11 @@ export default function LiveMonitoringPage() {
             <div className="flex items-center justify-between border-b border-brand-border pb-4">
               <div>
                 <span className="text-[10px] text-brand-muted uppercase">DETALHES DA REQUISIÇÃO</span>
-                <h2 className="text-base font-bold text-white">{selectedEvent.id}</h2>
+                <h2 className="text-base font-bold text-brand-white">{selectedEvent.id}</h2>
               </div>
               <button
                 onClick={() => setSelectedEvent(null)}
-                className="p-1 rounded-lg hover:bg-brand-hover text-brand-secondary hover:text-white"
+                className="p-1 rounded-lg hover:bg-brand-hover text-brand-secondary hover:text-brand-white"
               >
                 <X className="w-5 h-5" />
               </button>

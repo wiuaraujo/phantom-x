@@ -14,7 +14,7 @@ export const Pricing: React.FC = () => {
           <span className="text-xs font-mono tracking-widest uppercase text-brand-secondary">
             PLANOS & INFRAESTRUTURA
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-3 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-brand-white tracking-tight mt-3 mb-4">
             Previsibilidade para cada escala de operação.
           </h2>
           <p className="text-sm sm:text-base text-brand-secondary">
@@ -43,7 +43,7 @@ export const Pricing: React.FC = () => {
 
                 <div>
                   <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="text-xl font-bold text-white tracking-tight">{plan.name}</h3>
+                    <h3 className="text-xl font-bold text-brand-white tracking-tight">{plan.name}</h3>
                     <span className="text-xs font-mono text-brand-muted">
                       {plan.limits.eventsPerMonth}
                     </span>
@@ -56,7 +56,7 @@ export const Pricing: React.FC = () => {
                   {/* Price */}
                   <div className="flex items-baseline space-x-1 pb-6 mb-6 border-b border-brand-border">
                     <span className="text-xs font-mono text-brand-muted">{plan.currency}</span>
-                    <span className="text-4xl font-extrabold font-mono text-white tracking-tight">
+                    <span className="text-4xl font-extrabold font-mono text-brand-white tracking-tight">
                       {plan.priceMonthly}
                     </span>
                     <span className="text-xs font-mono text-brand-secondary">/mês</span>

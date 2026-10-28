@@ -23,7 +23,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
       <div className="lg:col-span-2 bg-brand-surface border border-brand-border rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-wide">
+            <h3 className="text-sm font-semibold text-brand-white tracking-wide">
               Volume de Requisições (Últimas 24h)
             </h3>
             <p className="text-xs text-brand-secondary mt-0.5">
@@ -32,11 +32,11 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
           </div>
           <div className="flex items-center space-x-4 text-xs font-mono">
             <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-white" />
+              <span className="w-2.5 h-2.5 rounded-sm bg-neutral-900 dark:bg-white" />
               <span className="text-brand-secondary">Acessos Reais</span>
             </div>
             <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-neutral-600" />
+              <span className="w-2.5 h-2.5 rounded-sm bg-neutral-400 dark:bg-neutral-600" />
               <span className="text-brand-secondary">Tráfego Filtrado</span>
             </div>
           </div>
@@ -54,7 +54,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
                 className="flex-1 flex flex-col items-center justify-end h-full group relative"
               >
                 {/* Tooltip on hover */}
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none absolute -top-10 bg-brand-black border border-brand-border text-white text-[10px] px-2 py-1 rounded shadow-glow whitespace-nowrap z-20 font-mono">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none absolute -top-10 bg-neutral-900 border border-neutral-700 text-white text-[10px] px-2 py-1 rounded shadow-glow whitespace-nowrap z-20 font-mono">
                   {item.hour}: {item.events} reqs ({item.threats} bots)
                 </div>
 
@@ -62,12 +62,12 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
                   {/* Clean traffic part */}
                   <div
                     style={{ height: `${heightPercent}%` }}
-                    className="w-full bg-white/90 group-hover:bg-white rounded-t-sm transition-all"
+                    className="w-full bg-neutral-900 dark:bg-white/90 group-hover:bg-black dark:group-hover:bg-white rounded-t-sm transition-all"
                   />
                   {/* Automated threats part */}
                   <div
                     style={{ height: `${threatHeightPercent}%` }}
-                    className="w-full bg-neutral-700 group-hover:bg-neutral-600"
+                    className="w-full bg-neutral-400 dark:bg-neutral-700 group-hover:bg-neutral-500 dark:group-hover:bg-neutral-600"
                   />
                 </div>
               </div>
@@ -84,7 +84,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
       {/* 2. Device Breakdown & Origin breakdown */}
       <div className="bg-brand-surface border border-brand-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-white tracking-wide mb-1">
+          <h3 className="text-sm font-semibold text-brand-white tracking-wide mb-1">
             Distribuição por Dispositivo
           </h3>
           <p className="text-xs text-brand-secondary mb-4">
@@ -95,12 +95,12 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
             <div>
               <div className="flex justify-between text-brand-secondary mb-1">
                 <span>Mobile (Smartphones)</span>
-                <span className="text-white font-bold">{deviceStats.mobile}%</span>
+                <span className="text-brand-white font-bold">{deviceStats.mobile}%</span>
               </div>
               <div className="w-full bg-brand-black h-2 rounded-full overflow-hidden border border-brand-borderSubtle">
                 <div
                   style={{ width: `${deviceStats.mobile}%` }}
-                  className="bg-white h-full"
+                  className="bg-neutral-900 dark:bg-white h-full"
                 />
               </div>
             </div>
@@ -108,12 +108,12 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
             <div>
               <div className="flex justify-between text-brand-secondary mb-1">
                 <span>Desktop (Workstations)</span>
-                <span className="text-white font-bold">{deviceStats.desktop}%</span>
+                <span className="text-brand-white font-bold">{deviceStats.desktop}%</span>
               </div>
               <div className="w-full bg-brand-black h-2 rounded-full overflow-hidden border border-brand-borderSubtle">
                 <div
                   style={{ width: `${deviceStats.desktop}%` }}
-                  className="bg-zinc-400 h-full"
+                  className="bg-neutral-600 dark:bg-zinc-400 h-full"
                 />
               </div>
             </div>
@@ -121,12 +121,12 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
             <div>
               <div className="flex justify-between text-brand-secondary mb-1">
                 <span>Tablets & Outros</span>
-                <span className="text-white font-bold">{deviceStats.tablet}%</span>
+                <span className="text-brand-white font-bold">{deviceStats.tablet}%</span>
               </div>
               <div className="w-full bg-brand-black h-2 rounded-full overflow-hidden border border-brand-borderSubtle">
                 <div
                   style={{ width: `${deviceStats.tablet}%` }}
-                  className="bg-zinc-600 h-full"
+                  className="bg-neutral-400 dark:bg-zinc-600 h-full"
                 />
               </div>
             </div>
@@ -134,12 +134,12 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
             <div>
               <div className="flex justify-between text-brand-secondary mb-1">
                 <span>Bots / Crawlers Identificados</span>
-                <span className="text-white font-bold">{deviceStats.bot}%</span>
+                <span className="text-brand-white font-bold">{deviceStats.bot}%</span>
               </div>
               <div className="w-full bg-brand-black h-2 rounded-full overflow-hidden border border-brand-borderSubtle">
                 <div
                   style={{ width: `${deviceStats.bot}%` }}
-                  className="bg-neutral-800 border-r border-white h-full"
+                  className="bg-neutral-300 dark:bg-neutral-800 border-r border-neutral-900 dark:border-white h-full"
                 />
               </div>
             </div>
@@ -148,7 +148,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
 
         {/* Top Countries Quick List */}
         <div className="pt-4 border-t border-brand-border mt-4">
-          <div className="text-xs font-semibold text-white mb-2">Principais Regiões</div>
+          <div className="text-xs font-semibold text-brand-white mb-2">Principais Regiões</div>
           <div className="space-y-1.5 text-xs font-mono">
             {geoData.slice(0, 3).map((g, i) => (
               <div key={i} className="flex justify-between items-center text-brand-secondary">
@@ -156,7 +156,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
                   <span className="text-sm select-none">{getCountryFlag(g.countryCode)}</span>
                   <span>{g.country}</span>
                 </span>
-                <span className="text-white font-semibold">{g.eventsCount} ({g.percentage}%)</span>
+                <span className="text-brand-white font-semibold">{g.eventsCount} ({g.percentage}%)</span>
               </div>
             ))}
           </div>

@@ -52,7 +52,7 @@ export default function SettingsPage() {
         {/* Appearance & Interface Theme Card */}
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
           <div className="border-b border-brand-border pb-3">
-            <h3 className="text-sm font-bold text-white">Aparência & Tema da Interface</h3>
+            <h3 className="text-sm font-bold text-brand-white">Aparência & Tema da Interface</h3>
             <p className="text-brand-secondary text-[11px]">
               Personalize o modo de visualização do dashboard e de toda a plataforma Phantom-X
             </p>
@@ -74,7 +74,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs">Tema Escuro (Obsidian)</span>
+                  <span className="font-bold text-brand-white text-xs">Tema Escuro (Obsidian)</span>
                   {theme === "dark" && (
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-black font-semibold">
                       Ativo
@@ -102,9 +102,9 @@ export default function SettingsPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs">Tema Claro (Titanium)</span>
+                  <span className="font-bold text-brand-white text-xs">Tema Claro (Titanium)</span>
                   {theme === "light" && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black text-white font-semibold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-900 text-white font-semibold">
                       Ativo
                     </span>
                   )}
@@ -120,7 +120,7 @@ export default function SettingsPage() {
         {/* Organization Information */}
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
           <div className="border-b border-brand-border pb-3">
-            <h3 className="text-sm font-bold text-white">Organização & Ambiente</h3>
+            <h3 className="text-sm font-bold text-brand-white">Organização & Ambiente</h3>
             <p className="text-brand-secondary text-[11px]">
               Dados de identificação do workspace e isolamento multi-tenant
             </p>
@@ -133,7 +133,7 @@ export default function SettingsPage() {
                 type="text"
                 readOnly
                 value={session?.user.organizationName || "Nexora Intelligence Lab"}
-                className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white"
+                className="w-full px-3 py-2 bg-brand-surface border border-brand-border rounded-lg text-brand-white"
               />
             </div>
 
@@ -143,7 +143,7 @@ export default function SettingsPage() {
                 type="text"
                 readOnly
                 value={session?.user.email || "admin@phantomx.pro"}
-                className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white"
+                className="w-full px-3 py-2 bg-brand-surface border border-brand-border rounded-lg text-brand-white"
               />
             </div>
           </div>
@@ -153,14 +153,14 @@ export default function SettingsPage() {
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
           <div className="border-b border-brand-border pb-3 flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-bold text-white">Chave de Ingestão de API</h3>
+              <h3 className="text-sm font-bold text-brand-white">Chave de Ingestão de API</h3>
               <p className="text-brand-secondary text-[11px]">
                 Utilizada para autenticar chamadas server-to-server ou clientes SDK
               </p>
             </div>
             <button
               onClick={handleGenerateNewKey}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-black border border-brand-border text-brand-secondary hover:text-white transition"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-secondary hover:text-brand-white transition"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Rotacionar Chave</span>
@@ -174,13 +174,13 @@ export default function SettingsPage() {
                 type="text"
                 readOnly
                 value={apiKey}
-                className="flex-1 px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white select-all"
+                className="flex-1 px-3 py-2 bg-brand-surface border border-brand-border rounded-lg text-brand-white select-all"
               />
               <button
                 onClick={() => copyToClipboard(apiKey, "key")}
-                className="px-3.5 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition flex items-center space-x-1.5"
+                className="px-3.5 py-2 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition flex items-center space-x-1.5"
               >
-                {copiedKey ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copiedKey ? <Check className="w-4 h-4 text-white dark:text-black" /> : <Copy className="w-4 h-4 text-white dark:text-black" />}
                 <span>{copiedKey ? "Copiado!" : "Copiar"}</span>
               </button>
             </div>
@@ -191,21 +191,21 @@ export default function SettingsPage() {
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
           <div className="border-b border-brand-border pb-3 flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-bold text-white">Snippet JavaScript de Rastreamento</h3>
+              <h3 className="text-sm font-bold text-brand-white">Snippet JavaScript de Rastreamento</h3>
               <p className="text-brand-secondary text-[11px]">
                 Adicione antes do fechamento da tag <code>&lt;/head&gt;</code> em suas páginas
               </p>
             </div>
             <button
               onClick={() => copyToClipboard(trackingSnippet, "script")}
-              className="px-3.5 py-1.5 rounded-lg bg-brand-black border border-brand-border text-white hover:bg-brand-hover transition flex items-center space-x-1.5"
+              className="px-3.5 py-1.5 rounded-lg bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-white transition flex items-center space-x-1.5"
             >
               {copiedScript ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copiedScript ? "Copiado!" : "Copiar Snippet"}</span>
             </button>
           </div>
 
-          <div className="p-4 rounded-lg bg-brand-black border border-brand-borderSubtle overflow-x-auto">
+          <div className="p-4 rounded-lg bg-neutral-900 dark:bg-black border border-brand-borderSubtle overflow-x-auto">
             <pre className="text-white text-[11px] leading-relaxed">
               <code>{trackingSnippet}</code>
             </pre>
@@ -215,16 +215,16 @@ export default function SettingsPage() {
         {/* Routing Security Policies */}
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
           <div className="border-b border-brand-border pb-3">
-            <h3 className="text-sm font-bold text-white">Políticas de Segurança e Proteção de Borda</h3>
+            <h3 className="text-sm font-bold text-brand-white">Políticas de Segurança e Proteção de Borda</h3>
             <p className="text-brand-secondary text-[11px]">
               Proteção contra open redirects, limitação de requisições e allowlists de destino
             </p>
           </div>
 
           <div className="space-y-4">
-            <label className="flex items-start justify-between cursor-pointer p-3 rounded-lg bg-brand-black border border-brand-borderSubtle">
+            <label className="flex items-start justify-between cursor-pointer p-3 rounded-lg bg-brand-surface border border-brand-borderSubtle">
               <div>
-                <div className="text-white font-medium">Bloqueio de Open Redirects</div>
+                <div className="text-brand-white font-medium">Bloqueio de Open Redirects</div>
                 <div className="text-brand-muted text-[11px] mt-0.5">
                   Garante que o tráfego só possa ser redirecionado para domínios explicitamente
                   cadastrados na sua allowlist de segurança.
@@ -234,13 +234,13 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={openRedirectProtection}
                 onChange={(e) => setOpenRedirectProtection(e.target.checked)}
-                className="rounded border-brand-border bg-brand-surface text-white focus:ring-0 mt-1"
+                className="rounded border-brand-border bg-brand-surface text-brand-white focus:ring-0 mt-1"
               />
             </label>
 
-            <label className="flex items-start justify-between cursor-pointer p-3 rounded-lg bg-brand-black border border-brand-borderSubtle">
+            <label className="flex items-start justify-between cursor-pointer p-3 rounded-lg bg-brand-surface border border-brand-borderSubtle">
               <div>
-                <div className="text-white font-medium">Rate Limiting de Borda (60 req/min por IP)</div>
+                <div className="text-brand-white font-medium">Rate Limiting de Borda (60 req/min por IP)</div>
                 <div className="text-brand-muted text-[11px] mt-0.5">
                   Isola automaticamente IPs que ultrapassem a frequência normal de navegação
                   humana, mitigando raspagem automatizada e ataques L7.
@@ -250,7 +250,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={rateLimitEnabled}
                 onChange={(e) => setRateLimitEnabled(e.target.checked)}
-                className="rounded border-brand-border bg-brand-surface text-white focus:ring-0 mt-1"
+                className="rounded border-brand-border bg-brand-surface text-brand-white focus:ring-0 mt-1"
               />
             </label>
           </div>

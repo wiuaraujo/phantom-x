@@ -27,13 +27,13 @@ export default function ForgotPasswordPage() {
       <div className="flex justify-between items-center max-w-5xl mx-auto w-full">
         <Link href="/" className="flex items-center space-x-3">
           <Logo size={28} />
-          <span className="font-mono text-sm font-bold text-white tracking-widest">
+          <span className="font-mono text-sm font-bold text-brand-white tracking-widest">
             {siteConfig.name}
           </span>
         </Link>
         <Link
           href="/login"
-          className="text-xs font-mono text-brand-secondary hover:text-white transition flex items-center space-x-1"
+          className="text-xs font-mono text-brand-secondary hover:text-brand-white transition flex items-center space-x-1"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Voltar ao login</span>
@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md mx-auto my-auto py-8 font-sans">
         <div className="bg-brand-surface border border-brand-border rounded-2xl p-8 shadow-sm">
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-white tracking-tight">
+            <h1 className="text-2xl font-bold text-brand-white tracking-tight">
               Vamos recuperar seu acesso.
             </h1>
             <p className="text-xs text-brand-secondary mt-1">
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="operador@suaempresa.com"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 bg-brand-black border border-brand-border rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono"
+                    className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
                   />
                 </div>
               </div>
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-4 py-3 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-glow-sm disabled:opacity-50"
+                className="w-full mt-4 py-3 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm disabled:opacity-50"
               >
                 {loading ? "Processando envio..." : "Enviar instruções"}
               </button>

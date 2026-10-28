@@ -96,7 +96,7 @@ export default function LoginPage() {
           </div>
 
           <div className="max-w-md mx-auto space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white leading-tight">
               Acesso ao Centro de Comando Phantom-X.
             </h2>
             <p className="text-xs sm:text-sm text-brand-secondary font-sans leading-relaxed">
@@ -107,8 +107,8 @@ export default function LoginPage() {
           {/* Value Props */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg text-left">
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
-              <div className="flex items-center space-x-1.5 text-xs font-semibold text-white">
-                <Zap className="w-3.5 h-3.5 text-white" />
+              <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
+                <Zap className="w-3.5 h-3.5 text-brand-white" />
                 <span>Roteamento Borda</span>
               </div>
               <p className="text-[11px] text-brand-muted">
@@ -117,8 +117,8 @@ export default function LoginPage() {
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
-              <div className="flex items-center space-x-1.5 text-xs font-semibold text-white">
-                <ShieldCheck className="w-3.5 h-3.5 text-white" />
+              <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
+                <ShieldCheck className="w-3.5 h-3.5 text-brand-white" />
                 <span>Filtragem Ativa</span>
               </div>
               <p className="text-[11px] text-brand-muted">
@@ -127,8 +127,8 @@ export default function LoginPage() {
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
-              <div className="flex items-center space-x-1.5 text-xs font-semibold text-white">
-                <Activity className="w-3.5 h-3.5 text-white" />
+              <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
+                <Activity className="w-3.5 h-3.5 text-brand-white" />
                 <span>Telemetria Real</span>
               </div>
               <p className="text-[11px] text-brand-muted">

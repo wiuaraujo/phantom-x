@@ -113,7 +113,7 @@ export default function SignupPage() {
           </div>
 
           <div className="max-w-md mx-auto space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white leading-tight">
               Infraestrutura de Tráfego Invisível em Escala Global.
             </h2>
             <p className="text-xs sm:text-sm text-brand-secondary font-sans leading-relaxed">
@@ -124,8 +124,8 @@ export default function SignupPage() {
           {/* Value Props / Instruções Claras */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg text-left">
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
-              <div className="flex items-center space-x-1.5 text-xs font-semibold text-white">
-                <Zap className="w-3.5 h-3.5 text-white" />
+              <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
+                <Zap className="w-3.5 h-3.5 text-brand-white" />
                 <span>&lt; 18ms Latência</span>
               </div>
               <p className="text-[11px] text-brand-muted">
@@ -134,8 +134,8 @@ export default function SignupPage() {
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
-              <div className="flex items-center space-x-1.5 text-xs font-semibold text-white">
-                <ShieldCheck className="w-3.5 h-3.5 text-white" />
+              <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
+                <ShieldCheck className="w-3.5 h-3.5 text-brand-white" />
                 <span>Zero Footprint</span>
               </div>
               <p className="text-[11px] text-brand-muted">
@@ -144,8 +144,8 @@ export default function SignupPage() {
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
-              <div className="flex items-center space-x-1.5 text-xs font-semibold text-white">
-                <Activity className="w-3.5 h-3.5 text-white" />
+              <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
+                <Activity className="w-3.5 h-3.5 text-brand-white" />
                 <span>Click ID Único</span>
               </div>
               <p className="text-[11px] text-brand-muted">

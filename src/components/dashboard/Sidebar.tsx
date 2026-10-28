@@ -56,14 +56,14 @@ export const Sidebar: React.FC = () => {
           <Link href="/dashboard" className="flex items-center space-x-3 overflow-hidden group">
             <Logo size={26} className="group-hover:scale-105 transition-transform shrink-0" />
             {!collapsed && (
-              <span className="font-sans text-sm font-bold text-white tracking-wider truncate">
+              <span className="font-sans text-sm font-bold text-brand-white tracking-wider truncate">
                 {siteConfig.name}
               </span>
             )}
           </Link>
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1 rounded-md hover:bg-brand-surface text-brand-secondary hover:text-white transition shrink-0"
+            className="p-1 rounded-md hover:bg-brand-surface text-brand-secondary hover:text-brand-white transition shrink-0"
             title={collapsed ? "Expandir menu" : "Recolher menu"}
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -82,13 +82,13 @@ export const Sidebar: React.FC = () => {
                 href={item.href}
                 className={`flex items-center px-3 py-2.5 rounded-xl text-xs font-medium transition-all group ${
                   isActive
-                    ? "bg-white text-black font-semibold shadow-glow-sm"
-                    : "text-brand-secondary hover:text-white hover:bg-brand-surface"
+                    ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
+                    : "text-brand-secondary hover:text-brand-white hover:bg-brand-surface"
                 }`}
                 title={collapsed ? item.label : undefined}
               >
                 <div className="relative shrink-0">
-                  <Icon className={`w-4 h-4 ${isActive ? "text-black" : "text-brand-secondary group-hover:text-white"}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? "text-white dark:text-black" : "text-brand-secondary group-hover:text-brand-white"}`} />
                   {item.pulse && (
                     <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-white animate-ping" />
                   )}
