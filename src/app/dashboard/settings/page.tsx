@@ -28,6 +28,9 @@ import {
   Server,
   Layers,
   Sparkles,
+  Fingerprint,
+  EyeOff,
+  Flame,
 } from "lucide-react";
 
 const COMMON_GEOS = [
@@ -51,6 +54,7 @@ export default function SettingsPage() {
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [copiedWorkerCode, setCopiedWorkerCode] = useState(false);
+  const [copiedFingerprint, setCopiedFingerprint] = useState(false);
   const [apiKey, setApiKey] = useState("ph_live_98a7f4e0c3b211ef893a0242ac120002");
   const [savedSuccess, setSavedSuccess] = useState(false);
 
@@ -58,14 +62,18 @@ export default function SettingsPage() {
   const [config, setConfig] = useState<CloakilioConfig>(() => store.getCloakilioConfig());
   const [customCountryInput, setCustomCountryInput] = useState("");
   const [generatedWorkerScript, setGeneratedWorkerScript] = useState("");
+  const [generatedClientSnippet, setGeneratedClientSnippet] = useState("");
 
-  // Sync worker script when config changes
+  // Sync worker script and client snippet when config changes
   useEffect(() => {
-    const script = CloakerEngine.generateCloudflareWorkerCode(config);
-    setGeneratedWorkerScript(script);
+    const worker = CloakerEngine.generateCloudflareWorkerCode(config);
+    setGeneratedWorkerScript(worker);
+
+    const clientSnippet = CloakerEngine.generateClientFingerprintSnippet(config);
+    setGeneratedClientSnippet(clientSnippet);
   }, [config]);
 
-  const copyToClipboard = (text: string, type: "key" | "snippet" | "worker") => {
+  const copyToClipboard = (text: string, type: "key" | "snippet" | "worker" | "fingerprint") => {
     navigator.clipboard.writeText(text);
     if (type === "key") {
       setCopiedKey(true);
@@ -73,9 +81,12 @@ export default function SettingsPage() {
     } else if (type === "snippet") {
       setCopiedSnippet(true);
       setTimeout(() => setCopiedSnippet(false), 2000);
-    } else {
+    } else if (type === "worker") {
       setCopiedWorkerCode(true);
       setTimeout(() => setCopiedWorkerCode(false), 2000);
+    } else {
+      setCopiedFingerprint(true);
+      setTimeout(() => setCopiedFingerprint(false), 2000);
     }
   };
 
@@ -126,6 +137,22 @@ export default function SettingsPage() {
     document.body.removeChild(link);
   };
 
+  const handleDownloadFingerprintScript = () => {
+    const jsOnly = generatedClientSnippet
+      .replace(/^<!--.*?-->\s*/m, "")
+      .replace(/^<script>\s*/m, "")
+      .replace(/<\/script>\s*$/m, "");
+
+    const blob = new Blob([jsOnly], { type: "application/javascript;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "phantom-fingerprint.js");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const trackingSnippet = `<!-- Script de Telemetria ${siteConfig.name} -->
 <script
   src="https://edge.phantomx.pro/v1/telemetry.js"
@@ -137,7 +164,7 @@ export default function SettingsPage() {
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
         title="Arquitetura de Borda & Configurações"
-        subtitle="Gerenciador do Motor CloakilioShield, geração de Cloudflare Worker e chaves de ingestão"
+        subtitle="Gerenciador do Motor CloakilioShield, geração de Cloudflare Worker e telemetria client-side"
       />
 
       <div className="p-3 sm:p-6 space-y-5 sm:space-y-8 max-w-5xl w-full mx-auto font-mono text-xs">
@@ -147,10 +174,10 @@ export default function SettingsPage() {
             <div className="flex items-center space-x-2.5">
               <Check className="w-5 h-5 text-white" />
               <span className="font-semibold text-xs font-sans">
-                Parâmetros do CloakilioShield atualizados e persistidos com sucesso!
+                Parâmetros do CloakilioShield e scripts atualizados e persistidos com sucesso!
               </span>
             </div>
-            <span className="text-[11px] text-neutral-400">Worker regenerado</span>
+            <span className="text-[11px] text-neutral-400">Worker &amp; Snippets regenerados</span>
           </div>
         )}
 
@@ -386,6 +413,63 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* CAMADA 3: CLIENT-SIDE FINGERPRINTING & HARDWARE INTEGRITY */}
+          <div className="space-y-3 border-t border-brand-borderSubtle pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Fingerprint className="w-4 h-4 text-brand-white" />
+                <label className="text-brand-muted text-[11px] font-bold">
+                  CAMADA 3: FINGERPRINT CLIENT-SIDE &amp; HARDWARE (WEBGL / CANVAS)
+                </label>
+              </div>
+              <span className="text-[10px] text-brand-secondary">Proteção ativa no navegador</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <label className="flex items-start justify-between cursor-pointer p-3 rounded-lg bg-brand-black/40 border border-brand-borderSubtle">
+                <div className="pr-2">
+                  <div className="text-brand-white font-medium text-xs">Anti-Headless &amp; Webdriver</div>
+                  <div className="text-brand-secondary text-[10px] mt-0.5">
+                    Detecta navigator.webdriver, Puppeteer e automações.
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={config.blockHeadless}
+                  onChange={(e) => setConfig({ ...config, blockHeadless: e.target.checked })}
+                  className="rounded border-brand-border bg-brand-surface text-brand-white focus:ring-0 mt-1"
+                />
+              </label>
+
+              <label className="flex items-start justify-between cursor-pointer p-3 rounded-lg bg-brand-black/40 border border-brand-borderSubtle">
+                <div className="pr-2">
+                  <div className="text-brand-white font-medium text-xs">Anti-GPU Datacenter</div>
+                  <div className="text-brand-secondary text-[10px] mt-0.5">
+                    Bloqueia SwiftShader, llvmpipe e Mesa rasterizers de servidores.
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={config.blockSwiftShader}
+                  onChange={(e) => setConfig({ ...config, blockSwiftShader: e.target.checked })}
+                  className="rounded border-brand-border bg-brand-surface text-brand-white focus:ring-0 mt-1"
+                />
+              </label>
+
+              <div className="p-3 rounded-lg bg-brand-black/40 border border-brand-borderSubtle space-y-1">
+                <label className="block text-brand-white font-medium text-xs">Ação ao Detectar Bot</label>
+                <select
+                  value={config.clientAction}
+                  onChange={(e) => setConfig({ ...config, clientAction: e.target.value as any })}
+                  className="w-full px-2 py-1 bg-brand-surface border border-brand-border rounded text-white text-[11px] focus:outline-none"
+                >
+                  <option value="redirect_whitepage">Redirecionar para Safe Page</option>
+                  <option value="log_only">Apenas Registrar Flag</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           {/* Threat Intelligence / ProxyCheck API */}
           <div className="space-y-3 border-t border-brand-borderSubtle pt-4">
             <div className="flex items-center space-x-2">
@@ -510,7 +594,53 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* 3. APPEARANCE & THEME CARD */}
+        {/* 3. CAMADA 3: CLIENT-SIDE FINGERPRINT SNIPPET */}
+        <div className="bg-brand-surface border border-brand-border rounded-xl p-5 sm:p-6 shadow-glow-sm space-y-4">
+          <div className="border-b border-brand-border pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center space-x-2">
+                <Fingerprint className="w-5 h-5 text-brand-white" />
+                <h3 className="text-sm font-bold text-brand-white">Snippet Client-Side: WebGL, Canvas &amp; Anti-Headless (Camada 3)</h3>
+              </div>
+              <p className="text-brand-secondary text-[11px] mt-0.5">
+                Cole antes do fechamento da tag <code>&lt;/head&gt;</code> na sua página para neutralizar robôs que executam JavaScript
+              </p>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => copyToClipboard(generatedClientSnippet, "fingerprint")}
+                className="px-3.5 py-1.5 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition flex items-center space-x-1.5"
+              >
+                {copiedFingerprint ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedFingerprint ? "Copiado!" : "Copiar Snippet"}</span>
+              </button>
+
+              <button
+                onClick={handleDownloadFingerprintScript}
+                className="px-3.5 py-1.5 rounded-lg bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-white transition flex items-center space-x-1.5"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Baixar .js</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-lg bg-neutral-900 dark:bg-black border border-brand-borderSubtle overflow-x-auto max-h-64">
+            <pre className="text-white text-[11px] leading-relaxed">
+              <code>{generatedClientSnippet}</code>
+            </pre>
+          </div>
+
+          <div className="p-3 rounded-lg bg-brand-black/40 border border-brand-borderSubtle text-[11px] text-brand-secondary flex items-center justify-between">
+            <span>Você também pode carregar dinamicamente via CDN/Endpoint:</span>
+            <code className="text-white bg-neutral-800 px-2 py-0.5 rounded font-mono text-[10px]">
+              &lt;script src=&quot;/api/v1/telemetry.js&quot; async&gt;&lt;/script&gt;
+            </code>
+          </div>
+        </div>
+
+        {/* 4. APPEARANCE & THEME CARD */}
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
           <div className="border-b border-brand-border pb-3">
             <h3 className="text-sm font-bold text-brand-white">Aparência &amp; Tema da Interface</h3>
@@ -578,7 +708,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* 4. API CREDENTIALS & SNIPPET */}
+        {/* 5. API CREDENTIALS */}
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
           <div className="border-b border-brand-border pb-3 flex justify-between items-center">
             <div>
@@ -613,31 +743,6 @@ export default function SettingsPage() {
                 <span>{copiedKey ? "Copiado!" : "Copiar"}</span>
               </button>
             </div>
-          </div>
-        </div>
-
-        {/* 5. TRACKING SNIPPET */}
-        <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
-          <div className="border-b border-brand-border pb-3 flex justify-between items-center">
-            <div>
-              <h3 className="text-sm font-bold text-brand-white">Snippet JavaScript de Rastreamento</h3>
-              <p className="text-brand-secondary text-[11px]">
-                Adicione antes do fechamento da tag <code>&lt;/head&gt;</code> em suas páginas
-              </p>
-            </div>
-            <button
-              onClick={() => copyToClipboard(trackingSnippet, "snippet")}
-              className="px-3.5 py-1.5 rounded-lg bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-white transition flex items-center space-x-1.5"
-            >
-              {copiedSnippet ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedSnippet ? "Copiado!" : "Copiar Snippet"}</span>
-            </button>
-          </div>
-
-          <div className="p-4 rounded-lg bg-neutral-900 dark:bg-black border border-brand-borderSubtle overflow-x-auto">
-            <pre className="text-white text-[11px] leading-relaxed">
-              <code>{trackingSnippet}</code>
-            </pre>
           </div>
         </div>
       </div>

@@ -32,6 +32,8 @@ export async function POST(req: NextRequest) {
       classification: event.classification || "human-like",
       riskScore: event.riskScore,
       riskCategory: event.riskCategory,
+      webglRenderer: event.webglRenderer,
+      isHeadless: event.isHeadless,
       threatReasons: event.threatReasons || [],
       latencyMs: event.latencyMs,
     });

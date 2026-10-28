@@ -369,6 +369,22 @@ export default function LiveMonitoringPage() {
                     : "WHITEPAGE (Página Segura de Moderação)"}
                 </span>
               </div>
+              {selectedEvent.webglRenderer && (
+                <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
+                  <span className="text-brand-muted">GPU / WebGL:</span>
+                  <span className="text-white text-[11px] truncate max-w-[240px] font-mono">
+                    {selectedEvent.webglRenderer}
+                  </span>
+                </div>
+              )}
+              {selectedEvent.canvasHash && (
+                <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
+                  <span className="text-brand-muted">Canvas 2D Hash:</span>
+                  <span className="text-white font-mono text-[11px]">
+                    {selectedEvent.canvasHash}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                 <span className="text-brand-muted">URL Entregue:</span>
                 <span className="text-white truncate max-w-[240px]">

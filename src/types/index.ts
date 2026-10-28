@@ -30,6 +30,11 @@ export interface CloakilioConfig {
   proxyCheckApiKey: string;
   blockedAsns: number[];
   botPatterns: string[];
+  // Camada 3: Client-Side Fingerprint & Anti-Headless
+  enableClientFingerprint: boolean;
+  blockHeadless: boolean;
+  blockSwiftShader: boolean;
+  clientAction: "redirect_whitepage" | "log_only";
 }
 
 export interface User {
@@ -136,6 +141,11 @@ export interface TrafficEvent {
   detectedLayer?: CloakerDetectedLayer;
   reverseProxyDelivery?: boolean;
   httpStatus?: number;
+  webglRenderer?: string;
+  webglVendor?: string;
+  isHeadless?: boolean;
+  canvasHash?: string;
+  hardwareConcurrency?: number;
   latencyMs: number;
   isThreat: boolean;
   threatReasons?: string[];

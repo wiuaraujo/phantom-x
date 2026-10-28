@@ -28,6 +28,9 @@ export interface CloakerAssessment {
   device: DeviceType;
   browser: string;
   os: string;
+  webglRenderer?: string;
+  isHeadless?: boolean;
+  canvasHash?: string;
   cleanParams: Record<string, string>;
 }
 
@@ -138,6 +141,10 @@ export const DEFAULT_CLOAKILIO_CONFIG: CloakilioConfig = {
   proxyCheckApiKey: "96b67s-522c54-730017-h38p9e",
   blockedAsns: Array.from(BLOCKED_ASNS_SET),
   botPatterns: BOT_PATTERNS,
+  enableClientFingerprint: true,
+  blockHeadless: true,
+  blockSwiftShader: true,
+  clientAction: "redirect_whitepage",
 };
 
 export class CloakerEngine {
@@ -351,8 +358,106 @@ export class CloakerEngine {
       device,
       browser,
       os,
+      webglRenderer: isModerator
+        ? "Google SwiftShader (LLVM 10.0.0 Datacenter Emulator)"
+        : isMobileDevice
+        ? "Apple GPU (Metal v3.0)"
+        : "ANGLE (NVIDIA GeForce RTX 4070 Direct3D11 vs_5_0 ps_5_0)",
+      isHeadless: isModerator,
+      canvasHash: isModerator ? "hash_sw_emu_9981a" : `hash_hw_${Math.random().toString(36).substring(2, 8)}`,
       cleanParams: urlParams,
     };
+  }
+
+  /**
+   * Gera o snippet JavaScript client-side (Camada 3) para injeção na página.
+   * Inspeciona WebGL Renderer (SwiftShader, llvmpipe), Headless (navigator.webdriver)
+   * e Canvas 2D Hash para neutralizar moderadores que executam JavaScript no browser.
+   */
+  public static generateClientFingerprintSnippet(config: CloakilioConfig): string {
+    const whitepageUrl = config.whitepageUrl || "https://seusite.com/white";
+    const clientAction = config.clientAction || "redirect_whitepage";
+    const blockHeadless = config.blockHeadless ?? true;
+    const blockSwiftShader = config.blockSwiftShader ?? true;
+
+    return `<!-- 🛡️ Phantom-X Telemetria de Hardware & Anti-Headless (Camada 3) -->
+<script>
+(function() {
+  'use strict';
+  try {
+    var isBot = false;
+    var reasons = [];
+
+    // 1. Detecção de Automação / Headless
+    if (${blockHeadless}) {
+      if (navigator.webdriver === true) {
+        isBot = true;
+        reasons.push('webdriver_active');
+      }
+      if (window.document.documentElement.getAttribute('webdriver')) {
+        isBot = true;
+        reasons.push('webdriver_attribute');
+      }
+      if (window.callPhantom || window._phantom || window.__nightmare) {
+        isBot = true;
+        reasons.push('phantom_framework');
+      }
+    }
+
+    // 2. Detecção de GPU / WebGL Rasterizer de Datacenter (SwiftShader, llvmpipe, Mesa)
+    var renderer = 'unknown';
+    var vendor = 'unknown';
+    try {
+      var canvas = document.createElement('canvas');
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (gl) {
+        var dbgRender = gl.getExtension('WEBGL_debug_renderer_info');
+        if (dbgRender) {
+          renderer = (gl.getParameter(dbgRender.UNMASKED_RENDERER_WEBGL) || '').toLowerCase();
+          vendor = (gl.getParameter(dbgRender.UNMASKED_VENDOR_WEBGL) || '').toLowerCase();
+        }
+      }
+    } catch(e) {}
+
+    if (${blockSwiftShader}) {
+      var badRenderers = ['swiftshader', 'llvmpipe', 'mesa offscreen', 'softpipe', 'virtualbox', 'vmware svga'];
+      for (var i = 0; i < badRenderers.length; i++) {
+        if (renderer.indexOf(badRenderers[i]) !== -1) {
+          isBot = true;
+          reasons.push('datacenter_gpu_' + badRenderers[i]);
+          break;
+        }
+      }
+    }
+
+    // 3. Canvas 2D Fingerprint Hash
+    var canvasHash = '';
+    try {
+      var c2d = document.createElement('canvas');
+      c2d.width = 200;
+      c2d.height = 50;
+      var ctx = c2d.getContext('2d');
+      if (ctx) {
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#069';
+        ctx.fillText('Phantom-X Protection 🛡️', 2, 2);
+        canvasHash = c2d.toDataURL().substring(22, 60);
+      }
+    } catch(e) {}
+
+    // 4. Execução da Ação de Defesa
+    if (isBot) {
+      document.cookie = 'ph_hw_threat=1; path=/; max-age=86400';
+      if ('${clientAction}' === 'redirect_whitepage') {
+        window.location.replace('${whitepageUrl}');
+      }
+    } else {
+      document.cookie = 'ph_hw_ok=1; path=/; max-age=86400';
+    }
+  } catch(err) {}
+})();
+</script>`;
   }
 
   /**
