@@ -21,25 +21,25 @@ export const Hero: React.FC = () => {
           never sliding down behind the pipeline or routing diagram.
           The top curve comfortably clears the navbar.
         */}
-        <div className="absolute top-24 sm:top-36 md:top-40 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] max-w-[95vw] xs:w-[380px] xs:h-[380px] sm:w-[540px] sm:h-[540px] md:w-[680px] md:h-[680px] pointer-events-none z-0 opacity-70 sm:opacity-75 flex items-center justify-center">
+        <div className="absolute top-24 sm:top-36 md:top-40 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] max-w-[95vw] xs:w-[380px] xs:h-[380px] sm:w-[540px] sm:h-[540px] md:w-[680px] md:h-[680px] pointer-events-auto z-0 opacity-90 sm:opacity-95 flex items-center justify-center">
           {/* Subtle Ambient Radial Backlight */}
           <div className="absolute inset-0 rounded-full dark:bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.04)_0%,transparent_70%)] blur-2xl pointer-events-none" />
           <TechGlobe className="w-full h-full" />
         </div>
 
         {/* Main Headline */}
-        <h1 className="relative z-10 text-3xl xs:text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-brand-white leading-[1.12] mb-4 sm:mb-6 font-sans drop-shadow-md">
+        <h1 className="relative z-10 text-3xl xs:text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-brand-white leading-[1.12] mb-4 sm:mb-6 font-sans drop-shadow-md select-none pointer-events-none">
           {t.hero.titleLine1} <br />
           <span className="text-brand-secondary font-medium">{t.hero.titleLine2}</span>
         </h1>
 
         {/* Subheadline */}
-        <p className="relative z-10 max-w-2xl text-sm sm:text-lg text-brand-secondary leading-relaxed font-sans font-normal mb-8 sm:mb-9 px-2 sm:px-0">
+        <p className="relative z-10 max-w-2xl text-sm sm:text-lg text-brand-secondary leading-relaxed font-sans font-normal mb-8 sm:mb-9 px-2 sm:px-0 select-none pointer-events-none">
           {t.hero.subtitle}
         </p>
 
         {/* CTA Buttons */}
-        <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
+        <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 w-full sm:w-auto pointer-events-auto">
           <Link
             href="/signup"
             className="w-full sm:w-auto px-7 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 group"

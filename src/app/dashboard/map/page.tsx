@@ -3,12 +3,14 @@
 import React, { useState } from "react";
 import { Header } from "@/components/dashboard/Header";
 import { DigitalMatrixWorldMap } from "@/components/dashboard/DigitalMatrixWorldMap";
+import { TechGlobe } from "@/components/globe/TechGlobe";
 import { store } from "@/lib/store";
 import { getCountryFlag } from "@/lib/geoFlags";
-import { Globe2, Radio, Server } from "lucide-react";
+import { Globe2, Radio, Server, Layers, RotateCw } from "lucide-react";
 
 export default function GlobalMapPage() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [mapMode, setMapMode] = useState<"2d" | "3d">("3d");
   const geoData = store.getGeoDistribution();
   const events = store.getEvents({ limit: 40, country: selectedCountry || undefined });
 
@@ -16,31 +18,69 @@ export default function GlobalMapPage() {
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
         title="Mapa de Telemetria Global"
-        subtitle="Visualização geoespacial da matriz digital das requisições e latência de borda"
+        subtitle="Visualização geoespacial 360º da matriz digital de requisições e latência de borda"
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
-        {/* Full-width Digital Matrix Map Canvas */}
+        {/* Full-width Map Canvas with 2D / 3D Toggle */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs font-mono">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
             <div className="flex items-center space-x-2 text-brand-white">
               <Globe2 className="w-4 h-4 text-brand-white" />
-              <span className="font-semibold text-xs truncate">NÓS DE TELEMETRIA POR PAÍS</span>
+              <span className="font-semibold text-xs truncate">
+                {mapMode === "3d" ? "GLOBO 3D 360º INTERATIVO" : "MATRIZ DIGITAL 2D (MAPA MUNDI)"}
+              </span>
             </div>
-            <span className="text-brand-muted text-[10px] sm:text-[11px] truncate ml-2">
-              {selectedCountry
-                ? `Isolando: [${selectedCountry}]`
-                : "Toque em um nó no mapa"}
-            </span>
+
+            <div className="flex items-center space-x-2">
+              <span className="text-brand-muted text-[10px] sm:text-[11px] truncate">
+                {selectedCountry ? `Isolando: [${selectedCountry}]` : "Navegação 360º Ativa"}
+              </span>
+
+              {/* View Switcher Tabs */}
+              <div className="flex items-center bg-brand-surface border border-brand-border rounded-lg p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setMapMode("3d")}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition flex items-center space-x-1 ${
+                    mapMode === "3d"
+                      ? "bg-neutral-900 text-white dark:bg-white dark:text-black shadow-sm"
+                      : "text-brand-secondary hover:text-white"
+                  }`}
+                >
+                  <RotateCw className="w-3 h-3" />
+                  <span>Globo 3D 360º</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMapMode("2d")}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition flex items-center space-x-1 ${
+                    mapMode === "2d"
+                      ? "bg-neutral-900 text-white dark:bg-white dark:text-black shadow-sm"
+                      : "text-brand-secondary hover:text-white"
+                  }`}
+                >
+                  <Layers className="w-3 h-3" />
+                  <span>Matriz 2D</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <DigitalMatrixWorldMap
-            events={events}
-            geoData={geoData}
-            selectedCountry={selectedCountry}
-            onSelectCountry={setSelectedCountry}
-            className="h-[380px] sm:h-[460px] md:h-[540px] w-full rounded-2xl border border-brand-border"
-          />
+          {mapMode === "3d" ? (
+            <div className="relative h-[420px] sm:h-[500px] md:h-[600px] w-full rounded-2xl border border-brand-border bg-brand-surface overflow-hidden shadow-glow-sm flex items-center justify-center">
+              <div className="absolute inset-0 dark:bg-[radial-gradient(circle,rgba(255,255,255,0.06)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.03)_0%,transparent_70%)] pointer-events-none" />
+              <TechGlobe className="w-full h-full" />
+            </div>
+          ) : (
+            <DigitalMatrixWorldMap
+              events={events}
+              geoData={geoData}
+              selectedCountry={selectedCountry}
+              onSelectCountry={setSelectedCountry}
+              className="h-[380px] sm:h-[460px] md:h-[540px] w-full rounded-2xl border border-brand-border"
+            />
+          )}
         </div>
 
         {/* Breakdown by Country Table */}
@@ -100,8 +140,16 @@ export default function GlobalMapPage() {
                             <span className="text-brand-secondary">{g.percentage}%</span>
                           </div>
                         </td>
-                        <td className="py-2.5 text-right text-brand-secondary">
-                          {selectedCountry === g.countryCode ? "Remover filtro" : "Filtrar"}
+                        <td className="py-2.5 text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCountry(selectedCountry === g.countryCode ? null : g.countryCode);
+                            }}
+                            className="text-[11px] text-brand-muted hover:text-white transition"
+                          >
+                            {selectedCountry === g.countryCode ? "Remover" : "Filtrar"}
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -111,43 +159,43 @@ export default function GlobalMapPage() {
             </div>
           </div>
 
-          {/* Edge Infrastructure Info */}
+          {/* Infrastructure Health Status */}
           <div className="bg-brand-surface border border-brand-border rounded-xl p-5 shadow-glow-sm space-y-4">
-            <h3 className="text-sm font-semibold text-white tracking-wide">
-              Infraestrutura de Ingestão
+            <h3 className="text-sm font-semibold text-brand-white tracking-wide">
+              Topologia de Borda (Edge PoPs)
             </h3>
 
             <div className="space-y-3 font-mono text-xs">
-              <div className="p-3 rounded-lg bg-brand-black border border-brand-borderSubtle">
-                <div className="flex items-center space-x-2 text-white text-xs font-semibold mb-1">
-                  <Server className="w-4 h-4 text-white" />
-                  <span>América do Sul (SA-East)</span>
+              <div className="p-3 rounded-lg bg-brand-black/50 border border-brand-borderSubtle space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-bold">PoP GRU (São Paulo - Brasil)</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">OPERACIONAL</span>
                 </div>
-                <div className="text-brand-muted text-[11px]">São Paulo (GRU) — 14ms latência</div>
+                <div className="text-[11px] text-brand-secondary">Latência: 11ms • Borda Primária</div>
               </div>
 
-              <div className="p-3 rounded-lg bg-brand-black border border-brand-borderSubtle">
-                <div className="flex items-center space-x-2 text-white text-xs font-semibold mb-1">
-                  <Server className="w-4 h-4 text-white" />
-                  <span>América do Norte (US-East)</span>
+              <div className="p-3 rounded-lg bg-brand-black/50 border border-brand-borderSubtle space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-bold">PoP IAD (Ashburn - EUA)</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">OPERACIONAL</span>
                 </div>
-                <div className="text-brand-muted text-[11px]">N. Virginia (IAD) — 22ms latência</div>
+                <div className="text-[11px] text-brand-secondary">Latência: 16ms • Rota Global</div>
               </div>
 
-              <div className="p-3 rounded-lg bg-brand-black border border-brand-borderSubtle">
-                <div className="flex items-center space-x-2 text-white text-xs font-semibold mb-1">
-                  <Server className="w-4 h-4 text-white" />
-                  <span>Europa Central (EU-Central)</span>
+              <div className="p-3 rounded-lg bg-brand-black/50 border border-brand-borderSubtle space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-bold">PoP LHR (Londres - Reino Unido)</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">OPERACIONAL</span>
                 </div>
-                <div className="text-brand-muted text-[11px]">Frankfurt (FRA) — 28ms latência</div>
+                <div className="text-[11px] text-brand-secondary">Latência: 18ms • Rota EMEA</div>
               </div>
 
-              <div className="p-3 rounded-lg bg-brand-black border border-brand-borderSubtle">
-                <div className="flex items-center space-x-2 text-white text-xs font-semibold mb-1">
-                  <Server className="w-4 h-4 text-white" />
-                  <span>Ásia-Pacífico (AP-East)</span>
+              <div className="p-3 rounded-lg bg-brand-black/50 border border-brand-borderSubtle space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-bold">PoP NRT (Tóquio - Japão)</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">OPERACIONAL</span>
                 </div>
-                <div className="text-brand-muted text-[11px]">Tóquio (NRT) — 38ms latência</div>
+                <div className="text-[11px] text-brand-secondary">Latência: 22ms • Rota APAC</div>
               </div>
             </div>
           </div>

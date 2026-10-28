@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { GLOBE_LAND_POINTS } from "@/components/globe/globeDotData";
+import { CONTINENT_CONTOURS } from "@/components/globe/continentBoundaries";
 
 interface RotatingGlobeProps {
   size?: number;
@@ -12,9 +14,13 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
   className = "",
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const angleRef = useRef(0);
+  const rotYRef = useRef(0.8);
+  const rotXRef = useRef(0.2);
   const isDraggingRef = useRef(false);
-  const dragStartRef = useRef({ x: 0, angle: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0, rotX: 0.2, rotY: 0.8 });
+  const velocityRef = useRef({ x: 0, y: 0 });
+  const lastTimeRef = useRef(0);
+  const lastPosRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,24 +34,38 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
     canvas.width = size * dpr;
     canvas.height = size * dpr;
 
-    // Generate Sphere Point Cloud (Fibonacci Sphere Distribution for even coverage)
-    const totalPoints = 420;
-    const points: { x: number; y: number; z: number }[] = [];
     const radius = size * 0.38;
 
-    const phi = Math.PI * (3 - Math.sqrt(5)); // Golden angle
-    for (let i = 0; i < totalPoints; i++) {
-      const y = 1 - (i / (totalPoints - 1)) * 2; // y goes from 1 to -1
-      const radiusAtY = Math.sqrt(1 - y * y);
-      const theta = phi * i;
+    // Convert lat, lon to 3D Cartesian coordinates on sphere
+    const landPoints3D: { x: number; y: number; z: number; isBright: boolean }[] = [];
+    const step = 2; // Step to keep performance 60fps on 2D canvas
+    for (let i = 0; i < GLOBE_LAND_POINTS.length; i += step) {
+      const [lat, lon] = GLOBE_LAND_POINTS[i];
+      const phi = (90 - lat) * (Math.PI / 180);
+      const theta = (lon + 180) * (Math.PI / 180);
 
-      const x = Math.cos(theta) * radiusAtY;
-      const z = Math.sin(theta) * radiusAtY;
+      const x = -(radius * Math.sin(phi) * Math.cos(theta));
+      const z = radius * Math.sin(phi) * Math.sin(theta);
+      const y = radius * Math.cos(phi);
 
-      points.push({ x: x * radius, y: y * radius, z: z * radius });
+      landPoints3D.push({ x, y, z, isBright: i % 8 === 0 });
     }
 
-    // Key Tech Hubs positioned on sphere (lat, lon)
+    // Convert Continent Contours to 3D
+    const contours3D = CONTINENT_CONTOURS.map((c) => ({
+      name: c.name,
+      points: c.points.map(([lat, lon]) => {
+        const phi = (90 - lat) * (Math.PI / 180);
+        const theta = (lon + 180) * (Math.PI / 180);
+        return {
+          x: -(radius * 1.002 * Math.sin(phi) * Math.cos(theta)),
+          z: radius * 1.002 * Math.sin(phi) * Math.sin(theta),
+          y: radius * 1.002 * Math.cos(phi),
+        };
+      }),
+    }));
+
+    // Tech Hubs
     const hubs = [
       { name: "São Paulo", lat: -23.55, lon: -46.63, flag: "🇧🇷", state: "SP" },
       { name: "Nova York", lat: 40.71, lon: -74.0, flag: "🇺🇸", state: "NY" },
@@ -54,13 +74,13 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
       { name: "Tóquio", lat: 35.68, lon: 139.69, flag: "🇯🇵", state: "TK" },
       { name: "Lisboa", lat: 38.72, lon: -9.14, flag: "🇵🇹", state: "LX" },
     ].map((h) => {
-      const latRad = (h.lat * Math.PI) / 180;
-      const lonRad = (h.lon * Math.PI) / 180;
+      const phi = (90 - h.lat) * (Math.PI / 180);
+      const theta = (h.lon + 180) * (Math.PI / 180);
       return {
         ...h,
-        baseX: radius * Math.cos(latRad) * Math.sin(lonRad),
-        baseY: -radius * Math.sin(latRad),
-        baseZ: radius * Math.cos(latRad) * Math.cos(lonRad),
+        x: -(radius * 1.008 * Math.sin(phi) * Math.cos(theta)),
+        z: radius * 1.008 * Math.sin(phi) * Math.sin(theta),
+        y: radius * 1.008 * Math.cos(phi),
       };
     });
 
@@ -68,13 +88,38 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
 
     const render = () => {
       if (!isDraggingRef.current) {
-        angleRef.current += 0.007; // Smooth continuous rotation
+        if (Math.abs(velocityRef.current.x) > 0.0001 || Math.abs(velocityRef.current.y) > 0.0001) {
+          rotYRef.current += velocityRef.current.x;
+          rotXRef.current = Math.max(-1.1, Math.min(1.1, rotXRef.current + velocityRef.current.y));
+          velocityRef.current.x *= 0.94;
+          velocityRef.current.y *= 0.94;
+        } else {
+          rotYRef.current += 0.006; // Ambient continuous rotation
+        }
       }
       pulseTime += 0.05;
 
-      const rot = angleRef.current;
-      const cosRot = Math.cos(rot);
-      const sinRot = Math.sin(rot);
+      const rotY = rotYRef.current;
+      const rotX = rotXRef.current;
+
+      const cosY = Math.cos(rotY);
+      const sinY = Math.sin(rotY);
+      const cosX = Math.cos(rotX);
+      const sinX = Math.sin(rotX);
+
+      // Rotate point (x, y, z) by rotY then rotX
+      const rotatePoint = (p: { x: number; y: number; z: number }) => {
+        // Yaw (around Y axis)
+        const x1 = p.x * cosY + p.z * sinY;
+        const z1 = -p.x * sinY + p.z * cosY;
+        const y1 = p.y;
+
+        // Pitch (around X axis)
+        const y2 = y1 * cosX - z1 * sinX;
+        const z2 = y1 * sinX + z1 * cosX;
+
+        return { x: x1, y: y2, z: z2 };
+      };
 
       ctx.save();
       ctx.scale(dpr, dpr);
@@ -88,136 +133,149 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
       const glowGrad = ctx.createRadialGradient(
         centerX,
         centerY,
-        radius * 0.6,
+        radius * 0.7,
         centerX,
         centerY,
         radius * 1.25
       );
       if (isLight) {
-        glowGrad.addColorStop(0, "rgba(0, 0, 0, 0.04)");
-        glowGrad.addColorStop(0.6, "rgba(0, 0, 0, 0.01)");
+        glowGrad.addColorStop(0, "rgba(0, 0, 0, 0.03)");
+        glowGrad.addColorStop(0.7, "rgba(0, 0, 0, 0.005)");
         glowGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
       } else {
-        glowGrad.addColorStop(0, "rgba(255, 255, 255, 0.03)");
-        glowGrad.addColorStop(0.6, "rgba(255, 255, 255, 0.01)");
+        glowGrad.addColorStop(0, "rgba(255, 255, 255, 0.04)");
+        glowGrad.addColorStop(0.7, "rgba(255, 255, 255, 0.01)");
         glowGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
       }
       ctx.fillStyle = glowGrad;
       ctx.fillRect(0, 0, size, size);
 
-      // 2. Translucent Sphere Silhouette
+      // 2. SOLID OPAQUE Core Sphere (Occludes back side completely)
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.fillStyle = isLight ? "rgba(240, 240, 244, 0.75)" : "rgba(10, 10, 12, 0.65)";
+      ctx.fillStyle = isLight ? "#ffffff" : "#050505";
       ctx.fill();
-      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.08)";
+      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)";
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // 3. Render Dot Cloud Points (Z-sorted: back first, then front)
-      const rotatedPoints = points.map((p) => {
-        // Rotate around Y axis
-        const xRot = p.x * cosRot + p.z * sinRot;
-        const zRot = -p.x * sinRot + p.z * cosRot;
-        return { x: xRot, y: p.y, z: zRot };
+      // 3. Render Continental Coastlines (Mapa Mundi outlines)
+      ctx.strokeStyle = isLight ? "rgba(60, 60, 67, 0.35)" : "rgba(200, 200, 210, 0.3)";
+      ctx.lineWidth = 1;
+      contours3D.forEach((c) => {
+        const rotatedContour = c.points.map(rotatePoint);
+        ctx.beginPath();
+        let started = false;
+        for (let j = 0; j < rotatedContour.length; j++) {
+          const pt = rotatedContour[j];
+          if (pt.z > 0) {
+            const px = centerX + pt.x;
+            const py = centerY + pt.y;
+            if (!started) {
+              ctx.moveTo(px, py);
+              started = true;
+            } else {
+              ctx.lineTo(px, py);
+            }
+          } else {
+            started = false;
+          }
+        }
+        ctx.stroke();
       });
 
-      // Split into back and front
-      const backPoints = rotatedPoints.filter((p) => p.z <= 0);
-      const frontPoints = rotatedPoints.filter((p) => p.z > 0);
+      // 4. Render Front-Facing Land Points (Clean Mapa Mundi dots)
+      landPoints3D.forEach((p) => {
+        const rotated = rotatePoint(p);
+        // Only draw points on facing hemisphere
+        if (rotated.z > 0) {
+          const px = centerX + rotated.x;
+          const py = centerY + rotated.y;
+          const depthAlpha = Math.min(1, Math.max(0.2, rotated.z / radius));
+          const dotSize = 1.4 + (rotated.z / radius) * 1.1;
 
-      // Draw Back Points (Fainter, smaller)
-      ctx.fillStyle = isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)";
-      ctx.beginPath();
-      backPoints.forEach((p) => {
-        const px = centerX + p.x;
-        const py = centerY + p.y;
-        ctx.rect(px - 0.75, py - 0.75, 1.5, 1.5);
+          if (isLight) {
+            ctx.fillStyle = p.isBright
+              ? `rgba(10, 10, 12, ${0.9 * depthAlpha})`
+              : `rgba(60, 60, 67, ${0.75 * depthAlpha})`;
+          } else {
+            ctx.fillStyle = p.isBright
+              ? `rgba(255, 255, 255, ${0.95 * depthAlpha})`
+              : `rgba(161, 161, 170, ${0.75 * depthAlpha})`;
+          }
+
+          ctx.fillRect(px - dotSize / 2, py - dotSize / 2, dotSize, dotSize);
+        }
       });
-      ctx.fill();
 
-      // 4. Render Orbital Ring (Inclined telemetry ring)
+      // 5. Render Orbital Ring
       ctx.save();
       ctx.translate(centerX, centerY);
-      ctx.rotate(0.35); // Incline
+      ctx.rotate(0.35);
       ctx.beginPath();
-      ctx.ellipse(0, 0, radius * 1.28, radius * 0.38, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)";
+      ctx.ellipse(0, 0, radius * 1.3, radius * 0.4, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)";
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 6]);
       ctx.stroke();
 
-      // Orbiting energy pulse on the ring
-      const orbitAngle = rot * 2.2;
-      const orbX = Math.cos(orbitAngle) * (radius * 1.28);
-      const orbY = Math.sin(orbitAngle) * (radius * 0.38);
+      const orbitAngle = rotY * 2.2;
+      const orbX = Math.cos(orbitAngle) * (radius * 1.3);
+      const orbY = Math.sin(orbitAngle) * (radius * 0.4);
       ctx.beginPath();
-      ctx.arc(orbX, orbY, 3, 0, Math.PI * 2);
+      ctx.arc(orbX, orbY, 2.5, 0, Math.PI * 2);
       ctx.fillStyle = isLight ? "#111111" : "#ffffff";
       ctx.fill();
       ctx.restore();
 
-      // Draw Front Points (Crisp titanium / white)
-      ctx.fillStyle = isLight ? "rgba(15, 15, 18, 0.85)" : "rgba(240, 245, 255, 0.75)";
-      ctx.beginPath();
-      frontPoints.forEach((p) => {
-        const px = centerX + p.x;
-        const py = centerY + p.y;
-        const dotSize = 1.8 + (p.z / radius) * 1.2;
-        ctx.rect(px - dotSize / 2, py - dotSize / 2, dotSize, dotSize);
-      });
-      ctx.fill();
-
-      // 5. Render Active Tech Hub Nodes with Pulsing Wave
+      // 6. Active Tech Hub Nodes (Pulsing Brasil & Major Hubs)
       hubs.forEach((hub) => {
-        const hx = hub.baseX * cosRot + hub.baseZ * sinRot;
-        const hz = -hub.baseX * sinRot + hub.baseZ * cosRot;
-        const hy = hub.baseY;
+        const rotated = rotatePoint(hub);
 
-        // Only draw when on front hemisphere
-        if (hz > 15) {
-          const px = centerX + hx;
-          const py = centerY + hy;
-          const depthAlpha = Math.min(1, hz / (radius * 0.6));
+        if (rotated.z > 10) {
+          const px = centerX + rotated.x;
+          const py = centerY + rotated.y;
+          const depthAlpha = Math.min(1, rotated.z / (radius * 0.6));
 
-          // Center pin
+          // Hub point
           ctx.beginPath();
-          ctx.arc(px, py, 3, 0, Math.PI * 2);
-          ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
+          ctx.arc(px, py, hub.flag === "🇧🇷" ? 3.5 : 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = hub.flag === "🇧🇷" ? (isLight ? "#059669" : "#10b981") : isLight ? "#18181b" : "#ffffff";
           ctx.fill();
 
-          // Radar wave
+          // Radar pulse
           const wave = (Math.sin(pulseTime + hub.lat * 0.1) + 1) / 2;
-          const ringRadius = 4 + wave * 9;
+          const ringR = 3 + wave * 8;
           ctx.beginPath();
-          ctx.arc(px, py, ringRadius, 0, Math.PI * 2);
-          ctx.strokeStyle = isLight
-            ? `rgba(15, 15, 18, ${(1 - wave) * depthAlpha * 0.7})`
+          ctx.arc(px, py, ringR, 0, Math.PI * 2);
+          ctx.strokeStyle = hub.flag === "🇧🇷"
+            ? `rgba(16, 185, 129, ${(1 - wave) * depthAlpha})`
+            : isLight
+            ? `rgba(24, 24, 27, ${(1 - wave) * depthAlpha * 0.7})`
             : `rgba(255, 255, 255, ${(1 - wave) * depthAlpha * 0.8})`;
           ctx.lineWidth = 1;
           ctx.stroke();
 
-          // Flag and state label on frontmost nodes
-          if (hz > radius * 0.35) {
-            ctx.font = "bold 9px Poppins, -apple-system, sans-serif";
-            const label = `${hub.flag} ${hub.name} [${hub.state}]`;
+          // Flag pill on frontmost
+          if (rotated.z > radius * 0.45) {
+            ctx.font = "bold 8.5px Poppins, sans-serif";
+            const label = `${hub.flag} ${hub.name}`;
             const textW = ctx.measureText(label).width;
 
-            // Mini glass pill
-            ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.94)" : "rgba(10, 10, 12, 0.88)";
+            ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.95)" : "rgba(10, 10, 12, 0.9)";
             ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.25)";
             ctx.lineWidth = 0.8;
             ctx.beginPath();
             if (ctx.roundRect) {
-              ctx.roundRect(px + 6, py - 8, textW + 8, 15, 3);
+              ctx.roundRect(px + 6, py - 7, textW + 7, 14, 3);
             } else {
-              ctx.rect(px + 6, py - 8, textW + 8, 15);
+              ctx.rect(px + 6, py - 7, textW + 7, 14);
             }
             ctx.fill();
             ctx.stroke();
 
-            ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
-            ctx.fillText(label, px + 10, py + 3);
+            ctx.fillStyle = isLight ? "#09090b" : "#ffffff";
+            ctx.fillText(label, px + 9, py + 3);
           }
         }
       });
@@ -233,50 +291,59 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
     };
   }, [size]);
 
-  // Touch / Mouse interactive drag to rotate
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // 360° Interactive Mouse & Touch Drag Handlers
+  const handlePointerDown = (e: React.PointerEvent) => {
     isDraggingRef.current = true;
-    dragStartRef.current = { x: e.clientX, angle: angleRef.current };
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      rotX: rotXRef.current,
+      rotY: rotYRef.current,
+    };
+    lastPosRef.current = { x: e.clientX, y: e.clientY };
+    lastTimeRef.current = performance.now();
+    velocityRef.current = { x: 0, y: 0 };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDraggingRef.current) return;
-    const dx = e.clientX - dragStartRef.current.x;
-    angleRef.current = dragStartRef.current.angle + dx * 0.008;
+    const now = performance.now();
+    const dt = Math.max(1, now - lastTimeRef.current);
+
+    const deltaX = e.clientX - dragStartRef.current.x;
+    const deltaY = e.clientY - dragStartRef.current.y;
+
+    const stepX = e.clientX - lastPosRef.current.x;
+    const stepY = e.clientY - lastPosRef.current.y;
+    velocityRef.current = {
+      x: (stepX / dt) * 0.08,
+      y: (stepY / dt) * 0.08,
+    };
+
+    rotYRef.current = dragStartRef.current.rotY + deltaX * 0.008;
+    rotXRef.current = Math.max(-1.15, Math.min(1.15, dragStartRef.current.rotX + deltaY * 0.008));
+
+    lastPosRef.current = { x: e.clientX, y: e.clientY };
+    lastTimeRef.current = now;
   };
 
-  const handleMouseUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
     isDraggingRef.current = false;
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      isDraggingRef.current = true;
-      dragStartRef.current = { x: e.touches[0].clientX, angle: angleRef.current };
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDraggingRef.current || e.touches.length !== 1) return;
-    const dx = e.touches[0].clientX - dragStartRef.current.x;
-    angleRef.current = dragStartRef.current.angle + dx * 0.008;
-  };
-
-  const handleTouchEnd = () => {
-    isDraggingRef.current = false;
+    try {
+      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
   };
 
   return (
     <div
-      className={`relative flex items-center justify-center select-none cursor-grab active:cursor-grabbing max-w-full ${className}`}
+      className={`relative flex items-center justify-center select-none cursor-grab active:cursor-grabbing max-w-full touch-none ${className}`}
       style={{ width: size, height: size }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      title="Clique e arraste em 360° para girar o globo"
     >
       <canvas
         ref={canvasRef}
