@@ -16,6 +16,11 @@ import {
   formatPhoneNumber,
 } from "@/lib/countryCodes";
 import {
+  createVerificationToken,
+  verifyOtpCode,
+} from "@/lib/emailService";
+import { EmailVerificationModal } from "@/components/auth/EmailVerificationModal";
+import {
   Lock,
   Mail,
   User,
@@ -48,6 +53,12 @@ function SignupFormInner() {
   const [error, setError] = useState<string | null>(null);
   const [isExistingUser, setIsExistingUser] = useState(false);
 
+  // Email Verification OTP State (Código de 6 Números com expiração de 5 min)
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [activeCode, setActiveCode] = useState("");
+  const [expiresAt, setExpiresAt] = useState(0);
+  const [verificationLoading, setVerificationLoading] = useState(false);
+
   useEffect(() => {
     const emailParam = searchParams.get("email");
     if (emailParam) {
@@ -62,6 +73,17 @@ function SignupFormInner() {
 
     if (!name || !email || !phone || !password || !confirmPassword) {
       setError("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim();
+
+    // Validação preventiva: verifica se a conta já existe
+    const existingUsers = auth.getUsers();
+    if (existingUsers.some((u) => u.email.toLowerCase() === cleanEmail)) {
+      setError("Já existe uma conta registrada com este e-mail. Por favor, faça login ou use outro e-mail.");
+      setIsExistingUser(true);
       return;
     }
 
@@ -88,12 +110,40 @@ function SignupFormInner() {
       return;
     }
 
-    setLoading(true);
+    // 1. Gera código renovável de 6 dígitos que expira em 5 minutos
+    const record = createVerificationToken(cleanEmail, cleanName);
+    setActiveCode(record.code);
+    setExpiresAt(record.expiresAt);
 
+    // 2. Dispara e-mail com o template oficial (HTML + degradê leve + assinatura)
+    try {
+      fetch("/api/v1/auth/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail, name: cleanName }),
+      }).catch(() => {});
+    } catch {}
+
+    // 3. Abre o Pop-up de Verificação com padrão visual do sistema
+    setShowVerificationModal(true);
+  };
+
+  const handleConfirmVerification = async (inputCode: string) => {
+    setVerificationLoading(true);
+
+    const cleanEmail = email.trim().toLowerCase();
+    const verifyResult = verifyOtpCode(inputCode, cleanEmail);
+
+    if (!verifyResult.success) {
+      setVerificationLoading(false);
+      throw new Error(verifyResult.error || "Código de verificação incorreto.");
+    }
+
+    // Token verificado com sucesso! Finaliza o provisionamento e login da conta
     try {
       const result = await auth.signup({
         name,
-        email,
+        email: cleanEmail,
         phone,
         phoneCountryCode: selectedCountry.code,
         password,
@@ -101,19 +151,34 @@ function SignupFormInner() {
       });
 
       if (!result.success) {
-        setError(result.error || "Falha ao provisionar a conta de operador.");
-        if (result.error?.includes("Já existe uma conta")) {
-          setIsExistingUser(true);
-        }
-        setLoading(false);
-        return;
+        setVerificationLoading(false);
+        throw new Error(result.error || "Falha ao provisionar a conta de operador.");
       }
 
+      setShowVerificationModal(false);
       router.push("/dashboard");
-    } catch {
-      setError("Falha inesperada ao provisionar a conta. Tente novamente.");
-      setLoading(false);
+    } catch (err: any) {
+      setVerificationLoading(false);
+      throw err;
     }
+  };
+
+  const handleResendVerification = async (): Promise<string> => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim();
+    const record = createVerificationToken(cleanEmail, cleanName);
+    setActiveCode(record.code);
+    setExpiresAt(record.expiresAt);
+
+    try {
+      fetch("/api/v1/auth/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail, name: cleanName }),
+      }).catch(() => {});
+    } catch {}
+
+    return record.code;
   };
 
   return (
@@ -433,6 +498,19 @@ function SignupFormInner() {
       <div className="text-center text-[10px] sm:text-[11px] font-mono text-brand-muted">
         Protegido por infraestrutura Phantom-X Edge • Criptografia SHA-256 + Salt
       </div>
+
+      {/* Pop-up Modal de Verificação de E-mail com Token de 6 Números */}
+      <EmailVerificationModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        email={email}
+        name={name}
+        activeCode={activeCode}
+        expiresAt={expiresAt}
+        onConfirm={handleConfirmVerification}
+        onResend={handleResendVerification}
+        loading={verificationLoading}
+      />
     </div>
   );
 }
