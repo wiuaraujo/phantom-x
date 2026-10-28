@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -31,6 +31,8 @@ import {
   X,
   ExternalLink,
   Laptop,
+  Play,
+  Pause,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -40,6 +42,7 @@ import { TrafficCharts } from "../dashboard/TrafficCharts";
 import { store } from "@/lib/store";
 import { TrafficEvent, GeoAggregate, MetricOverview, CloakerMode } from "@/types";
 import { generateCloudflareWorkerCode, BLOCKED_ASNS_MAP } from "@/lib/cloakerEngine";
+import { LocationBadge, getCountryFlag } from "@/lib/geoFlags";
 
 type ConsoleTab = "overview" | "layers" | "worker" | "live";
 
@@ -66,19 +69,18 @@ export const SystemPreview: React.FC = () => {
   } | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
 
+  // Stream & Live Simulation State
+  const [isStreamPaused, setIsStreamPaused] = useState(false);
+  const [newestEventId, setNewestEventId] = useState<string | null>(null);
+
   const loadData = () => {
     setMetrics(store.getDemoOverviewMetrics());
     setGeoData(store.getDemoGeoDistribution());
     setTimeSeries(store.getDemoTimeSeries(24));
-    setEvents(store.getDemoEvents(12));
   };
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(() => {
-      loadData();
-    }, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   const showToast = (msg: string) => {
@@ -86,102 +88,182 @@ export const SystemPreview: React.FC = () => {
     setTimeout(() => setNotification(null), 3500);
   };
 
-  // Simulates a verified genuine human lead with fbclid and residential ASN
-  const handleSimulateHuman = () => {
-    const newEvt: TrafficEvent = {
-      id: `evt_sim_${Date.now()}`,
-      clickId: `clk_fb_${Math.random().toString(36).substring(2, 9)}`,
-      timestamp: new Date().toISOString(),
-      domain: selectedDomain,
-      campaignName: "Meta Ads — Campanha Escala Q4",
-      ip: "177.142.88.24",
-      ipMasked: "177.142.***.***",
-      country: "Brasil",
-      countryCode: "BR",
-      city: "São Paulo",
-      state: "São Paulo",
-      stateCode: "SP",
-      latitude: -23.5505,
-      longitude: -46.6333,
-      device: "mobile",
-      browser: "Mobile Safari 17.4",
-      os: "iOS 17.4",
-      referrer: "https://instagram.com",
-      targetUrl: "https://pay.checkout-seguro.com/produto-exclusivo",
-      routedTo:
-        cloakerMode === "SO_WHITEPAGE"
+  // Pools de Simulação Realista com Cidades Brasileiras e ASN Autênticos
+  const BRAZIL_ISPS = [
+    { asn: 28573, org: "Claro Brasil Telecom" },
+    { asn: 18881, org: "Vivo / Telefônica Brasil" },
+    { asn: 26615, org: "TIM S.A. Brasil" },
+    { asn: 262955, org: "Brisanet Telecomunicações" },
+    { asn: 264426, org: "Desktop Internet Fibra" },
+    { asn: 16735, org: "Algar Telecom" },
+  ];
+
+  const BOT_ASNS = [
+    { asn: 32934, org: "Meta Platforms, Inc.", city: "Menlo Park", state: "California", stateCode: "CA", country: "Estados Unidos", code: "US", reason: "AS32934 Meta Ads Reviewer Bot", ua: "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)", layer: "asn_datacenter" },
+    { asn: 63293, org: "Facebook Ireland Ltd", city: "Dublin", state: "Dublin", stateCode: "DB", country: "Irlanda", code: "IE", reason: "AS63293 Meta Moderação Europeia", ua: "facebookexternalhit/1.1", layer: "asn_datacenter" },
+    { asn: 15169, org: "Google LLC Crawler", city: "Council Bluffs", state: "Iowa", stateCode: "IA", country: "Estados Unidos", code: "US", reason: "Google-InspectionTool Datacenter", ua: "Mozilla/5.0 (compatible; Google-InspectionTool/1.0;)", layer: "bot_pattern" },
+    { asn: 16509, org: "Amazon.com Datacenter", city: "Ashburn", state: "Virginia", stateCode: "VA", country: "Estados Unidos", code: "US", reason: "AWS Datacenter Scraper", ua: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36", layer: "asn_datacenter" },
+    { asn: 24940, org: "Hetzner Online GmbH", city: "Frankfurt", state: "Hessen", stateCode: "HE", country: "Alemanha", code: "DE", reason: "Spy Tool / AdPlexity Scanner", ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", layer: "asn_datacenter" },
+    { asn: 7922, org: "Verizon Wireless", city: "Miami", state: "Florida", stateCode: "FL", country: "Estados Unidos", code: "US", reason: "Geo-Fence: Acesso fora do Brasil", ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4)", layer: "geo_fencing" },
+  ];
+
+  const BRAZIL_CITIES = [
+    { city: "Rio de Janeiro", state: "Rio de Janeiro", stateCode: "RJ", lat: -22.9068, lon: -43.1729 },
+    { city: "São Paulo", state: "São Paulo", stateCode: "SP", lat: -23.5505, lon: -46.6333 },
+    { city: "Belo Horizonte", state: "Minas Gerais", stateCode: "MG", lat: -19.9167, lon: -43.9345 },
+    { city: "Brasília", state: "Distrito Federal", stateCode: "DF", lat: -15.7975, lon: -47.8919 },
+    { city: "Curitiba", state: "Paraná", stateCode: "PR", lat: -25.4284, lon: -49.2733 },
+    { city: "Porto Alegre", state: "Rio Grande do Sul", stateCode: "RS", lat: -30.0346, lon: -51.2177 },
+    { city: "Salvador", state: "Bahia", stateCode: "BA", lat: -12.9777, lon: -38.5016 },
+    { city: "Fortaleza", state: "Ceará", stateCode: "CE", lat: -3.7319, lon: -38.5267 },
+    { city: "Recife", state: "Pernambuco", stateCode: "PE", lat: -8.0476, lon: -34.877 },
+    { city: "Campinas", state: "São Paulo", stateCode: "SP", lat: -22.9099, lon: -47.0626 },
+    { city: "Goiânia", state: "Goiás", stateCode: "GO", lat: -16.6869, lon: -49.2648 },
+    { city: "Florianópolis", state: "Santa Catarina", stateCode: "SC", lat: -27.5954, lon: -48.548 },
+  ];
+
+  const createLiveEdgeEvent = (mode: "auto" | "human" | "bot" = "auto"): TrafficEvent => {
+    const isBot =
+      mode === "bot" ? true : mode === "human" ? false : Math.random() < 0.22;
+
+    const now = new Date();
+    const id = `evt_live_${now.getTime()}_${Math.random().toString(36).substring(2, 7)}`;
+
+    if (isBot) {
+      const bot = BOT_ASNS[Math.floor(Math.random() * BOT_ASNS.length)];
+      const isForcedOffer = cloakerMode === "SO_OFERTA";
+
+      return {
+        id,
+        clickId: `clk_bot_${Math.random().toString(36).substring(2, 9)}`,
+        timestamp: now.toISOString(),
+        domain: selectedDomain,
+        campaignName: "Meta Ads — Campanha Escala Q4",
+        ip: `69.171.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}`,
+        ipMasked: "69.171.***.***",
+        country: bot.country,
+        countryCode: bot.code,
+        city: bot.city,
+        state: bot.state,
+        stateCode: bot.stateCode,
+        latitude: 37.4538,
+        longitude: -122.1822,
+        device: "bot",
+        browser: bot.ua.includes("facebook") ? "facebookexternalhit/1.1" : "Googlebot/2.1",
+        os: "Linux x86_64",
+        referrer: "Direto / Sem Referrer",
+        targetUrl: "https://pay.checkout-seguro.com/produto-exclusivo",
+        routedTo: isForcedOffer
+          ? "https://pay.checkout-seguro.com/produto-exclusivo"
+          : "https://artigo-saude-bemestar.blog/seguranca",
+        riskScore: isForcedOffer ? 12 : Math.floor(94 + Math.random() * 5),
+        riskCategory: isForcedOffer ? "clean" : "bot",
+        classification: "known-crawler",
+        decision: isForcedOffer ? "routed_offer" : "mitigated_safe",
+        asn: bot.asn,
+        asnOrg: bot.org,
+        detectedLayer: isForcedOffer ? "clean_traffic" : (bot.layer as any),
+        httpStatus: 200,
+        reverseProxyDelivery: true,
+        webglRenderer: "SwiftShader Virtual Driver (Software)",
+        isHeadless: true,
+        canvasHash: "cv_00000000",
+        latencyMs: Math.floor(8 + Math.random() * 6),
+        isThreat: !isForcedOffer,
+        threatReasons: [bot.reason],
+      };
+    } else {
+      const city = BRAZIL_CITIES[Math.floor(Math.random() * BRAZIL_CITIES.length)];
+      const isp = BRAZIL_ISPS[Math.floor(Math.random() * BRAZIL_ISPS.length)];
+      const isForcedWhite = cloakerMode === "SO_WHITEPAGE";
+
+      const devices = [
+        { d: "mobile", os: "iOS 17.4", b: "Mobile Safari 17.4", gpu: "Apple GPU (Metal)" },
+        { d: "mobile", os: "Android 14", b: "Chrome Mobile 124", gpu: "Qualcomm Adreno 730" },
+        { d: "desktop", os: "macOS Sonoma", b: "Safari 17.4", gpu: "Apple M2 (Metal)" },
+        { d: "desktop", os: "Windows 11", b: "Chrome 124", gpu: "NVIDIA GeForce RTX 4060" },
+      ];
+      const dev = devices[Math.floor(Math.random() * devices.length)];
+
+      return {
+        id,
+        clickId: `clk_fb_${Math.random().toString(36).substring(2, 9)}`,
+        timestamp: now.toISOString(),
+        domain: selectedDomain,
+        campaignName: "Meta Ads — Campanha Escala Q4",
+        ip: `177.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}`,
+        ipMasked: "177.142.***.***",
+        country: "Brasil",
+        countryCode: "BR",
+        city: city.city,
+        state: city.state,
+        stateCode: city.stateCode,
+        latitude: city.lat,
+        longitude: city.lon,
+        device: dev.d as any,
+        browser: dev.b,
+        os: dev.os,
+        referrer: "https://instagram.com",
+        targetUrl: "https://pay.checkout-seguro.com/produto-exclusivo",
+        routedTo: isForcedWhite
           ? "https://artigo-saude-bemestar.blog/seguranca"
           : "https://pay.checkout-seguro.com/produto-exclusivo",
-      riskScore: cloakerMode === "SO_WHITEPAGE" ? 100 : 8,
-      riskCategory: cloakerMode === "SO_WHITEPAGE" ? "bot" : "clean",
-      classification: cloakerMode === "SO_WHITEPAGE" ? "preview-bot" : "human-like",
-      decision: cloakerMode === "SO_WHITEPAGE" ? "mitigated_safe" : "routed_offer",
-      asn: 28573,
-      asnOrg: "Claro Telecom Participacoes S.A.",
-      detectedLayer: cloakerMode === "SO_WHITEPAGE" ? "asn_datacenter" : "clean_traffic",
-      httpStatus: 200,
-      reverseProxyDelivery: true,
-      webglRenderer: "Apple GPU (Metal)",
-      isHeadless: false,
-      canvasHash: "cv_9f82d11b",
-      latencyMs: 11,
-      isThreat: cloakerMode === "SO_WHITEPAGE",
-      threatReasons: cloakerMode === "SO_WHITEPAGE" ? ["Modo Forçado SÓ_WHITEPAGE"] : [],
-    };
+        riskScore: isForcedWhite ? 100 : Math.floor(3 + Math.random() * 5),
+        riskCategory: isForcedWhite ? "bot" : "clean",
+        classification: isForcedWhite ? "preview-bot" : "human-like",
+        decision: isForcedWhite ? "mitigated_safe" : "routed_offer",
+        asn: isp.asn,
+        asnOrg: isp.org,
+        detectedLayer: isForcedWhite ? "asn_datacenter" : "clean_traffic",
+        httpStatus: 200,
+        reverseProxyDelivery: true,
+        webglRenderer: dev.gpu,
+        isHeadless: false,
+        canvasHash: `cv_${Math.random().toString(36).substring(2, 10)}`,
+        latencyMs: Math.floor(10 + Math.random() * 8),
+        isThreat: isForcedWhite,
+        threatReasons: isForcedWhite ? ["Modo Forçado SÓ_WHITEPAGE"] : [],
+      };
+    }
+  };
 
-    setEvents((prev) => [newEvt, ...prev.slice(0, 11)]);
-    showToast("Visitante Real injetado: Roteado via HTTP 200 Proxy Reverso (< 12ms)");
+  // Injeta um novo evento no topo da fila com animação de slide descendo
+  const handleInjectEvent = (type: "auto" | "human" | "bot" = "auto") => {
+    const newEvt = createLiveEdgeEvent(type);
+    setNewestEventId(newEvt.id);
+    setEvents((prev) => [newEvt, ...prev.slice(0, 15)]);
+
+    setTimeout(() => {
+      setNewestEventId((current) => (current === newEvt.id ? null : current));
+    }, 1800);
+
+    setMetrics((prev) => ({
+      ...prev,
+      totalEvents: prev.totalEvents + 1,
+      automatedThreatsBlocked: newEvt.isThreat
+        ? prev.automatedThreatsBlocked + 1
+        : prev.automatedThreatsBlocked,
+    }));
+  };
+
+  // Stream dinâmico do simulador em tempo real (intervalo dinâmico de 2.4s)
+  useEffect(() => {
+    if (isStreamPaused) return;
+    const interval = setInterval(() => {
+      handleInjectEvent("auto");
+    }, 2400);
+    return () => clearInterval(interval);
+  }, [isStreamPaused, cloakerMode, selectedDomain]);
+
+  // Simulates a verified genuine human lead with fbclid and residential ASN
+  const handleSimulateHuman = () => {
+    handleInjectEvent("human");
+    showToast("Visitante Real injetado via HTTP 200 Proxy Reverso (< 12ms)");
   };
 
   // Simulates a Meta Review Bot / Datacenter Inspector
   const handleSimulateBot = () => {
-    const newEvt: TrafficEvent = {
-      id: `evt_sim_${Date.now()}`,
-      clickId: `clk_bot_${Math.random().toString(36).substring(2, 9)}`,
-      timestamp: new Date().toISOString(),
-      domain: selectedDomain,
-      campaignName: "Meta Ads — Campanha Escala Q4",
-      ip: "69.171.251.12",
-      ipMasked: "69.171.***.***",
-      country: "Estados Unidos",
-      countryCode: "US",
-      city: "Menlo Park",
-      state: "California",
-      stateCode: "CA",
-      latitude: 37.4538,
-      longitude: -122.1822,
-      device: "bot",
-      browser: "facebookexternalhit/1.1",
-      os: "Linux x86_64",
-      referrer: "Direto / Sem Referrer",
-      targetUrl: "https://pay.checkout-seguro.com/produto-exclusivo",
-      routedTo:
-        cloakerMode === "SO_OFERTA"
-          ? "https://pay.checkout-seguro.com/produto-exclusivo"
-          : "https://artigo-saude-bemestar.blog/seguranca",
-      riskScore: cloakerMode === "SO_OFERTA" ? 12 : 98,
-      riskCategory: cloakerMode === "SO_OFERTA" ? "clean" : "bot",
-      classification: "known-crawler",
-      decision: cloakerMode === "SO_OFERTA" ? "routed_offer" : "mitigated_safe",
-      asn: 32934,
-      asnOrg: "Meta Platforms, Inc.",
-      detectedLayer: cloakerMode === "SO_OFERTA" ? "clean_traffic" : "asn_datacenter",
-      httpStatus: 200,
-      reverseProxyDelivery: true,
-      webglRenderer: "SwiftShader Virtual Driver (Software)",
-      isHeadless: true,
-      canvasHash: "cv_00000000",
-      latencyMs: 9,
-      isThreat: cloakerMode !== "SO_OFERTA",
-      threatReasons: [
-        "AS32934 Meta Platforms Datacenter",
-        "Crawler User-Agent (facebookexternalhit)",
-        "GPU WebGL Virtual (SwiftShader)",
-        "Navegador Automatizado (navigator.webdriver=true)",
-      ],
-    };
-
-    setEvents((prev) => [newEvt, ...prev.slice(0, 11)]);
+    handleInjectEvent("bot");
     showToast("Robô Meta (AS32934) detectado: Mitigado para Whitepage HTTP 200");
   };
 
@@ -617,25 +699,57 @@ export const SystemPreview: React.FC = () => {
                     {/* Real Traffic Charts */}
                     <TrafficCharts timeSeries={timeSeries} geoData={geoData} />
 
-                    {/* Compact Activity Table Preview */}
+                    {/* Compact Activity Table Preview with Real-time Streaming Simulator & Country Flags */}
                     <div className="bg-brand-surface border border-brand-border rounded-xl p-4 sm:p-5 shadow-sm">
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <div>
-                          <h3 className="text-xs sm:text-sm font-semibold text-brand-white tracking-wide flex items-center space-x-2">
+                          <div className="flex items-center space-x-2">
                             <Activity className="w-4 h-4 text-brand-white" />
-                            <span>Requisições Auditadas na Borda (Últimas 6)</span>
-                          </h3>
+                            <h3 className="text-xs sm:text-sm font-semibold text-brand-white tracking-wide">
+                              Requisições Auditadas na Borda (Últimas 6)
+                            </h3>
+                            {/* Live Simulator Stream Pulse Pill */}
+                            <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                              <span className={`w-2 h-2 rounded-full ${isStreamPaused ? "bg-amber-400" : "bg-emerald-500 animate-pulse"}`} />
+                              <span>{isStreamPaused ? "STREAM PAUSADO" : "SIMULADOR AO VIVO"}</span>
+                            </span>
+                          </div>
                           <p className="text-[11px] text-brand-secondary mt-0.5">
                             Decisões em tempo real via Proxy Reverso transparente (HTTP 200 OK sem redirects)
                           </p>
                         </div>
-                        <button
-                          onClick={() => setActiveTab("live")}
-                          className="text-xs text-brand-white hover:underline flex items-center space-x-1"
-                        >
-                          <span>Ver auditoria detalhada</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
+
+                        <div className="flex items-center space-x-2 shrink-0">
+                          {/* Stream Pause / Play Toggle */}
+                          <button
+                            onClick={() => {
+                              setIsStreamPaused(!isStreamPaused);
+                              showToast(isStreamPaused ? "Stream retornado: Simulando novas requisições" : "Stream pausado temporariamente");
+                            }}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-brand-surface hover:bg-brand-hover border border-brand-border text-xs font-mono text-brand-secondary hover:text-brand-white transition"
+                            title={isStreamPaused ? "Retomar fluxo ao vivo" : "Pausar fluxo ao vivo"}
+                          >
+                            {isStreamPaused ? (
+                              <>
+                                <Play className="w-3 h-3 text-emerald-500" />
+                                <span>Retomar</span>
+                              </>
+                            ) : (
+                              <>
+                                <Pause className="w-3 h-3" />
+                                <span>Pausar</span>
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() => setActiveTab("live")}
+                            className="text-xs text-brand-white hover:underline flex items-center space-x-1 font-medium pl-1"
+                          >
+                            <span>Ver auditoria detalhada</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="overflow-x-auto">
@@ -643,7 +757,7 @@ export const SystemPreview: React.FC = () => {
                           <thead>
                             <tr className="border-b border-brand-border text-brand-muted text-[10px] sm:text-[11px]">
                               <th className="pb-2.5 font-medium">TIMESTAMP</th>
-                              <th className="pb-2.5 font-medium">ASN & REDE</th>
+                              <th className="pb-2.5 font-medium">ASN &amp; REDE</th>
                               <th className="pb-2.5 font-medium">ORIGEM</th>
                               <th className="pb-2.5 font-medium">CAMADA ATIVADA</th>
                               <th className="pb-2.5 font-medium">RISCO</th>
@@ -651,67 +765,100 @@ export const SystemPreview: React.FC = () => {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-brand-borderSubtle">
-                            {events.slice(0, 6).map((evt) => (
-                              <tr
-                                key={evt.id}
-                                onClick={() => setSelectedEvent(evt)}
-                                className="hover:bg-brand-hover/50 transition cursor-pointer"
-                              >
-                                <td className="py-2.5 text-brand-secondary font-mono">
-                                  {new Date(evt.timestamp).toLocaleTimeString()}
-                                </td>
-                                <td className="py-2.5 text-brand-white">
-                                  <div className="flex items-center space-x-1.5">
-                                    <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-brand-hover border border-brand-border">
-                                      AS{evt.asn || "---"}
+                            {events.slice(0, 6).map((evt) => {
+                              const isNew = evt.id === newestEventId;
+                              return (
+                                <tr
+                                  key={evt.id}
+                                  onClick={() => setSelectedEvent(evt)}
+                                  className={`transition-all duration-500 cursor-pointer ${
+                                    isNew
+                                      ? evt.isThreat
+                                        ? "bg-rose-500/15 dark:bg-rose-500/20 border-l-2 border-rose-500 animate-in fade-in slide-in-from-top-3 duration-500"
+                                        : "bg-emerald-500/15 dark:bg-emerald-500/20 border-l-2 border-emerald-500 animate-in fade-in slide-in-from-top-3 duration-500"
+                                      : "hover:bg-brand-hover/50"
+                                  }`}
+                                >
+                                  <td className="py-2.5 text-brand-secondary font-mono text-xs whitespace-nowrap">
+                                    <div className="flex items-center space-x-1.5">
+                                      {isNew && (
+                                        <span
+                                          className={`w-1.5 h-1.5 rounded-full animate-ping shrink-0 ${
+                                            evt.isThreat ? "bg-rose-500" : "bg-emerald-500"
+                                          }`}
+                                        />
+                                      )}
+                                      <span>{new Date(evt.timestamp).toLocaleTimeString()}</span>
+                                    </div>
+                                  </td>
+
+                                  <td className="py-2.5 text-brand-white">
+                                    <div className="flex items-center space-x-1.5">
+                                      <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-brand-surface border border-brand-border text-brand-white font-medium">
+                                        AS{evt.asn || "---"}
+                                      </span>
+                                      <span className="truncate max-w-[130px] sm:max-w-[160px] text-brand-secondary">
+                                        {evt.asnOrg || "Provedor Residencial"}
+                                      </span>
+                                    </div>
+                                  </td>
+
+                                  {/* ORIGEM com bandeira do país ao lado da cidade/estado */}
+                                  <td className="py-2.5 whitespace-nowrap">
+                                    <LocationBadge
+                                      countryCode={evt.countryCode}
+                                      cityName={evt.city}
+                                      stateCode={evt.stateCode}
+                                      stateName={evt.state}
+                                    />
+                                  </td>
+
+                                  <td className="py-2.5 whitespace-nowrap">
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-surface border border-brand-border text-brand-white font-medium">
+                                      {evt.detectedLayer === "asn_datacenter"
+                                        ? "ASN Datacenter"
+                                        : evt.detectedLayer === "platform_token"
+                                        ? "Token fbclid"
+                                        : evt.detectedLayer === "threat_intelligence"
+                                        ? "Threat Intel"
+                                        : evt.detectedLayer === "geo_fencing"
+                                        ? "Geo-Fence"
+                                        : evt.detectedLayer === "bot_pattern"
+                                        ? "Crawler Bot"
+                                        : "Humano Real"}
                                     </span>
-                                    <span className="truncate max-w-[140px] text-brand-secondary">
-                                      {evt.asnOrg || "Provedor Residencial"}
+                                  </td>
+
+                                  <td className="py-2.5 whitespace-nowrap">
+                                    <span
+                                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${
+                                        evt.riskScore > 70
+                                          ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold"
+                                          : evt.riskScore > 35
+                                          ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                                          : "text-brand-secondary font-medium"
+                                      }`}
+                                    >
+                                      {evt.riskScore}/100
                                     </span>
-                                  </div>
-                                </td>
-                                <td className="py-2.5 text-brand-secondary">
-                                  {evt.city}, {evt.countryCode}
-                                </td>
-                                <td className="py-2.5">
-                                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-surface border border-brand-border text-brand-white">
-                                    {evt.detectedLayer === "asn_datacenter"
-                                      ? "ASN Datacenter"
-                                      : evt.detectedLayer === "platform_token"
-                                      ? "Token fbclid"
-                                      : evt.detectedLayer === "threat_intelligence"
-                                      ? "Threat Intel"
-                                      : evt.detectedLayer === "geo_fencing"
-                                      ? "Geo-Fence"
-                                      : evt.detectedLayer === "bot_pattern"
-                                      ? "Crawler Bot"
-                                      : "Humano Real"}
-                                  </span>
-                                </td>
-                                <td className="py-2.5">
-                                  <span
-                                    className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                                      evt.riskScore > 70
-                                        ? "bg-neutral-900 text-white border border-neutral-700"
-                                        : evt.riskScore > 35
-                                        ? "bg-neutral-800 text-neutral-200 border border-neutral-700"
-                                        : "text-brand-secondary"
-                                    }`}
-                                  >
-                                    {evt.riskScore}/100
-                                  </span>
-                                </td>
-                                <td className="py-2.5 text-right">
-                                  <span
-                                    className={`text-[11px] font-semibold ${
-                                      evt.isThreat ? "text-neutral-400" : "text-brand-white"
-                                    }`}
-                                  >
-                                    {evt.isThreat ? "200 Safe Page" : "200 Proxy Oferta"}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
+                                  </td>
+
+                                  <td className="py-2.5 text-right whitespace-nowrap">
+                                    {evt.isThreat ? (
+                                      <span className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 inline-flex items-center space-x-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                                        <span>200 Safe Page</span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 inline-flex items-center space-x-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                                        <span>200 Proxy Oferta</span>
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -1107,10 +1254,15 @@ export const SystemPreview: React.FC = () => {
                                   </span>
                                 </div>
                               </td>
-                              <td className="py-2.5 text-brand-secondary">
-                                {evt.city}, {evt.countryCode}
+                              <td className="py-2.5 whitespace-nowrap">
+                                <LocationBadge
+                                  countryCode={evt.countryCode}
+                                  cityName={evt.city}
+                                  stateCode={evt.stateCode}
+                                  stateName={evt.state}
+                                />
                               </td>
-                              <td className="py-2.5">
+                              <td className="py-2.5 whitespace-nowrap">
                                 <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-surface border border-brand-border text-brand-white">
                                   {evt.detectedLayer === "asn_datacenter"
                                     ? "ASN Datacenter"
@@ -1128,27 +1280,31 @@ export const SystemPreview: React.FC = () => {
                               <td className="py-2.5 text-brand-secondary font-mono text-[11px] truncate max-w-[110px]">
                                 {evt.webglRenderer || "Apple M2"}
                               </td>
-                              <td className="py-2.5">
+                              <td className="py-2.5 whitespace-nowrap">
                                 <span
-                                  className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                                  className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${
                                     evt.riskScore > 70
-                                      ? "bg-neutral-900 text-white border border-neutral-700"
+                                      ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold"
                                       : evt.riskScore > 35
-                                      ? "bg-neutral-800 text-neutral-200 border border-neutral-700"
-                                      : "text-brand-secondary"
+                                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                                      : "text-brand-secondary font-medium"
                                   }`}
                                 >
                                   {evt.riskScore}/100
                                 </span>
                               </td>
-                              <td className="py-2.5 text-right">
-                                <span
-                                  className={`text-[11px] font-semibold ${
-                                    evt.isThreat ? "text-neutral-400" : "text-brand-white"
-                                  }`}
-                                >
-                                  {evt.isThreat ? "200 Safe Page" : "200 Proxy Oferta"}
-                                </span>
+                              <td className="py-2.5 text-right whitespace-nowrap">
+                                {evt.isThreat ? (
+                                  <span className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 inline-flex items-center space-x-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                                    <span>200 Safe Page</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 inline-flex items-center space-x-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                                    <span>200 Proxy Oferta</span>
+                                  </span>
+                                )}
                               </td>
                             </tr>
                           ))}
