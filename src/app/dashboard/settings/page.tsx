@@ -297,11 +297,11 @@ function SettingsPageContent() {
               <div className="border-b border-brand-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center space-x-2">
-                    <ShieldCheck className="w-5 h-5 text-brand-white" />
-                    <h3 className="text-sm font-bold text-brand-white">Motor de Borda Phantom-X (6 Camadas)</h3>
+                    <Sliders className="w-5 h-5 text-brand-white" />
+                    <h3 className="text-sm font-bold text-brand-white">Configurações do Cloaker Phantom-X</h3>
                   </div>
                   <p className="text-brand-secondary text-[11px] mt-0.5">
-                    Arquitetura determinística com entrega via Proxy Reverso transparente (HTTP 200 OK sem redirects)
+                    Regras de moderação, modos operacionais e entrega via Proxy Reverso transparente (HTTP 200 OK sem redirects)
                   </p>
                 </div>
 

@@ -53,28 +53,25 @@ function MobileAppNavContent() {
     { label: "Visão Geral", href: "/dashboard", icon: LayoutDashboard },
     { label: "Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
     { label: "Globo 360º", href: "/dashboard/map", icon: Globe },
-    { label: "Motor 6C", href: "/dashboard/settings?tab=cloaker", icon: ShieldCheck },
+    { label: "Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
   ];
 
   const allNavItems = [
     { label: "Visão Geral & Matriz", href: "/dashboard", icon: LayoutDashboard },
     { label: "Auditoria Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
     { label: "Globo 360º", href: "/dashboard/map", icon: Globe },
-    { label: "Motor 6 Camadas", href: "/dashboard/settings?tab=cloaker", icon: ShieldCheck, badge: "6/6" },
-    { label: "Cloudflare Worker", href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
     { label: "Campanhas", href: "/dashboard/campaigns", icon: Layers },
     { label: "Domínios", href: "/dashboard/domains", icon: Globe2 },
     { label: "Eventos", href: "/dashboard/events", icon: ListFilter },
-    { label: "Relatórios", href: "/dashboard/reports", icon: BarChart3 },
-    { label: "Configurações Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
-    { label: "Configurações Perfil", href: "/dashboard/settings?tab=profile", icon: User },
+    { label: "Cloudflare Worker", href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
+    { label: "Configurações do Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
+    { label: "Configurações do Perfil", href: "/dashboard/settings?tab=profile", icon: User },
   ];
 
   const isMoreActive =
     pathname.includes("/campaigns") ||
     pathname.includes("/domains") ||
     pathname.includes("/events") ||
-    pathname.includes("/reports") ||
     (pathname.includes("/settings") && currentTab !== "cloaker");
 
   return (

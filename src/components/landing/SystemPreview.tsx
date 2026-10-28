@@ -34,6 +34,7 @@ import {
   Play,
   Pause,
   User,
+  Sliders,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -347,7 +348,7 @@ export const SystemPreview: React.FC = () => {
 
   const navItems = [
     { id: "overview", label: "Visão Geral & Matriz", icon: LayoutDashboard },
-    { id: "layers", label: "Motor 6 Camadas", icon: ShieldCheck, badge: "6/6" },
+    { id: "layers", label: "Configurações do Cloaker", icon: Sliders },
     { id: "worker", label: "Cloudflare Worker", icon: FileCode, badge: "Edge" },
     { id: "live", label: "Auditoria Ao Vivo", icon: Radio, pulse: true },
   ];
@@ -524,7 +525,7 @@ export const SystemPreview: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <h1 className="text-xs sm:text-sm font-semibold text-brand-white tracking-wide">
                       {activeTab === "overview" && "Visão Geral da Operação"}
-                      {activeTab === "layers" && "Motor de Borda Phantom-X (6 Camadas)"}
+                      {activeTab === "layers" && "Configurações do Cloaker"}
                       {activeTab === "worker" && "Cloudflare Worker Edge Generator"}
                       {activeTab === "live" && "Auditoria de Tráfego em Tempo Real"}
                     </h1>
@@ -534,7 +535,7 @@ export const SystemPreview: React.FC = () => {
                   </div>
                   <p className="text-[11px] text-brand-secondary hidden sm:block">
                     {activeTab === "overview" && "Telemetria global, distribuição geográfica e auditoria de borda"}
-                    {activeTab === "layers" && "Pipeline determinístico de 6 camadas com telemetria client-side de GPU"}
+                    {activeTab === "layers" && "Painel de regras do Cloaker com proteção e telemetria client-side"}
                     {activeTab === "worker" && "Código compilado pronto para deploy direto na infraestrutura Cloudflare"}
                     {activeTab === "live" && "Inspeção profunda de ASNs, GPU WebGL, score de risco e decisão determinística"}
                   </p>
