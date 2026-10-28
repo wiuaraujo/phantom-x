@@ -33,6 +33,7 @@ import {
   Laptop,
   Play,
   Pause,
+  User,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -348,7 +349,7 @@ export const SystemPreview: React.FC = () => {
     { id: "overview", label: "Visão Geral & Matriz", icon: LayoutDashboard },
     { id: "layers", label: "Motor 6 Camadas", icon: ShieldCheck, badge: "6/6" },
     { id: "worker", label: "Cloudflare Worker", icon: FileCode, badge: "Edge" },
-    { id: "live", label: "Auditoria em Tempo Real", icon: Radio, pulse: true },
+    { id: "live", label: "Auditoria Ao Vivo", icon: Radio, pulse: true },
   ];
 
   return (
@@ -481,11 +482,18 @@ export const SystemPreview: React.FC = () => {
                       <span>Campanhas Ativas</span>
                     </Link>
                     <Link
-                      href="/dashboard/settings"
+                      href="/dashboard/settings?tab=cloaker"
                       className="flex items-center px-3 py-2 rounded-lg text-xs text-brand-secondary hover:text-brand-white hover:bg-brand-surface transition"
                     >
                       <Settings className="w-4 h-4 mr-2.5 text-brand-secondary" />
-                      <span>Configurações Cloaker</span>
+                      <span>Configurações do Cloaker</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/settings?tab=profile"
+                      className="flex items-center px-3 py-2 rounded-lg text-xs text-brand-secondary hover:text-brand-white hover:bg-brand-surface transition"
+                    >
+                      <User className="w-4 h-4 mr-2.5 text-brand-secondary" />
+                      <span>Configurações do Perfil</span>
                     </Link>
                   </div>
                 </nav>
@@ -696,7 +704,7 @@ export const SystemPreview: React.FC = () => {
                             geoData={geoData}
                             selectedCountry={selectedCountry}
                             onSelectCountry={setSelectedCountry}
-                            className="h-[300px] sm:h-[380px] w-full rounded-2xl border border-brand-border/60"
+                            className="h-[260px] xs:h-[300px] sm:h-[380px] w-full rounded-2xl border border-brand-border/60"
                           />
                         </div>
                       </div>

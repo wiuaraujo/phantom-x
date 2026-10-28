@@ -103,21 +103,21 @@ export default function DashboardOverview() {
           </div>
 
           <Link
-            href="/dashboard/settings"
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-hover text-brand-secondary hover:text-white border border-brand-border transition text-xs font-mono shrink-0"
+            href="/dashboard/settings?tab=profile"
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-hover text-brand-secondary hover:text-brand-white border border-brand-border transition text-xs font-mono shrink-0"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>Configurações de Conta</span>
+            <span>Configurações do Perfil</span>
           </Link>
         </div>
         {/* 
           ======================================================================
           1. IMMERSIVE MAIN BANNER: DIGITAL MATRIX WORLD MAP 360° OVAL
           "manter esse estilo de mapa, porém com dinâmica de 360 graus baseado
-          no mapa mundi, meio que oval"
+          no mapa mundi, meio que oval. O mapa no mobile tem que ficar na horizontal"
           ======================================================================
         */}
-        <div className="relative w-full h-[380px] sm:h-[480px] lg:h-[620px] rounded-2xl bg-brand-surface border border-brand-border overflow-hidden shadow-sm flex flex-col">
+        <div className="relative w-full h-[260px] xs:h-[300px] sm:h-[440px] lg:h-[600px] rounded-2xl bg-brand-surface border border-brand-border overflow-hidden shadow-sm flex flex-col">
           {/* Panoramic Map Header Floating Overlay (Limpo, sem textos de matriz global) */}
           <div className="absolute top-0 inset-x-0 z-20 p-2.5 sm:p-5 flex items-center justify-end gap-2 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none">
             {/* Actions Bar */}
@@ -138,16 +138,16 @@ export default function DashboardOverview() {
 
               <button
                 onClick={handleSimulateBurst}
-                className="hover:bg-brand-hover text-white flex items-center space-x-1 text-[11px] bg-brand-surface px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-brand-border transition font-medium shadow-glow-sm"
+                className="hover:bg-brand-hover text-brand-white flex items-center space-x-1 text-[11px] bg-brand-surface px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-brand-border transition font-medium shadow-glow-sm"
                 title="Injetar requisição de teste para ativar nós em tempo real"
               >
-                <Send className="w-3 h-3 text-white" />
+                <Send className="w-3 h-3 text-brand-white" />
                 <span className="hidden xs:inline">Simular</span>
               </button>
 
               <button
                 onClick={loadData}
-                className="hover:bg-brand-hover hover:text-white p-1 sm:p-2 rounded-lg bg-brand-surface border border-brand-border text-brand-secondary transition"
+                className="hover:bg-brand-hover hover:text-brand-white p-1 sm:p-2 rounded-lg bg-brand-surface border border-brand-border text-brand-secondary transition"
                 title="Recarregar dados"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
@@ -189,7 +189,7 @@ export default function DashboardOverview() {
                   <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                   <span>AMBIENTE DE BORDA INICIALIZADO</span>
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+                <h3 className="text-lg sm:text-xl font-bold text-brand-white tracking-tight">
                   Sua conta Phantom-X está ativa e pronta para receber tráfego
                 </h3>
                 <p className="text-xs sm:text-sm text-brand-secondary leading-relaxed">
@@ -201,7 +201,7 @@ export default function DashboardOverview() {
               <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                 <Link
                   href="/dashboard/domains"
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-glow-sm"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm"
                 >
                   <Globe2 className="w-4 h-4" />
                   <span>Conectar Domínio</span>
@@ -209,7 +209,7 @@ export default function DashboardOverview() {
 
                 <Link
                   href="/dashboard/campaigns"
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-brand-surface text-white border border-brand-border font-medium text-xs hover:bg-brand-hover transition"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-brand-surface text-brand-white border border-brand-border font-medium text-xs hover:bg-brand-hover transition"
                 >
                   <Layers className="w-4 h-4 text-brand-secondary" />
                   <span>Criar Campanha</span>
@@ -217,9 +217,9 @@ export default function DashboardOverview() {
 
                 <button
                   onClick={handleSimulateBurst}
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-brand-surface text-brand-secondary border border-brand-border font-medium text-xs hover:text-white hover:bg-brand-hover transition"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-brand-surface text-brand-secondary border border-brand-border font-medium text-xs hover:text-brand-white hover:bg-brand-hover transition"
                 >
-                  <Send className="w-3.5 h-3.5 text-white" />
+                  <Send className="w-3.5 h-3.5 text-brand-white" />
                   <span>Testar Requisição</span>
                 </button>
               </div>
@@ -337,7 +337,7 @@ export default function DashboardOverview() {
                         ) : (
                           <span
                             className={`text-[11px] font-semibold ${
-                              evt.isThreat ? "text-neutral-400" : "text-white"
+                              evt.isThreat ? "text-neutral-400" : "text-brand-white"
                             }`}
                           >
                             {evt.isThreat ? "SAFE PAGE" : "OFERTA"}

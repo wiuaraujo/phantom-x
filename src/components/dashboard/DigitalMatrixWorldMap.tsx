@@ -207,8 +207,11 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       const cx = w / 2 + currentPan.x;
       const cy = h / 2 + currentPan.y;
 
-      // Scale map to comfortably fill the container vertically
-      const cellH = ((h * 0.94) / MATRIX_ROWS) * currentZoom;
+      const isMobile = w < 640;
+      // Scale map to comfortably fill the container vertically & horizontally without compression
+      const rawCellH = ((h * 0.92) / MATRIX_ROWS) * currentZoom;
+      // On mobile, guarantee horizontal balance so continents aren't stretched tall or squeezed
+      const cellH = isMobile ? Math.min(rawCellH, (w * 1.55) / MATRIX_COLS) : rawCellH;
       const cellW = cellH * 1.08;
       const worldWidth = MATRIX_COLS * cellW;
       const startY = cy - (MATRIX_ROWS / 2) * cellH;
@@ -420,6 +423,42 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
 
             ctx.restore();
           }
+
+          // Mobile Clean Flag Badge (w < 640): Sempre visível e nítido sem sobreposições
+          if (w < 640) {
+            const flag = hub.flag || getCountryFlag(hub.code);
+            const badgeW = 44;
+            const badgeH = 18;
+            const badgeX = ptX - badgeW / 2;
+            const badgeY = ptY - 22;
+
+            ctx.save();
+            ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.95)" : "rgba(8, 9, 13, 0.92)";
+            ctx.strokeStyle = isSelected
+              ? (isLight ? "#000000" : "#ffffff")
+              : (isLight ? "rgba(0, 0, 0, 0.2)" : "rgba(255, 255, 255, 0.35)");
+            ctx.lineWidth = 1;
+
+            if (ctx.roundRect) {
+              ctx.beginPath();
+              ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 4);
+              ctx.fill();
+              ctx.stroke();
+            } else {
+              ctx.fillRect(badgeX, badgeY, badgeW, badgeH);
+              ctx.strokeRect(badgeX, badgeY, badgeW, badgeH);
+            }
+
+            // Flag emoji
+            ctx.font = "10px sans-serif";
+            ctx.fillText(flag, badgeX + 3.5, badgeY + 13);
+
+            // Hub code
+            ctx.font = "bold 8.5px 'JetBrains Mono', monospace";
+            ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
+            ctx.fillText(hub.code, badgeX + 20, badgeY + 12.5);
+            ctx.restore();
+          }
         });
       }
 
@@ -606,12 +645,12 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
   return (
     <div
       ref={containerRef}
-      style={{ touchAction: "none", overscrollBehavior: "contain" }}
+      style={{ touchAction: "pan-y", overscrollBehavior: "contain" }}
       className={`relative w-full h-full bg-[#050608] overflow-hidden select-none font-sans ${className}`}
     >
       <canvas
         ref={canvasRef}
-        style={{ touchAction: "none", overscrollBehavior: "contain" }}
+        style={{ touchAction: "pan-y", overscrollBehavior: "contain" }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

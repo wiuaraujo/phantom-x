@@ -200,18 +200,18 @@ export default function DomainsPage() {
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md bg-brand-surface border border-brand-border rounded-2xl p-6 shadow-glow font-mono">
             <div className="flex items-center justify-between border-b border-brand-border pb-3 mb-5">
-              <h3 className="text-base font-bold text-white">Adicionar Domínio</h3>
+              <h3 className="text-base font-bold text-brand-white">Adicionar Domínio</h3>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-brand-secondary hover:text-white"
+                className="text-brand-secondary hover:text-brand-white"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddDomain} className="space-y-4 text-xs">
+            <form onSubmit={handleAddDomain} className="space-y-4 text-xs font-sans">
               <div>
-                <label className="block text-brand-secondary mb-1">
+                <label className="block text-brand-secondary mb-1 font-mono text-[11px]">
                   NOME DO DOMÍNIO OU SUBDOMÍNIO
                 </label>
                 <input
@@ -220,11 +220,11 @@ export default function DomainsPage() {
                   onChange={(e) => setNewDomainName(e.target.value)}
                   placeholder="trk.meusite.com"
                   required
-                  className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-white transition"
+                  className="w-full px-3 py-2 bg-white dark:bg-brand-black border border-brand-border rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono text-xs"
                 />
-                <span className="block text-[11px] text-brand-muted mt-1.5 leading-tight">
+                <span className="block text-[11px] text-brand-muted mt-1.5 leading-tight font-mono">
                   Após adicionar, você precisará criar o registro CNAME apontando para{" "}
-                  <code className="text-white">cname.phantomx.pro</code>.
+                  <code className="text-brand-white font-bold bg-brand-surface px-1.5 py-0.5 rounded border border-brand-border">cname.phantomx.pro</code>.
                 </span>
               </div>
 
@@ -232,13 +232,13 @@ export default function DomainsPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-lg bg-brand-black border border-brand-border text-brand-secondary hover:text-white"
+                  className="px-4 py-2 rounded-lg bg-brand-surface border border-brand-border text-brand-secondary hover:text-brand-white transition"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-white text-black font-semibold hover:bg-neutral-200 transition"
+                  className="px-5 py-2 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm"
                 >
                   Cadastrar Domínio
                 </button>

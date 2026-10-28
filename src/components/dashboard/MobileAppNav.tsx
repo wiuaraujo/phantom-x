@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useDashboardNav } from "./DashboardNavContext";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -16,26 +16,28 @@ import {
   Globe2,
   ListFilter,
   BarChart3,
-  Settings,
+  Sliders,
   Menu,
   X,
   LogOut,
   ExternalLink,
   ChevronRight,
   ShieldCheck,
+  Code,
+  User,
 } from "lucide-react";
 
-export const MobileAppNav: React.FC = () => {
+function MobileAppNavContent() {
   const pathname = usePathname();
-  const { mobileDrawerOpen, setMobileDrawerOpen, openDrawer, closeDrawer } = useDashboardNav();
+  const searchParams = useSearchParams();
+  const { mobileDrawerOpen, openDrawer, closeDrawer } = useDashboardNav();
   const session = auth.getSession();
+  const currentTab = searchParams?.get("tab");
 
-  // Fecha o drawer automaticamente ao mudar de rota
   useEffect(() => {
     closeDrawer();
-  }, [pathname]);
+  }, [pathname, currentTab]);
 
-  // Previne scroll do body quando o drawer estiver aberto
   useEffect(() => {
     if (mobileDrawerOpen) {
       document.body.style.overflow = "hidden";
@@ -50,43 +52,47 @@ export const MobileAppNav: React.FC = () => {
   const bottomNavItems = [
     { label: "Visão Geral", href: "/dashboard", icon: LayoutDashboard },
     { label: "Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
-    { label: "Mapa", href: "/dashboard/map", icon: Globe },
-    { label: "Campanhas", href: "/dashboard/campaigns", icon: Layers },
+    { label: "Globo 360º", href: "/dashboard/map", icon: Globe },
+    { label: "Motor 6C", href: "/dashboard/settings?tab=cloaker", icon: ShieldCheck },
   ];
 
   const allNavItems = [
-    { label: "Visão Geral", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Monitoramento Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
-    { label: "Mapa Global", href: "/dashboard/map", icon: Globe },
+    { label: "Visão Geral & Matriz", href: "/dashboard", icon: LayoutDashboard },
+    { label: "Auditoria Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
+    { label: "Globo 360º", href: "/dashboard/map", icon: Globe },
+    { label: "Motor 6 Camadas", href: "/dashboard/settings?tab=cloaker", icon: ShieldCheck, badge: "6/6" },
+    { label: "Cloudflare Worker", href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
     { label: "Campanhas", href: "/dashboard/campaigns", icon: Layers },
     { label: "Domínios", href: "/dashboard/domains", icon: Globe2 },
     { label: "Eventos", href: "/dashboard/events", icon: ListFilter },
     { label: "Relatórios", href: "/dashboard/reports", icon: BarChart3 },
-    { label: "Configurações", href: "/dashboard/settings", icon: Settings },
+    { label: "Configurações Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
+    { label: "Configurações Perfil", href: "/dashboard/settings?tab=profile", icon: User },
   ];
 
   const isMoreActive =
+    pathname.includes("/campaigns") ||
     pathname.includes("/domains") ||
     pathname.includes("/events") ||
     pathname.includes("/reports") ||
-    pathname.includes("/settings");
+    (pathname.includes("/settings") && currentTab !== "cloaker");
 
   return (
     <>
-      {/* 
-        ========================================================================
-        1. NATIVE MOBILE BOTTOM APP BAR (Fixed at bottom on < lg)
-        Estilo App Nativo iOS / Android: 100% responsivo, ergonômico e limpo
-        ========================================================================
-      */}
+      {/* 1. NATIVE MOBILE BOTTOM APP BAR (Fixed at bottom on < lg) */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-surface/95 dark:bg-black/95 backdrop-blur-xl border-t border-brand-border h-16 flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
         {bottomNavItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isTabRoute = item.href.includes("?tab=");
+          const tabName = isTabRoute ? item.href.split("tab=")[1] : null;
+
+          const isActive = isTabRoute
+            ? pathname === "/dashboard/settings" && currentTab === tabName
+            : pathname === item.href && (!currentTab || pathname !== "/dashboard/settings");
 
           return (
             <Link
-              key={item.href}
+              key={item.href + item.label}
               href={item.href}
               className={`flex-1 flex flex-col items-center justify-center py-1 transition-all relative ${
                 isActive
@@ -104,7 +110,7 @@ export const MobileAppNav: React.FC = () => {
                   <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                 )}
               </div>
-              <span className="text-[10px] mt-1 font-sans tracking-tight">
+              <span className="text-[10px] mt-1 font-sans tracking-tight truncate max-w-[64px]">
                 {item.label}
               </span>
               {isActive && (
@@ -139,11 +145,7 @@ export const MobileAppNav: React.FC = () => {
         </button>
       </nav>
 
-      {/* 
-        ========================================================================
-        2. NATIVE MOBILE SLIDE-OVER DRAWER MENU (< lg)
-        ========================================================================
-      */}
+      {/* 2. NATIVE MOBILE SLIDE-OVER DRAWER MENU (< lg) */}
       {mobileDrawerOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           {/* Backdrop Blur */}
@@ -184,7 +186,7 @@ export const MobileAppNav: React.FC = () => {
 
               {/* User Account Snippet */}
               <Link
-                href="/dashboard/settings"
+                href="/dashboard/settings?tab=profile"
                 onClick={closeDrawer}
                 className="mt-4 p-3 rounded-xl bg-brand-black/60 border border-brand-border flex items-center space-x-3 hover:bg-brand-hover transition block"
               >
@@ -209,11 +211,16 @@ export const MobileAppNav: React.FC = () => {
               <nav className="mt-5 space-y-1">
                 {allNavItems.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href;
+                  const isTabRoute = item.href.includes("?tab=");
+                  const tabName = isTabRoute ? item.href.split("tab=")[1] : null;
+
+                  const isActive = isTabRoute
+                    ? pathname === "/dashboard/settings" && currentTab === tabName
+                    : pathname === item.href && (!currentTab || pathname !== "/dashboard/settings");
 
                   return (
                     <Link
-                      key={item.href}
+                      key={item.href + item.label}
                       href={item.href}
                       onClick={closeDrawer}
                       className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition ${
@@ -222,8 +229,8 @@ export const MobileAppNav: React.FC = () => {
                           : "text-brand-secondary hover:text-brand-white hover:bg-brand-hover"
                       }`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <div className="relative">
+                      <div className="flex items-center space-x-3 truncate">
+                        <div className="relative shrink-0">
                           <Icon
                             className={`w-4 h-4 ${
                               isActive ? "text-white dark:text-black" : "text-brand-secondary"
@@ -233,13 +240,20 @@ export const MobileAppNav: React.FC = () => {
                             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                           )}
                         </div>
-                        <span>{item.label}</span>
+                        <span className="truncate">{item.label}</span>
                       </div>
-                      <ChevronRight
-                        className={`w-3.5 h-3.5 ${
-                          isActive ? "text-white dark:text-black" : "text-brand-muted"
-                        }`}
-                      />
+                      <div className="flex items-center space-x-1 shrink-0 ml-2">
+                        {item.badge && (
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded border border-brand-border text-brand-muted bg-brand-surface">
+                            {item.badge}
+                          </span>
+                        )}
+                        <ChevronRight
+                          className={`w-3.5 h-3.5 ${
+                            isActive ? "text-white dark:text-black" : "text-brand-muted"
+                          }`}
+                        />
+                      </div>
                     </Link>
                   );
                 })}
@@ -276,7 +290,7 @@ export const MobileAppNav: React.FC = () => {
                   auth.logout();
                   window.location.href = "/login";
                 }}
-                className="w-full flex items-center space-x-2.5 px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-950/20 transition rounded-lg"
+                className="w-full flex items-center space-x-2.5 px-3 py-2 text-xs text-rose-500 hover:text-white hover:bg-rose-600 transition rounded-lg font-medium"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Desconectar Sessão</span>
@@ -286,5 +300,13 @@ export const MobileAppNav: React.FC = () => {
         </div>
       )}
     </>
+  );
+}
+
+export const MobileAppNav: React.FC = () => {
+  return (
+    <Suspense fallback={null}>
+      <MobileAppNavContent />
+    </Suspense>
   );
 };

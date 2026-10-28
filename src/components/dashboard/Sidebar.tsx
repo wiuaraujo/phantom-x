@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { siteConfig } from "@/config/site";
 import { Logo } from "@/components/ui/Logo";
 import {
@@ -13,29 +13,38 @@ import {
   Globe2,
   ListFilter,
   BarChart3,
-  Settings,
+  Sliders,
   ChevronLeft,
   ChevronRight,
   LogOut,
   ExternalLink,
+  ShieldCheck,
+  Code,
+  User,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 
-export const Sidebar: React.FC = () => {
+function SidebarContent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [collapsed, setCollapsed] = useState(false);
   const session = auth.getSession();
   const displayName = session?.user?.nickname || session?.user?.name?.split(" ")[0] || "Operador";
 
+  const currentTab = searchParams?.get("tab");
+
   const navItems = [
-    { label: "Visão Geral", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Monitoramento Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
-    { label: "Mapa Global", href: "/dashboard/map", icon: Globe },
+    { label: "Visão Geral & Matriz", href: "/dashboard", icon: LayoutDashboard },
+    { label: "Auditoria Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
+    { label: "Globo 360º", href: "/dashboard/map", icon: Globe },
+    { label: "Motor 6 Camadas", href: "/dashboard/settings?tab=cloaker", icon: ShieldCheck, badge: "6/6" },
+    { label: "Cloudflare Worker", href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
     { label: "Campanhas", href: "/dashboard/campaigns", icon: Layers },
     { label: "Domínios", href: "/dashboard/domains", icon: Globe2 },
     { label: "Eventos", href: "/dashboard/events", icon: ListFilter },
     { label: "Relatórios", href: "/dashboard/reports", icon: BarChart3 },
-    { label: "Configurações", href: "/dashboard/settings", icon: Settings },
+    { label: "Configurações Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
+    { label: "Configurações Perfil", href: "/dashboard/settings?tab=profile", icon: User },
   ];
 
   return (
@@ -87,11 +96,16 @@ export const Sidebar: React.FC = () => {
         <nav className="p-3 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isTabRoute = item.href.includes("?tab=");
+            const tabName = isTabRoute ? item.href.split("tab=")[1] : null;
+
+            const isActive = isTabRoute
+              ? pathname === "/dashboard/settings" && currentTab === tabName
+              : pathname === item.href && (!currentTab || pathname !== "/dashboard/settings");
 
             return (
               <Link
-                key={item.href}
+                key={item.href + item.label}
                 href={item.href}
                 className={`flex items-center ${
                   collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
@@ -112,7 +126,20 @@ export const Sidebar: React.FC = () => {
                     <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                   )}
                 </div>
-                {!collapsed && <span className="ml-3 truncate">{item.label}</span>}
+                {!collapsed && (
+                  <div className="ml-3 flex-1 flex items-center justify-between truncate">
+                    <span className="truncate">{item.label}</span>
+                    {item.badge && (
+                      <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border ml-1.5 ${
+                        isActive
+                          ? "border-current opacity-80"
+                          : "border-brand-border text-brand-muted bg-brand-surface"
+                      }`}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                )}
               </Link>
             );
           })}
@@ -133,7 +160,7 @@ export const Sidebar: React.FC = () => {
 
         {/* User Profile Card */}
         <Link
-          href="/dashboard/settings"
+          href="/dashboard/settings?tab=profile"
           className={`rounded-xl bg-brand-surface border border-brand-border flex items-center ${
             collapsed ? "justify-center p-2" : "p-2.5 space-x-2.5"
           } hover:bg-brand-hover transition block`}
@@ -181,5 +208,13 @@ export const Sidebar: React.FC = () => {
         </button>
       </div>
     </aside>
+  );
+}
+
+export const Sidebar: React.FC = () => {
+  return (
+    <Suspense fallback={<aside className="hidden lg:flex w-64 min-h-screen bg-brand-black border-r border-brand-border" />}>
+      <SidebarContent />
+    </Suspense>
   );
 };

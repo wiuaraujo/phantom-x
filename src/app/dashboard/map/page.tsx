@@ -2,33 +2,30 @@
 
 import React, { useState } from "react";
 import { Header } from "@/components/dashboard/Header";
-import { DigitalMatrixWorldMap } from "@/components/dashboard/DigitalMatrixWorldMap";
 import { TechGlobe } from "@/components/globe/TechGlobe";
 import { store } from "@/lib/store";
 import { getCountryFlag } from "@/lib/geoFlags";
-import { Globe2, Radio, Server, Layers, RotateCw } from "lucide-react";
+import { Globe2, Radio, Server, RotateCw } from "lucide-react";
 
 export default function GlobalMapPage() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [mapMode, setMapMode] = useState<"2d" | "3d">("3d");
   const geoData = store.getGeoDistribution();
-  const events = store.getEvents({ limit: 40, country: selectedCountry || undefined });
 
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
-        title="Mapa de Telemetria Global"
-        subtitle="Visualização geoespacial 360º da matriz digital de requisições e latência de borda"
+        title="Globo de Telemetria 360º"
+        subtitle="Visualização geoespacial esférica 360º em tempo real da rede Phantom-X e latência global"
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
-        {/* Full-width Map Canvas with 2D / 3D Toggle */}
+        {/* Full-width 360 Interactive Spherical Globe */}
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
             <div className="flex items-center space-x-2 text-brand-white">
               <Globe2 className="w-4 h-4 text-brand-white" />
               <span className="font-semibold text-xs truncate">
-                {mapMode === "3d" ? "GLOBO 3D 360º INTERATIVO" : "MATRIZ DIGITAL 2D (MAPA MUNDI)"}
+                GLOBO ESFÉRICO 360º INTERATIVO
               </span>
             </div>
 
@@ -37,55 +34,22 @@ export default function GlobalMapPage() {
                 {selectedCountry ? `Isolando: [${selectedCountry}]` : "Navegação 360º Ativa"}
               </span>
 
-              {/* View Switcher Tabs */}
-              <div className="flex items-center bg-brand-surface border border-brand-border rounded-lg p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setMapMode("3d")}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition flex items-center space-x-1 ${
-                    mapMode === "3d"
-                      ? "bg-neutral-900 text-white dark:bg-white dark:text-black shadow-sm"
-                      : "text-brand-secondary hover:text-white"
-                  }`}
-                >
-                  <RotateCw className="w-3 h-3" />
-                  <span>Globo 3D 360º</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMapMode("2d")}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition flex items-center space-x-1 ${
-                    mapMode === "2d"
-                      ? "bg-neutral-900 text-white dark:bg-white dark:text-black shadow-sm"
-                      : "text-brand-secondary hover:text-white"
-                  }`}
-                >
-                  <Layers className="w-3 h-3" />
-                  <span>Matriz 2D</span>
-                </button>
+              <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-brand-surface border border-brand-border text-[11px] font-semibold text-brand-white">
+                <RotateCw className="w-3 h-3 text-brand-secondary" />
+                <span>Rotação 360º</span>
               </div>
             </div>
           </div>
 
-          {mapMode === "3d" ? (
-            <div className="relative h-[420px] sm:h-[500px] md:h-[600px] w-full rounded-2xl border border-brand-border bg-brand-surface overflow-hidden shadow-glow-sm flex items-center justify-center">
-              <div className="absolute inset-0 dark:bg-[radial-gradient(circle,rgba(255,255,255,0.06)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.03)_0%,transparent_70%)] pointer-events-none" />
-              <TechGlobe className="w-full h-full" />
-            </div>
-          ) : (
-            <DigitalMatrixWorldMap
-              events={events}
-              geoData={geoData}
-              selectedCountry={selectedCountry}
-              onSelectCountry={setSelectedCountry}
-              className="h-[380px] sm:h-[460px] md:h-[540px] w-full rounded-2xl border border-brand-border"
-            />
-          )}
+          <div className="relative h-[340px] xs:h-[400px] sm:h-[500px] md:h-[600px] w-full rounded-2xl border border-brand-border bg-brand-surface overflow-hidden shadow-glow-sm flex items-center justify-center">
+            <div className="absolute inset-0 dark:bg-[radial-gradient(circle,rgba(255,255,255,0.06)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.03)_0%,transparent_70%)] pointer-events-none" />
+            <TechGlobe className="w-full h-full" />
+          </div>
         </div>
 
         {/* Breakdown by Country Table */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-brand-surface border border-brand-border rounded-xl p-5 shadow-glow-sm">
+          <div className="lg:col-span-2 bg-brand-surface border border-brand-border rounded-xl p-4 sm:p-5 shadow-glow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-brand-white tracking-wide">
                 Volume e Penetração por País
@@ -124,18 +88,18 @@ export default function GlobalMapPage() {
                           setSelectedCountry(selectedCountry === g.countryCode ? null : g.countryCode)
                         }
                       >
-                        <td className="py-2.5 text-white font-medium flex items-center space-x-2">
+                        <td className="py-2.5 text-brand-white font-medium flex items-center space-x-2">
                           <span className="text-base leading-none select-none">
                             {getCountryFlag(g.countryCode)}
                           </span>
                           <span>{g.country}</span>
                         </td>
                         <td className="py-2.5 text-brand-secondary">{g.countryCode}</td>
-                        <td className="py-2.5 text-white font-bold">{g.eventsCount}</td>
+                        <td className="py-2.5 text-brand-white font-bold">{g.eventsCount}</td>
                         <td className="py-2.5">
                           <div className="flex items-center space-x-2">
                             <div className="w-24 bg-brand-black h-1.5 rounded-full overflow-hidden border border-brand-borderSubtle">
-                              <div style={{ width: `${g.percentage}%` }} className="bg-white h-full" />
+                              <div style={{ width: `${g.percentage}%` }} className="bg-brand-white h-full" />
                             </div>
                             <span className="text-brand-secondary">{g.percentage}%</span>
                           </div>
@@ -146,7 +110,7 @@ export default function GlobalMapPage() {
                               e.stopPropagation();
                               setSelectedCountry(selectedCountry === g.countryCode ? null : g.countryCode);
                             }}
-                            className="text-[11px] text-brand-muted hover:text-white transition"
+                            className="text-[11px] text-brand-muted hover:text-brand-white transition"
                           >
                             {selectedCountry === g.countryCode ? "Remover" : "Filtrar"}
                           </button>
@@ -160,7 +124,7 @@ export default function GlobalMapPage() {
           </div>
 
           {/* Infrastructure Health Status */}
-          <div className="bg-brand-surface border border-brand-border rounded-xl p-5 shadow-glow-sm space-y-4">
+          <div className="bg-brand-surface border border-brand-border rounded-xl p-4 sm:p-5 shadow-glow-sm space-y-4">
             <h3 className="text-sm font-semibold text-brand-white tracking-wide">
               Topologia de Borda (Edge PoPs)
             </h3>
@@ -168,32 +132,32 @@ export default function GlobalMapPage() {
             <div className="space-y-3 font-mono text-xs">
               <div className="p-3 rounded-lg bg-brand-black/50 border border-brand-borderSubtle space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-white font-bold">PoP GRU (São Paulo - Brasil)</span>
-                  <span className="text-[10px] text-emerald-400 font-bold">OPERACIONAL</span>
+                  <span className="text-brand-white font-bold">PoP GRU (São Paulo - Brasil)</span>
+                  <span className="text-[10px] text-emerald-500 font-bold">OPERACIONAL</span>
                 </div>
                 <div className="text-[11px] text-brand-secondary">Latência: 11ms • Borda Primária</div>
               </div>
 
               <div className="p-3 rounded-lg bg-brand-black/50 border border-brand-borderSubtle space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-white font-bold">PoP IAD (Ashburn - EUA)</span>
-                  <span className="text-[10px] text-emerald-400 font-bold">OPERACIONAL</span>
+                  <span className="text-brand-white font-bold">PoP IAD (Ashburn - EUA)</span>
+                  <span className="text-[10px] text-emerald-500 font-bold">OPERACIONAL</span>
                 </div>
                 <div className="text-[11px] text-brand-secondary">Latência: 16ms • Rota Global</div>
               </div>
 
               <div className="p-3 rounded-lg bg-brand-black/50 border border-brand-borderSubtle space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-white font-bold">PoP LHR (Londres - Reino Unido)</span>
-                  <span className="text-[10px] text-emerald-400 font-bold">OPERACIONAL</span>
+                  <span className="text-brand-white font-bold">PoP LHR (Londres - Reino Unido)</span>
+                  <span className="text-[10px] text-emerald-500 font-bold">OPERACIONAL</span>
                 </div>
                 <div className="text-[11px] text-brand-secondary">Latência: 18ms • Rota EMEA</div>
               </div>
 
               <div className="p-3 rounded-lg bg-brand-black/50 border border-brand-borderSubtle space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-white font-bold">PoP NRT (Tóquio - Japão)</span>
-                  <span className="text-[10px] text-emerald-400 font-bold">OPERACIONAL</span>
+                  <span className="text-brand-white font-bold">PoP NRT (Tóquio - Japão)</span>
+                  <span className="text-[10px] text-emerald-500 font-bold">OPERACIONAL</span>
                 </div>
                 <div className="text-[11px] text-brand-secondary">Latência: 22ms • Rota APAC</div>
               </div>

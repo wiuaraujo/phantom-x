@@ -43,6 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
   const [domainDropdown, setDomainDropdown] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const domainRef = useRef<HTMLDivElement>(null);
 
   const [greeting, setGreeting] = useState(() => getDashboardGreeting(session?.user));
 
@@ -55,13 +57,24 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   useEffect(() => {
-    const handleDocClick = (e: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+    const handleDocClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
         setShowUserMenu(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(target)) {
+        setShowNotifications(false);
+      }
+      if (domainRef.current && !domainRef.current.contains(target)) {
+        setDomainDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleDocClick);
-    return () => document.removeEventListener("mousedown", handleDocClick);
+    document.addEventListener("touchstart", handleDocClick);
+    return () => {
+      document.removeEventListener("mousedown", handleDocClick);
+      document.removeEventListener("touchstart", handleDocClick);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -70,11 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const handleAvatarClick = () => {
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      openDrawer();
-    } else {
-      setShowUserMenu(!showUserMenu);
-    }
+    setShowUserMenu((prev) => !prev);
   };
 
   return (
@@ -84,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({
         MAIN DASHBOARD HEADER (Responsivo e com formato de App)
         ========================================================================
       */}
-      <header className="h-14 sm:h-16 border-b border-brand-border bg-brand-black/90 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between z-20 shrink-0">
+      <header className="h-14 sm:h-16 border-b border-brand-border bg-brand-black/90 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between relative z-40 shrink-0">
         {/* Left: Mobile Menu Trigger + Page Title */}
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           <button
@@ -125,7 +134,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Desktop-only: Domain Selector Dropdown */}
           {domains && onSelectDomain && (
-            <div className="relative hidden lg:block">
+            <div ref={domainRef} className="relative hidden lg:block">
               <button
                 onClick={() => setDomainDropdown(!domainDropdown)}
                 className="flex items-center space-x-2 bg-brand-surface hover:bg-brand-hover border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono text-brand-white transition"
@@ -135,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               {domainDropdown && (
-                <div className="absolute right-0 mt-2 w-56 bg-brand-surface border border-brand-border rounded-lg shadow-glow py-1 z-50 font-mono text-xs">
+                <div className="absolute right-0 mt-2 w-56 bg-brand-surface border border-brand-border rounded-xl shadow-2xl py-1 z-50 font-mono text-xs">
                   {domains.map((dom) => (
                     <button
                       key={dom}
@@ -179,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
           <ThemeToggle />
 
           {/* Notification Bell */}
-          <div className="relative">
+          <div ref={notifRef} className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
               className="p-1.5 sm:p-2 rounded-lg bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-secondary hover:text-white transition relative"
@@ -190,23 +199,23 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-brand-surface border border-brand-border rounded-xl shadow-glow p-4 z-50 text-xs font-sans">
+              <div className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-24px)] bg-brand-surface border border-brand-border rounded-xl shadow-2xl p-4 z-50 text-xs font-sans">
                 <div className="flex items-center justify-between border-b border-brand-border pb-2 mb-3">
-                  <span className="font-semibold text-white">Eventos do Sistema</span>
+                  <span className="font-semibold text-brand-white">Eventos do Sistema</span>
                   <span className="text-[10px] text-brand-muted font-mono">3 recentes</span>
                 </div>
                 <div className="space-y-3 font-mono">
                   <div className="flex items-start space-x-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-white text-[11px]">Mitigação de Tráfego Automático</div>
+                      <div className="text-brand-white text-[11px] font-medium">Mitigação de Tráfego Automático</div>
                       <div className="text-brand-muted text-[10px]">12 requisições isoladas com sucesso</div>
                     </div>
                   </div>
                   <div className="flex items-start space-x-2">
                     <Radio className="w-4 h-4 text-brand-secondary shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-white text-[11px]">Novo pico de acessos (Brasil)</div>
+                      <div className="text-brand-white text-[11px] font-medium">Novo pico de acessos (Brasil)</div>
                       <div className="text-brand-muted text-[10px]">Latência média mantida em 18ms</div>
                     </div>
                   </div>
@@ -246,9 +255,9 @@ export const Header: React.FC<HeaderProps> = ({
               <ChevronDown className="w-3 h-3 text-brand-muted group-hover:text-brand-white hidden sm:block transition" />
             </div>
 
-            {/* Desktop User Profile Popover */}
+            {/* User Profile Popover (Works seamlessly on desktop & mobile) */}
             {showUserMenu && (
-              <div className="hidden lg:block absolute right-0 mt-2 w-64 bg-brand-surface border border-brand-border rounded-xl shadow-glow py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute right-0 mt-2 w-64 sm:w-72 bg-brand-surface border border-brand-border rounded-xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                 <div className="px-4 py-2.5 border-b border-brand-borderSubtle">
                   <div className="text-xs font-semibold text-brand-white flex items-center space-x-1.5">
                     <User className="w-3.5 h-3.5 text-brand-secondary" />
@@ -262,14 +271,32 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 </div>
 
-                <div className="p-1 space-y-0.5 text-xs font-sans">
+                <div className="p-1.5 space-y-0.5 text-xs font-sans">
                   <Link
-                    href="/dashboard/settings"
+                    href="/dashboard/settings?tab=profile"
                     onClick={() => setShowUserMenu(false)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-brand-secondary hover:text-brand-white hover:bg-brand-hover transition"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-brand-secondary hover:text-brand-white hover:bg-brand-hover transition font-medium"
+                  >
+                    <User className="w-3.5 h-3.5 text-brand-secondary" />
+                    <span>Configurações do Perfil</span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/settings?tab=cloaker"
+                    onClick={() => setShowUserMenu(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-brand-secondary hover:text-brand-white hover:bg-brand-hover transition font-medium"
                   >
                     <Settings className="w-3.5 h-3.5 text-brand-secondary" />
-                    <span>Configurações & Perfil</span>
+                    <span>Configurações do Cloaker</span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/settings?tab=worker"
+                    onClick={() => setShowUserMenu(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-brand-secondary hover:text-brand-white hover:bg-brand-hover transition font-medium"
+                  >
+                    <Radio className="w-3.5 h-3.5 text-brand-secondary" />
+                    <span>Cloudflare Worker &amp; Edge</span>
                   </Link>
 
                   <button

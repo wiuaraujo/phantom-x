@@ -302,28 +302,28 @@ export default function LiveMonitoringPage() {
             {/* 6-Layer Decision Breakdown */}
             <div className="p-4 rounded-xl bg-brand-black/60 border border-brand-border space-y-3">
               <div className="text-[11px] font-bold text-brand-white flex items-center space-x-1.5">
-                <Layers className="w-4 h-4 text-white" />
+                <Layers className="w-4 h-4 text-brand-secondary" />
                 <span>AVALIAÇÃO DAS 6 CAMADAS DE SEGURANÇA</span>
               </div>
 
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
                   <span className="text-brand-muted">1. Geo-Fencing:</span>
-                  <span className="text-white">
+                  <span className="text-brand-white font-medium">
                     {selectedEvent.countryCode} ({selectedEvent.country})
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
                   <span className="text-brand-muted">2. Filtro de Dispositivo:</span>
-                  <span className="text-white">
+                  <span className="text-brand-white font-medium">
                     {selectedEvent.device} ({selectedEvent.os})
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
                   <span className="text-brand-muted">3. ASN / Rede Datacenter:</span>
-                  <span className="text-white">
+                  <span className="text-brand-white font-medium">
                     {selectedEvent.asn ? `AS${selectedEvent.asn} — ` : ""}
                     {selectedEvent.asnOrg || "Residencial"}
                   </span>
@@ -331,21 +331,21 @@ export default function LiveMonitoringPage() {
 
                 <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
                   <span className="text-brand-muted">4. Assinatura Bot / Crawler:</span>
-                  <span className="text-white">
+                  <span className="text-brand-white font-medium">
                     {selectedEvent.isThreat ? "Detectado em Lista Negra" : "Nenhum padrão malicioso"}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
                   <span className="text-brand-muted">5. Token fbclid / UTM:</span>
-                  <span className="text-white">
+                  <span className="text-brand-white font-medium">
                     {selectedEvent.clickId ? "Válido / Presente" : "Sem Token de Campanha"}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
                   <span className="text-brand-muted">6. Threat Intel (ProxyCheck):</span>
-                  <span className="text-white">
+                  <span className="text-brand-white font-medium">
                     {selectedEvent.riskScore > 65 ? "Proxy / VPN Sinalizada" : "IP Residencial Limpo"}
                   </span>
                 </div>
@@ -356,14 +356,14 @@ export default function LiveMonitoringPage() {
             <div className="space-y-3 text-xs">
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                 <span className="text-brand-muted">Método de Entrega:</span>
-                <span className="text-white font-bold flex items-center space-x-1">
+                <span className="text-brand-white font-bold flex items-center space-x-1">
                   <Server className="w-3.5 h-3.5" />
                   <span>HTTP 200 OK (Proxy Reverso Transparente)</span>
                 </span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                 <span className="text-brand-muted">Decisão de Roteamento:</span>
-                <span className="text-white font-semibold">
+                <span className="text-brand-white font-semibold">
                   {selectedEvent.decision === "routed_offer" || !selectedEvent.isThreat
                     ? "OFERTA (Acesso Concedido)"
                     : "WHITEPAGE (Página Segura de Moderação)"}
@@ -372,7 +372,7 @@ export default function LiveMonitoringPage() {
               {selectedEvent.webglRenderer && (
                 <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                   <span className="text-brand-muted">GPU / WebGL:</span>
-                  <span className="text-white text-[11px] truncate max-w-[240px] font-mono">
+                  <span className="text-brand-white text-[11px] truncate max-w-[240px] font-mono">
                     {selectedEvent.webglRenderer}
                   </span>
                 </div>
@@ -380,38 +380,38 @@ export default function LiveMonitoringPage() {
               {selectedEvent.canvasHash && (
                 <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                   <span className="text-brand-muted">Canvas 2D Hash:</span>
-                  <span className="text-white font-mono text-[11px]">
+                  <span className="text-brand-white font-mono text-[11px]">
                     {selectedEvent.canvasHash}
                   </span>
                 </div>
               )}
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                 <span className="text-brand-muted">URL Entregue:</span>
-                <span className="text-white truncate max-w-[240px]">
+                <span className="text-brand-white truncate max-w-[240px]">
                   {selectedEvent.routedTo || selectedEvent.targetUrl}
                 </span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                 <span className="text-brand-muted">Cache Headers:</span>
-                <span className="text-white font-mono text-[10px]">
+                <span className="text-brand-white font-mono text-[10px]">
                   no-store, no-cache, max-age=0
                 </span>
               </div>
               {selectedEvent.isThreat && (
                 <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                   <span className="text-brand-muted">Robots Header:</span>
-                  <span className="text-white font-mono text-[10px]">
+                  <span className="text-brand-white font-mono text-[10px]">
                     X-Robots-Tag: noindex, nofollow
                   </span>
                 </div>
               )}
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                 <span className="text-brand-muted">IP Mascarado:</span>
-                <span className="text-white">{selectedEvent.ipMasked}</span>
+                <span className="text-brand-white font-mono">{selectedEvent.ipMasked}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                 <span className="text-brand-muted">Localização:</span>
-                <span className="text-white flex items-center space-x-1.5">
+                <span className="text-brand-white flex items-center space-x-1.5">
                   <span className="text-sm select-none">{getCountryFlag(selectedEvent.countryCode)}</span>
                   <span>
                     {selectedEvent.city}
@@ -423,11 +423,11 @@ export default function LiveMonitoringPage() {
               </div>
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                 <span className="text-brand-muted">User Agent:</span>
-                <span className="text-white truncate max-w-[240px]">{selectedEvent.browser}</span>
+                <span className="text-brand-white truncate max-w-[240px]">{selectedEvent.browser}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
                 <span className="text-brand-muted">Latência de Borda:</span>
-                <span className="text-white">{selectedEvent.latencyMs}ms</span>
+                <span className="text-brand-white font-mono">{selectedEvent.latencyMs}ms</span>
               </div>
             </div>
           </div>

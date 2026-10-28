@@ -279,14 +279,14 @@ export default function CampaignsPage() {
           <div className="w-full max-w-xl bg-brand-surface border border-brand-border rounded-2xl p-5 sm:p-6 shadow-glow font-mono my-auto">
             <div className="flex items-center justify-between border-b border-brand-border pb-3 mb-5">
               <div>
-                <h3 className="text-base font-bold text-white">Criar Nova Campanha Cloaker</h3>
+                <h3 className="text-base font-bold text-brand-white">Criar Nova Campanha Cloaker</h3>
                 <p className="text-[11px] text-brand-secondary">
                   Configure o destino de conversão e a página segura de moderação
                 </p>
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-brand-secondary hover:text-white"
+                className="text-brand-secondary hover:text-brand-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -301,7 +301,7 @@ export default function CampaignsPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: Meta Ads — Escala Q4"
                   required
-                  className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-white transition"
+                  className="w-full px-3 py-2 bg-white dark:bg-brand-black border border-brand-border rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-white transition"
                 />
               </div>
 
@@ -311,7 +311,7 @@ export default function CampaignsPage() {
                   <select
                     value={domainId}
                     onChange={(e) => setDomainId(e.target.value)}
-                    className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white focus:outline-none focus:border-white transition"
+                    className="w-full px-3 py-2 bg-white dark:bg-brand-black border border-brand-border rounded-lg text-neutral-900 dark:text-white focus:outline-none focus:border-white transition"
                   >
                     {domains.map((dom) => (
                       <option key={dom.id} value={dom.id}>
@@ -326,7 +326,7 @@ export default function CampaignsPage() {
                   <select
                     value={mode}
                     onChange={(e) => setMode(e.target.value as CloakerMode)}
-                    className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white focus:outline-none focus:border-white transition"
+                    className="w-full px-3 py-2 bg-white dark:bg-brand-black border border-brand-border rounded-lg text-neutral-900 dark:text-white focus:outline-none focus:border-white transition"
                   >
                     <option value="AUTOMATICO">Automático (Filtro 6 Camadas)</option>
                     <option value="SO_WHITEPAGE">Apenas Whitepage (Moderação)</option>
@@ -345,7 +345,7 @@ export default function CampaignsPage() {
                   onChange={(e) => setOfertaUrl(e.target.value)}
                   placeholder="https://minhaloja.com/checkout-black"
                   required
-                  className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-white transition"
+                  className="w-full px-3 py-2 bg-white dark:bg-brand-black border border-brand-border rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-white transition"
                 />
                 <span className="text-[10px] text-brand-muted mt-0.5 block">
                   Entregue transparentemente via Proxy Reverso para tráfego humano aprovado.
@@ -362,7 +362,7 @@ export default function CampaignsPage() {
                   onChange={(e) => setWhitepageUrl(e.target.value)}
                   placeholder="https://minhaloja.com/artigo-informativo"
                   required
-                  className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-white transition"
+                  className="w-full px-3 py-2 bg-white dark:bg-brand-black border border-brand-border rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-white transition"
                 />
                 <span className="text-[10px] text-brand-muted mt-0.5 block">
                   Entregue para robôs, crawlers de moderação e acessos fora dos países autorizados.

@@ -156,7 +156,23 @@ html.light .bg-neutral-800,
 html.light .bg-zinc-950,
 html.light .bg-zinc-900,
 html.light .bg-zinc-800,
-html.light .dark-surface {
+html.light .dark-surface,
+html.light button.bg-neutral-900,
+html.light button.bg-black,
+html.light a.bg-neutral-900,
+html.light a.bg-black {
+  color: #ffffff !important;
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  color: #0f0f12 !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
   color: #ffffff !important;
 }
 

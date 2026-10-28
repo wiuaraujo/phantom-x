@@ -57,7 +57,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
           return (
             <div
               key={i}
-              className="bg-brand-surface border border-brand-border rounded-xl p-3.5 transition-all hover:border-brand-borderHighlight hover:shadow-sm flex flex-col justify-between"
+              className="bg-brand-surface border border-brand-border rounded-xl p-3.5 transition-all hover:border-brand-borderHighlight hover:shadow-sm flex flex-col justify-between min-w-0 overflow-hidden"
             >
               <div className="flex items-center justify-between text-brand-secondary mb-2">
                 <span className="text-[11px] font-medium tracking-wide">{card.title}</span>
@@ -118,7 +118,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
         return (
           <div
             key={i}
-            className={`bg-brand-surface border border-brand-border rounded-xl p-3 sm:p-4 transition-all hover:border-brand-borderHighlight hover:shadow-sm flex flex-col justify-between ${
+            className={`bg-brand-surface border border-brand-border rounded-xl p-3 sm:p-4 transition-all hover:border-brand-borderHighlight hover:shadow-sm flex flex-col justify-between min-w-0 overflow-hidden ${
               isLastCard ? "col-span-2 sm:col-span-2 lg:col-span-1" : ""
             }`}
           >
