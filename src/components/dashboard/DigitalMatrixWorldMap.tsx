@@ -7,6 +7,7 @@ import {
   MATRIX_ROWS,
   WORLD_MATRIX_DOTS,
   MATRIX_TECH_HUBS,
+  TechHub,
 } from "./worldDotData";
 import { ZoomIn, ZoomOut, RotateCcw, Play, Pause, Globe } from "lucide-react";
 import { getCountryFlag } from "@/lib/geoFlags";
@@ -27,7 +28,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
   geoData = [],
   selectedCountry = null,
   onSelectCountry,
-  className = "min-h-[340px] h-[340px] sm:h-[440px] md:h-[500px] w-full",
+  className = "min-h-[380px] h-[380px] sm:h-[480px] md:h-[560px] w-full",
   showControls = true,
   interactive = true,
   compact = false,
@@ -38,14 +39,14 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
   // 360-degree rotation and zoom state
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isAutoRotate, setIsAutoRotate] = useState(true);
+  const [isAutoRotate, setIsAutoRotate] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Refs for smooth 60fps interaction without React re-render lag
+  // High-performance refs for 60 FPS animation loop
   const rotationRef = useRef(0);
   const zoomRef = useRef(1);
   const panRef = useRef({ x: 0, y: 0 });
-  const isAutoRotateRef = useRef(true);
+  const isAutoRotateRef = useRef(false);
   const isDraggingRef = useRef(false);
 
   const dragStartRef = useRef({
@@ -83,7 +84,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     isDraggingRef.current = isDragging;
   }, [isDragging]);
 
-  // Dimension tracking via ResizeObserver
+  // Track container dimensions via ResizeObserver
   const [, setDimensions] = useState({ w: 0, h: 0 });
   useEffect(() => {
     const container = containerRef.current;
@@ -102,28 +103,17 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  const [hoveredNode, setHoveredNode] = useState<{
-    name: string;
-    code: string;
-    eventsCount: number;
-    percentage: number;
-    lat: number;
-    lon: number;
-    state?: string;
-    stateCode?: string;
-    flag?: string;
-  } | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<TechHub | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
-  // Check if account has real/active configured traffic
-  // "os pop-ups não devem estar. Os pop-ups e os países só devem estar quando uma conta estiver configurada"
+  // Check if account has active traffic configured
   const hasConfiguredTraffic = useMemo(() => {
     const hasGeo = geoData && geoData.some((g) => g.eventsCount > 0);
     const hasEvts = events && events.length > 0;
     return Boolean(hasGeo || hasEvts);
   }, [geoData, events]);
 
-  // Only active nodes with events appear on the map (zero dummy pins on fresh/unconfigured accounts)
+  // Active tech hubs with event stats
   const activeHubNodes = useMemo(() => {
     if (!hasConfiguredTraffic) return [];
 
@@ -141,26 +131,21 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     }).filter((h) => h.hasActivity || selectedCountry === h.code);
   }, [geoData, hasConfiguredTraffic, selectedCountry]);
 
-  // Helper for 360-degree Oval (Mollweide/Robinson-style) projection
+  // 360-degree cylindrical projection position calculator
   const getProjectedPoint = useCallback(
-    (col: number, row: number, rot: number, cx: number, cy: number, a: number, b: number) => {
-      // Normalized latitude v: [-1, 1] from North Pole (row 0) to South Pole (row 51)
-      const v = (row - 25.5) / 25.5;
-      // Elliptical curvature width factor (oval map): widest at equator (1.0), tapering near poles (0.54)
-      const wFactor = Math.sqrt(Math.max(0.12, 1 - Math.pow(v * 0.84, 2)));
-
-      // 360-degree horizontal wrapping: angle relative to center meridian
+    (col: number, row: number, rot: number, cx: number, cy: number, cellW: number, cellH: number, startY: number) => {
+      // 360-degree horizontal wrapping
       const diff = (((col - rot) % MATRIX_COLS) + MATRIX_COLS) % MATRIX_COLS - MATRIX_COLS / 2;
       const u = diff / (MATRIX_COLS / 2); // [-1, 1]
 
-      const x = cx + u * a * wFactor;
-      const y = cy + v * b;
-      return { x, y, u, v, wFactor };
+      const px = cx + diff * cellW;
+      const py = startY + row * cellH;
+      return { x: px, y: py, u };
     },
     []
   );
 
-  // Wheel zoom handler
+  // Wheel zoom listener
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -179,7 +164,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     };
   }, [interactive]);
 
-  // Main 360° Oval Vector Animation Loop (60 FPS, 0% lag)
+  // Main Cyber-Stipple Vector Animation Loop (60 FPS)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -188,18 +173,20 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
 
     let animId: number;
     let pulseCycle = 0;
+    let particleOffset = 0;
 
     const render = () => {
-      pulseCycle = (pulseCycle + 0.045) % (Math.PI * 2);
+      pulseCycle = (pulseCycle + 0.035) % (Math.PI * 2);
+      particleOffset = (particleOffset + 0.008) % 1;
 
-      // Auto-rotation when not dragging
+      // Gentle auto-rotation if active
       if (isAutoRotateRef.current && !isDraggingRef.current) {
-        rotationRef.current = (rotationRef.current + 0.038) % MATRIX_COLS;
+        rotationRef.current = (rotationRef.current + 0.04) % MATRIX_COLS;
       }
 
       const dpr = window.devicePixelRatio || 1;
       const w = canvas.parentElement?.clientWidth || 900;
-      const h = canvas.parentElement?.clientHeight || (compact ? 360 : 500);
+      const h = canvas.parentElement?.clientHeight || (compact ? 380 : 540);
 
       if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
         canvas.width = Math.round(w * dpr);
@@ -209,24 +196,24 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       ctx.save();
       ctx.scale(dpr, dpr);
 
-      // 1. Deep Obsidian / Titanium Radial Gradient Background
+      // 1. Deep Midnight Cyber Background with Ambient Vignette
       const isLight = document.documentElement.classList.contains("light");
-      const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 25, w / 2, h / 2, Math.max(w, h) * 0.75);
+      const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, Math.max(w, h) * 0.8);
       if (isLight) {
         bgGrad.addColorStop(0, "#ffffff");
-        bgGrad.addColorStop(0.4, "#fafafa");
-        bgGrad.addColorStop(0.75, "#f4f4f5");
+        bgGrad.addColorStop(0.5, "#fafafa");
+        bgGrad.addColorStop(0.85, "#f4f4f6");
         bgGrad.addColorStop(1, "#ededf0");
       } else {
-        bgGrad.addColorStop(0, "#141414");
-        bgGrad.addColorStop(0.4, "#0d0d0d");
-        bgGrad.addColorStop(0.75, "#080808");
-        bgGrad.addColorStop(1, "#040404");
+        bgGrad.addColorStop(0, "#0c0d12");
+        bgGrad.addColorStop(0.45, "#07080b");
+        bgGrad.addColorStop(0.85, "#040406");
+        bgGrad.addColorStop(1, "#020203");
       }
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, w, h);
 
-      // 2. Compute 360° Oval Dimensions & Transforms
+      // 2. Compute Canvas Bounds & Transforms
       const currentZoom = zoomRef.current;
       const currentPan = panRef.current;
       const currentRot = rotationRef.current;
@@ -234,149 +221,260 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       const cx = w / 2 + currentPan.x;
       const cy = h / 2 + currentPan.y;
 
-      const usableW = Math.min(w * 0.92, h * 1.95) * currentZoom;
-      const usableH = (usableW / 2.05);
-      const a = usableW / 2; // Semi-major axis
-      const b = usableH / 2; // Semi-minor axis
+      const usableW = Math.min(w * 0.94, h * 2.05) * currentZoom;
+      const usableH = usableW * (MATRIX_ROWS / MATRIX_COLS);
+      const cellW = usableW / MATRIX_COLS;
+      const cellH = usableH / MATRIX_ROWS;
+      const startY = cy - usableH / 2;
 
-      // 3. Draw Outer Oval Frame Silhouette (Robinson/Mollweide world map horizon)
+      // 3. Subtle Cyber Coordinate Horizon & Grid Lines
       ctx.save();
+      ctx.setLineDash([2, 6]);
+      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.06)";
+      ctx.lineWidth = 1;
+
+      // Equator line
+      const equatorY = startY + (MATRIX_ROWS / 2) * cellH;
       ctx.beginPath();
-      ctx.ellipse(cx, cy, a * 1.02, b * 1.02, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.14)";
-      ctx.lineWidth = 1.2;
+      ctx.moveTo(cx - usableW / 2, equatorY);
+      ctx.lineTo(cx + usableW / 2, equatorY);
       ctx.stroke();
 
-      // Subtle Equator & Prime Meridian Coordinate Graticules
-      ctx.beginPath();
-      ctx.setLineDash([3, 5]);
-      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.06)" : "rgba(255, 255, 255, 0.07)";
-      ctx.lineWidth = 1;
-      // Equator
-      ctx.moveTo(cx - a, cy);
-      ctx.lineTo(cx + a, cy);
-      // Central meridian
-      ctx.moveTo(cx, cy - b);
-      ctx.lineTo(cx, cy + b);
-      ctx.stroke();
+      // Meridians
+      for (let m = -2; m <= 2; m++) {
+        const mx = cx + m * (usableW / 4);
+        ctx.beginPath();
+        ctx.moveTo(mx, startY);
+        ctx.lineTo(mx, startY + usableH);
+        ctx.stroke();
+      }
       ctx.setLineDash([]);
       ctx.restore();
 
-      // 4. Batch Draw 1,650 Continental Dots in 360° Oval Projection
-      // Fast single GPU path fill: 0.04ms execution, razor-sharp vector precision
-      ctx.fillStyle = isLight ? "rgba(20, 20, 24, 0.74)" : "rgba(238, 244, 255, 0.75)";
-      ctx.beginPath();
+      // 4. Batch Draw 6,105 Stipple Halftone Dots (Exact reference style!)
+      const baseDotSize = Math.max(1.3, Math.min(cellW * 0.72, cellH * 0.72));
 
-      const baseDotSize = Math.max(1.8, Math.min(usableW / 126, usableH / 52) * 0.72);
+      // Draw standard continent dots in single high-performance path
+      ctx.fillStyle = isLight ? "rgba(24, 24, 27, 0.75)" : "rgba(240, 244, 255, 0.78)";
+      ctx.beginPath();
 
       for (let i = 0; i < WORLD_MATRIX_DOTS.length; i++) {
         const [col, row] = WORLD_MATRIX_DOTS[i];
-        const pt = getProjectedPoint(col, row, currentRot, cx, cy, a, b);
+        const pt = getProjectedPoint(col, row, currentRot, cx, cy, cellW, cellH, startY);
 
-        // Limb curvature compression: subtle tapering near outer oval horizon
-        const limbScale = Math.max(0.45, 1 - Math.abs(pt.u) * 0.35);
-        const dotSize = baseDotSize * pt.wFactor * limbScale;
-
-        ctx.rect(pt.x - dotSize / 2, pt.y - dotSize / 2, dotSize, dotSize);
+        // Render dot if within visible horizontal window (with margin)
+        if (pt.x >= -20 && pt.x <= w + 20) {
+          ctx.rect(pt.x - baseDotSize / 2, pt.y - baseDotSize / 2, baseDotSize, baseDotSize);
+        }
       }
       ctx.fill();
 
-      // 5. Active Nodes & Connections (ONLY when account is configured / has active traffic)
-      // "os pop-ups não devem estar. Os pop-ups e os países só devem estar quando uma conta estiver configurada"
+      // 5. Active Traffic Connections & Cyber HUD Overlays (ONLY when account has traffic)
       if (hasConfiguredTraffic && activeHubNodes.length > 0) {
-        // Active Arcs between nodes with traffic
-        ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.22)" : "rgba(255, 255, 255, 0.25)";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([2, 4]);
-
+        // A. Sweeping Bezier Connection Arcs
         const keyArcs = [
-          { from: "São Paulo", to: "Nova York" },
           { from: "Nova York", to: "Londres" },
+          { from: "Nova York", to: "São Paulo" },
           { from: "Londres", to: "Frankfurt" },
-          { from: "Frankfurt", to: "Tóquio" },
-          { from: "Tóquio", to: "Singapura" },
-          { from: "Lisboa", to: "São Paulo" },
+          { from: "Frankfurt", to: "Dubai" },
+          { from: "Dubai", to: "Mumbai" },
+          { from: "Mumbai", to: "Singapura" },
+          { from: "Singapura", to: "Tóquio" },
+          { from: "Tóquio", to: "Sydney" },
+          { from: "Frankfurt", to: "Cidade do Cabo" },
+          { from: "San Francisco", to: "Tóquio" },
         ];
 
         keyArcs.forEach(({ from, to }) => {
-          const h1 = activeHubNodes.find((h) => h.name === from && h.hasActivity);
-          const h2 = activeHubNodes.find((h) => h.name === to && h.hasActivity);
+          const h1 = activeHubNodes.find((h) => h.name === from);
+          const h2 = activeHubNodes.find((h) => h.name === to);
           if (h1 && h2) {
-            const pt1 = getProjectedPoint(h1.col, h1.row, currentRot, cx, cy, a, b);
-            const pt2 = getProjectedPoint(h2.col, h2.row, currentRot, cx, cy, a, b);
+            const pt1 = getProjectedPoint(h1.col, h1.row, currentRot, cx, cy, cellW, cellH, startY);
+            const pt2 = getProjectedPoint(h2.col, h2.row, currentRot, cx, cy, cellW, cellH, startY);
 
-            // Only draw arc if both nodes are visible on the front face of the 360° projection
-            if (Math.abs(pt1.u) < 0.92 && Math.abs(pt2.u) < 0.92) {
-              const midX = (pt1.x + pt2.x) / 2;
-              const midY = Math.min(pt1.y, pt2.y) - Math.abs(pt2.x - pt1.x) * 0.18;
+            // Arc curve
+            const midX = (pt1.x + pt2.x) / 2;
+            const midY = Math.min(pt1.y, pt2.y) - Math.abs(pt2.x - pt1.x) * 0.22;
 
-              ctx.beginPath();
-              ctx.moveTo(pt1.x, pt1.y);
-              ctx.quadraticCurveTo(midX, midY, pt2.x, pt2.y);
-              ctx.stroke();
-            }
-          }
-        });
-        ctx.setLineDash([]);
-
-        // Render Active Node Pulse Rings
-        activeHubNodes.forEach((hub) => {
-          if (!hub.hasActivity && selectedCountry !== hub.code) return;
-
-          const pt = getProjectedPoint(hub.col, hub.row, currentRot, cx, cy, a, b);
-          if (Math.abs(pt.u) > 0.94) return; // Hidden on far limbs
-
-          const isSelected = selectedCountry === hub.code;
-
-          // Center glowing dot
-          ctx.fillStyle = isSelected ? "#ffffff" : isLight ? "#0f0f12" : "#f1f5f9";
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, baseDotSize * 0.9, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Radar wave pulse ring
-          const wave = (Math.sin(pulseCycle + hub.row * 0.6) + 1) / 2;
-          const pulseRadius = baseDotSize * 1.4 + wave * (baseDotSize * 3.4);
-          const opacity = Math.max(0, 0.75 - wave * 0.75);
-
-          ctx.strokeStyle = isSelected
-            ? `rgba(255, 255, 255, ${opacity + 0.25})`
-            : isLight
-            ? `rgba(15, 15, 18, ${opacity * 0.7})`
-            : `rgba(255, 255, 255, ${opacity * 0.75})`;
-          ctx.lineWidth = isSelected ? 1.5 : 1;
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, pulseRadius, 0, Math.PI * 2);
-          ctx.stroke();
-
-          // Show badge ONLY if explicitly selected by the user (no clutter)
-          if (isSelected) {
-            const labelText = `${hub.flag} ${hub.name} [${hub.stateCode || hub.code}]`;
-            ctx.font = "bold 9px Poppins, sans-serif";
-            const textMetrics = ctx.measureText(labelText);
-            const badgeW = textMetrics.width + 10;
-            const badgeH = 16;
-            const badgeX = pt.x + baseDotSize + 4;
-            const badgeY = pt.y - 8;
-
-            ctx.fillStyle = isLight ? "rgba(15, 15, 18, 0.92)" : "rgba(255, 255, 255, 0.95)";
-            ctx.strokeStyle = isLight ? "#000000" : "#ffffff";
+            ctx.save();
+            ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.25)" : "rgba(255, 255, 255, 0.3)";
             ctx.lineWidth = 1;
+            ctx.setLineDash([3, 4]);
 
             ctx.beginPath();
-            if (ctx.roundRect) {
-              ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 3);
-            } else {
-              ctx.rect(badgeX, badgeY, badgeW, badgeH);
-            }
-            ctx.fill();
+            ctx.moveTo(pt1.x, pt1.y);
+            ctx.quadraticCurveTo(midX, midY, pt2.x, pt2.y);
             ctx.stroke();
 
-            ctx.fillStyle = isLight ? "#ffffff" : "#000000";
-            ctx.fillText(labelText, badgeX + 5, badgeY + 11);
+            // Traveling Light Pulse along Arc
+            ctx.setLineDash([]);
+            const t = particleOffset;
+            const px = Math.pow(1 - t, 2) * pt1.x + 2 * (1 - t) * t * midX + Math.pow(t, 2) * pt2.x;
+            const py = Math.pow(1 - t, 2) * pt1.y + 2 * (1 - t) * t * midY + Math.pow(t, 2) * pt2.y;
+
+            ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
+            ctx.beginPath();
+            ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+          }
+        });
+
+        // B. Target Nodes with Concentric Sonar Rings & Callout Tags
+        activeHubNodes.forEach((hub, idx) => {
+          const pt = getProjectedPoint(hub.col, hub.row, currentRot, cx, cy, cellW, cellH, startY);
+          if (pt.x < -60 || pt.x > w + 60) return;
+
+          const isSelected = selectedCountry === hub.code;
+          const nodeColor = hub.color || (isLight ? "#0f0f12" : "#ffffff");
+
+          // 1. Center glowing dot
+          ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 2. Inner ring
+          ctx.strokeStyle = nodeColor;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 6.5, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 3. Concentric Expanding Radar Waves
+          const wave1 = (Math.sin(pulseCycle + idx * 0.8) + 1) / 2;
+          const wave2 = (Math.sin(pulseCycle + idx * 0.8 + Math.PI / 2) + 1) / 2;
+
+          ctx.strokeStyle = isLight
+            ? `rgba(15, 15, 18, ${Math.max(0, 0.6 - wave1 * 0.6)})`
+            : `rgba(255, 255, 255, ${Math.max(0, 0.65 - wave1 * 0.65)})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 8 + wave1 * 14, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.strokeStyle = isLight
+            ? `rgba(15, 15, 18, ${Math.max(0, 0.45 - wave2 * 0.45)})`
+            : `rgba(255, 255, 255, ${Math.max(0, 0.5 - wave2 * 0.5)})`;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 14 + wave2 * 18, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 4. Cyber HUD Callout Card with Leader Line (Exact Reference Style!)
+          // Draw callout for selected country or key active hubs
+          const shouldShowCard = isSelected || idx % 2 === 0 || w > 1024;
+          if (shouldShowCard && w >= 640) {
+            const cardW = 148;
+            const cardH = 50;
+            const isLeft = pt.x > w * 0.65;
+            const cardX = isLeft ? pt.x - cardW - 35 : pt.x + 35;
+            const cardY = pt.y - (idx % 2 === 0 ? 30 : -10);
+
+            // Angled Leader Line from node to card
+            const elbowX = isLeft ? cardX + cardW + 12 : cardX - 12;
+            const elbowY = cardY + 22;
+
+            ctx.save();
+            ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255, 255, 255, 0.45)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pt.x, pt.y);
+            ctx.lineTo(elbowX, elbowY);
+            ctx.lineTo(isLeft ? cardX + cardW : cardX, elbowY);
+            ctx.stroke();
+
+            // Tiny anchor dot at node end of leader
+            ctx.fillStyle = nodeColor;
+            ctx.beginPath();
+            ctx.arc(elbowX, elbowY, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Callout Card Box
+            ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.94)" : "rgba(8, 9, 13, 0.92)";
+            ctx.strokeStyle = isSelected
+              ? (isLight ? "#000000" : "#ffffff")
+              : (isLight ? "rgba(0, 0, 0, 0.22)" : "rgba(255, 255, 255, 0.28)");
+            ctx.lineWidth = 1;
+
+            if (ctx.roundRect) {
+              ctx.beginPath();
+              ctx.roundRect(cardX, cardY, cardW, cardH, 4);
+              ctx.fill();
+              ctx.stroke();
+            } else {
+              ctx.fillRect(cardX, cardY, cardW, cardH);
+              ctx.strokeRect(cardX, cardY, cardW, cardH);
+            }
+
+            // Flag badge tab on top-right of card
+            const flag = hub.flag || getCountryFlag(hub.code);
+            ctx.font = "11px sans-serif";
+            ctx.fillText(flag, isLeft ? cardX + 6 : cardX + cardW - 20, cardY + 14);
+
+            // Monospace Cyber Details
+            ctx.font = "bold 8.5px 'JetBrains Mono', monospace";
+            ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
+            ctx.fillText(`ORIGIN: IP ${hub.ip || "192.168.***"}`, cardX + (isLeft ? 24 : 8), cardY + 13);
+
+            ctx.font = "8px 'JetBrains Mono', monospace";
+            ctx.fillStyle = isLight ? "#52525b" : "#a1a1aa";
+            ctx.fillText(`DESTINATION: [${hub.name.toUpperCase()}]`, cardX + 8, cardY + 25);
+            ctx.fillText(`STATUS: PROXY 200 OK`, cardX + 8, cardY + 35);
+
+            ctx.fillStyle = isLight ? "#047857" : "#34d399";
+            ctx.fillText(`TRAFFIC: ENCRYPTED`, cardX + 8, cardY + 45);
+
+            ctx.restore();
           }
         });
       }
+
+      // 6. Corner HUD Overlays (Exact replica of Reference Image)
+      // A. Bottom-Left Terminal Ingestion Box
+      ctx.save();
+      const terminalW = 220;
+      const terminalH = 68;
+      const termX = 14;
+      const termY = h - terminalH - 14;
+
+      ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.9)" : "rgba(6, 7, 10, 0.88)";
+      ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.18)";
+      ctx.lineWidth = 1;
+
+      if (ctx.roundRect) {
+        ctx.beginPath();
+        ctx.roundRect(termX, termY, terminalW, terminalH, 4);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.fillRect(termX, termY, terminalW, terminalH);
+        ctx.strokeRect(termX, termY, terminalW, terminalH);
+      }
+
+      ctx.font = "bold 8.5px 'JetBrains Mono', monospace";
+      ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
+      ctx.fillText("PHANTOM-X EDGE AUDITOR V2.4", termX + 8, termY + 14);
+
+      ctx.font = "8px 'JetBrains Mono', monospace";
+      ctx.fillStyle = isLight ? "#52525b" : "#a1a1aa";
+      ctx.fillText("ORIGIN: IP 177.136.24.*** [SP/BR]", termX + 8, termY + 27);
+      ctx.fillText("DESTINATION: PROXY 200 OK (DIRECT)", termX + 8, termY + 39);
+      ctx.fillText("ASNS BLOQUEADOS: 14 REDES (META/AWS)", termX + 8, termY + 51);
+
+      ctx.fillStyle = isLight ? "#047857" : "#34d399";
+      ctx.fillText("STATUS: ZERO REDIRECTS • < 14ms", termX + 8, termY + 62);
+      ctx.restore();
+
+      // B. Top-Right Telemetry Coordinates Metadata
+      ctx.save();
+      ctx.font = "8px 'JetBrains Mono', monospace";
+      ctx.fillStyle = isLight ? "rgba(15, 15, 18, 0.65)" : "rgba(255, 255, 255, 0.55)";
+      ctx.textAlign = "right";
+      ctx.fillText("CLUSTER: EDGE-PHANTOM-01", w - 14, 20);
+      ctx.fillText("MODE: REVERSE PROXY 200 OK", w - 14, 32);
+      ctx.fillText("ROTATION: 360° CYLINDRICAL WRAP", w - 14, 44);
+      ctx.restore();
 
       ctx.restore();
       animId = requestAnimationFrame(render);
@@ -415,14 +513,14 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         dragStartRef.current.moved = true;
       }
 
-      // Horizontal dragging rotates 360 degrees smoothly
+      // Horizontal dragging smoothly wraps around 360 degrees
       const w = canvas.clientWidth || 900;
-      const rotDelta = (dx / (w * 0.7)) * MATRIX_COLS;
+      const rotDelta = (dx / (w * 0.8)) * MATRIX_COLS;
       rotationRef.current =
         (((dragStartRef.current.startRotation - rotDelta) % MATRIX_COLS) + MATRIX_COLS) %
         MATRIX_COLS;
 
-      // Vertical dragging provides subtle pan
+      // Vertical subtle pan
       setPan({
         x: dragStartRef.current.startPanX,
         y: dragStartRef.current.startPanY + dy * 0.35,
@@ -430,7 +528,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       return;
     }
 
-    // Hover inspection on active nodes (only if account has configured traffic)
+    // Hover inspection on active nodes
     if (!hasConfiguredTraffic || activeHubNodes.length === 0) {
       if (hoveredNode) setHoveredNode(null);
       return;
@@ -444,20 +542,20 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     const h = canvas.clientHeight;
     const cx = w / 2 + pan.x;
     const cy = h / 2 + pan.y;
-    const usableW = Math.min(w * 0.92, h * 1.95) * zoom;
-    const usableH = (usableW / 2.05);
-    const a = usableW / 2;
-    const b = usableH / 2;
 
-    let matched: any = null;
+    const usableW = Math.min(w * 0.94, h * 2.05) * zoom;
+    const usableH = usableW * (MATRIX_ROWS / MATRIX_COLS);
+    const cellW = usableW / MATRIX_COLS;
+    const cellH = usableH / MATRIX_ROWS;
+    const startY = cy - usableH / 2;
+
+    let matched: TechHub | null = null;
     for (const hub of activeHubNodes) {
-      const pt = getProjectedPoint(hub.col, hub.row, rotationRef.current, cx, cy, a, b);
-      if (Math.abs(pt.u) < 0.92) {
-        const dist = Math.hypot(mouseX - pt.x, mouseY - pt.y);
-        if (dist < 18) {
-          matched = hub;
-          break;
-        }
+      const pt = getProjectedPoint(hub.col, hub.row, rotationRef.current, cx, cy, cellW, cellH, startY);
+      const dist = Math.hypot(mouseX - pt.x, mouseY - pt.y);
+      if (dist < 22) {
+        matched = hub;
+        break;
       }
     }
 
@@ -548,7 +646,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       const touch = e.touches[0];
       const dx = touch.clientX - touchStartRef.current.x;
       const w = canvas.clientWidth || 900;
-      const rotDelta = (dx / (w * 0.7)) * MATRIX_COLS;
+      const rotDelta = (dx / (w * 0.8)) * MATRIX_COLS;
       const startRot = touchStartRef.current.startRot ?? 0;
       rotationRef.current = (((startRot - rotDelta) % MATRIX_COLS) + MATRIX_COLS) % MATRIX_COLS;
     }
@@ -563,7 +661,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     <div
       ref={containerRef}
       style={{ touchAction: "none", overscrollBehavior: "contain" }}
-      className={`relative w-full h-full bg-brand-black overflow-hidden select-none font-sans ${className}`}
+      className={`relative w-full h-full bg-[#050608] overflow-hidden select-none font-sans ${className}`}
     >
       <canvas
         ref={canvasRef}
@@ -577,14 +675,14 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         onTouchEnd={handleTouchEnd}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
-        className={`w-full h-full bg-brand-black ${
+        className={`w-full h-full bg-[#050608] ${
           interactive ? "cursor-grab active:cursor-grabbing" : ""
         }`}
       />
 
       {/* 360° Controls Overlay */}
       {showControls && (
-        <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-4 flex items-center space-x-1 bg-brand-surface/90 backdrop-blur-md border border-brand-border p-1 rounded-lg shadow-glow-sm z-20">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center space-x-1 bg-brand-surface/90 backdrop-blur-md border border-brand-border p-1 rounded-lg shadow-glow-sm z-20">
           <button
             onClick={() => setZoom((z) => Math.min(z + 0.3, 3.5))}
             title="Aproximar (+)"
@@ -624,7 +722,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       )}
 
       {/* Bottom Telemetry Legend Bar */}
-      <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-4 flex items-center space-x-1.5 sm:space-x-3 bg-brand-surface/85 backdrop-blur-md border border-brand-border px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs text-brand-secondary font-sans z-20 max-w-[65%] sm:max-w-none truncate">
+      <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-4 flex items-center space-x-1.5 sm:space-x-3 bg-brand-surface/85 backdrop-blur-md border border-brand-border px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs text-brand-secondary font-sans z-20 max-w-[65%] sm:max-w-none truncate">
         <div className="flex items-center space-x-1.5 shrink-0">
           <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white animate-pulse shrink-0" />
           <span className="text-white font-medium text-[10px] sm:text-[11px] truncate">Matriz Global 360º</span>
@@ -633,54 +731,6 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
           <span>Arraste para girar 360º • Scroll para zoom</span>
         </div>
       </div>
-
-      {/* Interactive Tooltip on Node Hover / Touch (Active only when node is touched/hovered) */}
-      {hoveredNode && hasConfiguredTraffic && (
-        <div
-          style={{
-            left: Math.max(
-              10,
-              Math.min(
-                tooltipPos.x > 200 ? tooltipPos.x - 210 : tooltipPos.x + 12,
-                (canvasRef.current?.clientWidth || 360) - 220
-              )
-            ),
-            top: Math.max(
-              10,
-              Math.min(
-                tooltipPos.y > 150 ? tooltipPos.y - 110 : tooltipPos.y + 12,
-                (canvasRef.current?.clientHeight || 360) - 130
-              )
-            ),
-          }}
-          className="pointer-events-none absolute z-30 bg-[#0d0e14]/95 backdrop-blur-md border border-white/10 px-3 py-2 rounded-xl shadow-[0_10px_35px_rgba(0,0,0,0.85)] text-xs font-sans ring-1 ring-white/5 w-52 max-w-[85vw]"
-        >
-          <div className="font-semibold text-white flex items-center justify-between space-x-2">
-            <div className="flex items-center space-x-1.5 truncate">
-              <span className="text-sm leading-none select-none shrink-0">
-                {hoveredNode.flag || getCountryFlag(hoveredNode.code)}
-              </span>
-              <span className="text-white font-medium truncate text-xs">{hoveredNode.name}</span>
-            </div>
-            <span className="text-brand-secondary font-mono text-[10px] shrink-0">[{hoveredNode.code}]</span>
-          </div>
-          {hoveredNode.state && (
-            <div className="text-[10px] text-brand-muted mt-0.5 truncate">
-              {hoveredNode.state}
-            </div>
-          )}
-          <div className="text-brand-secondary mt-1.5 flex justify-between space-x-2 text-[10px] font-mono">
-            <span>Volume:</span>
-            <span className="text-white font-bold">{hoveredNode.eventsCount} reqs</span>
-          </div>
-          {hoveredNode.percentage > 0 && (
-            <div className="text-brand-secondary flex justify-between space-x-2 text-[10px] font-mono">
-              <span>Fatia da rede:</span>
-              <span className="text-white">{hoveredNode.percentage}%</span>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
