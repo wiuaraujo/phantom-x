@@ -624,3 +624,7 @@ async function serveTarget(request, destination, isModerator) {
 `;
   }
 }
+
+export const generateCloudflareWorkerCode = CloakerEngine.generateCloudflareWorkerCode.bind(CloakerEngine);
+export const generateClientFingerprintSnippet = CloakerEngine.generateClientFingerprintSnippet.bind(CloakerEngine);
+

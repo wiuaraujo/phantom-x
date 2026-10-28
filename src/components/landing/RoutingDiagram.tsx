@@ -29,10 +29,10 @@ export const RoutingDiagram: React.FC = () => {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 bg-brand-surface border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono text-white">
               <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <span className="font-semibold tracking-wider">PIPELINE DE BORDA PHANTOM-X</span>
+              <span className="font-semibold tracking-wider">PIPELINE DE BORDA CLOAKILIOSHIELD</span>
             </div>
             <span className="text-xs font-mono text-brand-muted hidden sm:inline">
-              Edge Telemetry & Real-Time Filtering
+              6 Camadas Determinísticas & Proxy Reverso 200 OK
             </span>
           </div>
 
@@ -56,7 +56,7 @@ export const RoutingDiagram: React.FC = () => {
                   : "text-brand-secondary hover:text-brand-white"
               }`}
             >
-              <span>Visitante Real</span>
+              <span>Visitante Real (Oferta)</span>
             </button>
             <button
               onClick={() => setActiveTab("bot")}
@@ -66,7 +66,7 @@ export const RoutingDiagram: React.FC = () => {
                   : "text-brand-secondary hover:text-brand-white"
               }`}
             >
-              <span>Crawlers & Bots</span>
+              <span>Moderadores & Bots (Whitepage)</span>
             </button>
           </div>
         </div>
@@ -78,7 +78,7 @@ export const RoutingDiagram: React.FC = () => {
             <div className="lg:col-span-3 space-y-4">
               <div className="text-[11px] font-mono text-brand-muted uppercase tracking-wider flex items-center space-x-1.5">
                 <Globe2 className="w-3.5 h-3.5 text-brand-white" />
-                <span>1. Origens de Tráfego</span>
+                <span>1. Ingressos de Tráfego</span>
               </div>
 
               {/* Ingress Card 1: Comprador / Visitante */}
@@ -91,13 +91,13 @@ export const RoutingDiagram: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-brand-white font-semibold border border-brand-border">
-                    TRÁFEGO PAGO
+                    TRÁFEGO PAGO COM TOKEN
                   </span>
                   <span className="text-[10px] font-mono text-brand-secondary">4G/5G / WiFi</span>
                 </div>
                 <div className="text-xs font-bold text-brand-white">Visitante Humano Real</div>
                 <div className="text-[11px] text-brand-secondary mt-1.5 leading-snug">
-                  Meta Ads, TikTok, Google Search. Dispositivo móvel/desktop residencial.
+                  Clique com token <span className="font-mono text-brand-white">fbclid</span>, UTMs ativas, navegador com GPU WebGL física e IP residencial.
                 </div>
               </div>
 
@@ -111,57 +111,65 @@ export const RoutingDiagram: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-brand-secondary font-semibold border border-brand-border">
-                    INSPEÇÃO
+                    MODERAÇÃO & SPY
                   </span>
-                  <span className="text-[10px] font-mono text-brand-muted">Datacenter ASN</span>
+                  <span className="text-[10px] font-mono text-brand-muted">Datacenters</span>
                 </div>
-                <div className="text-xs font-bold text-brand-secondary">Bots & Review Crawlers</div>
+                <div className="text-xs font-bold text-brand-secondary">Robôs de Anúncios & Scrapers</div>
                 <div className="text-[11px] text-brand-secondary mt-1.5 leading-snug">
-                  Google-InspectionTool, Facebot, ByteSpider, headless scrapers.
+                  Meta Reviewers (<span className="font-mono text-brand-muted">AS32934</span>), AWS, Google Inspection, Spy Tools ou renderizadores virtuais.
                 </div>
               </div>
             </div>
 
             {/* STAGE 2: PHANTOM-X CORE PROCESSOR (Center 6 cols - Clean with no wire clutter) */}
-            <div className="lg:col-span-6 relative flex flex-col items-center justify-center p-6 sm:p-8 rounded-3xl bg-brand-surface/60 border border-brand-border shadow-inner">
+            <div className="lg:col-span-6 relative flex flex-col items-center justify-center p-6 sm:p-7 rounded-3xl bg-brand-surface/60 border border-brand-border shadow-inner">
               {/* Concentric Telemetry Radar Rings */}
               <div className="absolute w-48 h-48 rounded-full border border-brand-border/40 animate-ping pointer-events-none opacity-20" />
               <div className="absolute w-64 h-64 rounded-full border border-brand-border/30 pointer-events-none" />
 
               {/* Central Vault com a Logomarca da Phantom (Paleta do Sistema) */}
-              <div className="relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-b from-brand-hover via-brand-surface to-brand-surface border border-brand-borderHighlight p-2 shadow-glow flex items-center justify-center group hover:scale-105 transition-transform duration-300">
-                <div className="w-full h-full rounded-2xl bg-brand-surface flex items-center justify-center p-3 border border-brand-border">
-                  <Logo size={62} />
+              <div className="relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-b from-brand-hover via-brand-surface to-brand-surface border border-brand-borderHighlight p-2 shadow-glow flex items-center justify-center group hover:scale-105 transition-transform duration-300">
+                <div className="w-full h-full rounded-2xl bg-brand-surface flex items-center justify-center p-2.5 border border-brand-border">
+                  <Logo size={52} />
                 </div>
               </div>
 
               {/* Processor Title */}
-              <div className="relative z-10 mt-5 text-center">
-                <span className="font-mono text-sm font-bold text-brand-white tracking-widest uppercase">
-                  Motor de Decisão em Borda
+              <div className="relative z-10 mt-4 text-center">
+                <span className="font-mono text-xs sm:text-sm font-bold text-brand-white tracking-widest uppercase">
+                  Motor de Decisão CloakilioShield
                 </span>
-                <p className="text-xs text-brand-secondary mt-1 font-sans">
-                  Inspeção de Assinatura, ASN e Risco em &lt; 14ms
+                <p className="text-[11px] text-brand-secondary mt-0.5 font-sans">
+                  Pipeline de 6 Camadas na Borda • Decisão em &lt; 14ms
                 </p>
               </div>
 
-              {/* Live Real-Time Telemetry Tags */}
-              <div className="relative z-10 mt-5 grid grid-cols-2 gap-2.5 w-full max-w-sm text-[10px] sm:text-[11px] font-mono">
-                <div className="p-2.5 rounded-xl bg-brand-surface/70 border border-brand-border flex items-center space-x-2">
-                  <Fingerprint className="w-3.5 h-3.5 text-brand-white shrink-0" />
-                  <span className="text-brand-secondary truncate">Click ID Assinado</span>
+              {/* Live Real-Time 6-Layer Telemetry Tags */}
+              <div className="relative z-10 mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 w-full text-[10px] font-mono">
+                <div className="p-2 rounded-xl bg-brand-surface/80 border border-brand-border flex items-center space-x-1.5">
+                  <Globe2 className="w-3 h-3 text-brand-white shrink-0" />
+                  <span className="text-brand-secondary truncate">1. Geo-Fence (BR)</span>
                 </div>
-                <div className="p-2.5 rounded-xl bg-brand-surface/70 border border-brand-border flex items-center space-x-2">
-                  <Zap className="w-3.5 h-3.5 text-brand-white shrink-0" />
-                  <span className="text-brand-secondary truncate">Latência &lt; 18ms</span>
+                <div className="p-2 rounded-xl bg-brand-surface/80 border border-brand-border flex items-center space-x-1.5">
+                  <Cpu className="w-3 h-3 text-brand-white shrink-0" />
+                  <span className="text-brand-secondary truncate">2. ASN Datacenter</span>
                 </div>
-                <div className="p-2.5 rounded-xl bg-brand-surface/70 border border-brand-border flex items-center space-x-2">
-                  <Cpu className="w-3.5 h-3.5 text-brand-white shrink-0" />
-                  <span className="text-brand-secondary truncate">ASN IP Filtering</span>
+                <div className="p-2 rounded-xl bg-brand-surface/80 border border-brand-border flex items-center space-x-1.5">
+                  <Fingerprint className="w-3 h-3 text-brand-white shrink-0" />
+                  <span className="text-brand-secondary truncate">3. Token fbclid</span>
                 </div>
-                <div className="p-2.5 rounded-xl bg-brand-surface/70 border border-brand-border flex items-center space-x-2">
-                  <Lock className="w-3.5 h-3.5 text-brand-white shrink-0" />
-                  <span className="text-brand-secondary truncate">Anti-Open Redirect</span>
+                <div className="p-2 rounded-xl bg-brand-surface/80 border border-brand-border flex items-center space-x-1.5">
+                  <Zap className="w-3 h-3 text-brand-white shrink-0" />
+                  <span className="text-brand-secondary truncate">4. Client Hints</span>
+                </div>
+                <div className="p-2 rounded-xl bg-brand-surface/80 border border-brand-border flex items-center space-x-1.5">
+                  <Lock className="w-3 h-3 text-brand-white shrink-0" />
+                  <span className="text-brand-secondary truncate">5. Threat Intel</span>
+                </div>
+                <div className="p-2 rounded-xl bg-brand-surface/80 border border-brand-border flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-3 h-3 text-brand-white shrink-0" />
+                  <span className="text-brand-secondary truncate">6. GPU WebGL</span>
                 </div>
               </div>
             </div>
@@ -183,16 +191,16 @@ export const RoutingDiagram: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-brand-white font-semibold border border-brand-border">
-                    ROTA DE OFERTA
+                    HTTP 200 PROXY REVERSO
                   </span>
                   <span className="text-[10px] font-mono text-brand-white flex items-center space-x-1">
                     <CheckCircle2 className="w-3 h-3 text-brand-white" />
                     <span>Liberado</span>
                   </span>
                 </div>
-                <div className="text-xs font-bold text-brand-white">Página de Conversão</div>
+                <div className="text-xs font-bold text-brand-white">Página de Oferta (Black)</div>
                 <div className="text-[11px] text-brand-secondary mt-1.5 leading-snug">
-                  Checkout direto com preservação integral de UTMs e Click ID atribuído.
+                  Conteúdo injetado transparentemente no mesmo domínio, sem redirecionamentos 301/302 e parâmetros preservados.
                 </div>
               </div>
 
@@ -206,16 +214,16 @@ export const RoutingDiagram: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-brand-secondary font-semibold border border-brand-border">
-                    ROTA SEGURA
+                    HTTP 200 WHITEPAGE
                   </span>
                   <span className="text-[10px] font-mono text-brand-muted flex items-center space-x-1">
                     <ShieldAlert className="w-3 h-3 text-brand-muted" />
                     <span>Mitigado</span>
                   </span>
                 </div>
-                <div className="text-xs font-bold text-brand-secondary">Safe Page / Verificação</div>
+                <div className="text-xs font-bold text-brand-secondary">Whitepage Compliance</div>
                 <div className="text-[11px] text-brand-secondary mt-1.5 leading-snug">
-                  Artigo neutro ou verificação institucional. Zero risco de reprovação ou bloqueio.
+                  Artigo neutro com header <span className="font-mono text-brand-muted">X-Robots-Tag: noindex</span> e sanitização estéril de resposta.
                 </div>
               </div>
             </div>

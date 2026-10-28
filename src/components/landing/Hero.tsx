@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, Zap, Shield, ArrowRightLeft } from "lucide-react";
 import { TechGlobe } from "../globe/TechGlobe";
 import { RoutingDiagram } from "./RoutingDiagram";
 import { useLanguage } from "@/lib/i18n";
@@ -34,9 +34,48 @@ export const Hero: React.FC = () => {
         </h1>
 
         {/* Subheadline */}
-        <p className="relative z-10 max-w-2xl text-sm sm:text-lg text-brand-secondary leading-relaxed font-sans font-normal mb-8 sm:mb-9 px-2 sm:px-0 select-none pointer-events-none">
+        <p className="relative z-10 max-w-2xl text-sm sm:text-lg text-brand-secondary leading-relaxed font-sans font-normal mb-7 sm:mb-8 px-2 sm:px-0 select-none pointer-events-none">
           {t.hero.subtitle}
         </p>
+
+        {/* Architecture Highlights: 3 Pillars */}
+        <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5 w-full max-w-3xl mb-8 pointer-events-auto text-left">
+          <div className="p-3 sm:p-3.5 rounded-xl bg-brand-surface/85 backdrop-blur-md border border-brand-border/80 hover:border-brand-borderHighlight transition shadow-sm">
+            <div className="flex items-center space-x-2 mb-1.5">
+              <div className="w-5 h-5 rounded-md bg-brand-hover flex items-center justify-center text-brand-white">
+                <Zap className="w-3 h-3 text-brand-white" />
+              </div>
+              <span className="text-xs font-mono font-bold text-brand-white">&lt; 14ms Latência</span>
+            </div>
+            <p className="text-[11px] text-brand-secondary leading-snug">
+              Processamento na borda global sem redirects lentos 301/302.
+            </p>
+          </div>
+
+          <div className="p-3 sm:p-3.5 rounded-xl bg-brand-surface/85 backdrop-blur-md border border-brand-border/80 hover:border-brand-borderHighlight transition shadow-sm">
+            <div className="flex items-center space-x-2 mb-1.5">
+              <div className="w-5 h-5 rounded-md bg-brand-hover flex items-center justify-center text-brand-white">
+                <Shield className="w-3 h-3 text-brand-white" />
+              </div>
+              <span className="text-xs font-mono font-bold text-brand-white">Zero Footprint</span>
+            </div>
+            <p className="text-[11px] text-brand-secondary leading-snug">
+              Assinatura estéril, no-store e sanitização total de headers upstream.
+            </p>
+          </div>
+
+          <div className="p-3 sm:p-3.5 rounded-xl bg-brand-surface/85 backdrop-blur-md border border-brand-border/80 hover:border-brand-borderHighlight transition shadow-sm">
+            <div className="flex items-center space-x-2 mb-1.5">
+              <div className="w-5 h-5 rounded-md bg-brand-hover flex items-center justify-center text-brand-white">
+                <ArrowRightLeft className="w-3 h-3 text-brand-white" />
+              </div>
+              <span className="text-xs font-mono font-bold text-brand-white">Proxy Reverso 200 OK</span>
+            </div>
+            <p className="text-[11px] text-brand-secondary leading-snug">
+              Oferta servida no mesmo domínio com fbclid e UTMs preservados.
+            </p>
+          </div>
+        </div>
 
         {/* CTA Buttons */}
         <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 w-full sm:w-auto pointer-events-auto">

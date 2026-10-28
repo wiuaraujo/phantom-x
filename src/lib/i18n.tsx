@@ -23,6 +23,7 @@ export interface Translations {
     latency: string;
     cluster: string;
     cleanTraffic: string;
+    proxyBadge: string;
   };
   demo: {
     title: string;
@@ -46,16 +47,17 @@ const translations: Record<Language, Translations> = {
       getStarted: "Começar grátis",
     },
     hero: {
-      eyebrow: "DUPLA CAMADA DE PROTEÇÃO & INTELIGÊNCIA",
-      titleLine1: "Todo o seu tráfego.",
-      titleLine2: "Sob controle global.",
+      eyebrow: "ARQUITETURA DE BORDA • CLOAKILIOSHIELD V2.4",
+      titleLine1: "Infraestrutura de Tráfego Invisível.",
+      titleLine2: "Em Escala Global.",
       subtitle:
-        "Bots, moderadores e acessos indesejados são identificados antes de tocar suas páginas. Roteamento inteligente na borda em menos de 18ms.",
-      startFree: "Começar grátis",
-      explore: "Como funciona",
-      latency: "Latência de Borda: 18ms",
+        "Roteamento determinístico em borda com filtragem de bots em tempo real, entrega via Proxy Reverso transparente (HTTP 200 OK sem redirects) e blindagem contra moderadores de anúncios.",
+      startFree: "Criar Conta Gratuita",
+      explore: "Conhecer a Arquitetura",
+      latency: "Latência de Borda: < 14ms",
       cluster: "Cluster Global: 14 PoPs Ativos",
-      cleanTraffic: "99.98% Tráfego Limpo",
+      cleanTraffic: "Entrega: Proxy Reverso 200 OK",
+      proxyBadge: "Filtro 6 Camadas Ativo",
     },
     demo: {
       title: "A interface em ação.",
@@ -77,16 +79,17 @@ const translations: Record<Language, Translations> = {
       getStarted: "Get Started",
     },
     hero: {
-      eyebrow: "DUAL-LAYER PROTECTION & INTELLIGENCE",
-      titleLine1: "All your traffic.",
-      titleLine2: "Under global control.",
+      eyebrow: "EDGE ARCHITECTURE • CLOAKILIOSHIELD V2.4",
+      titleLine1: "Invisible Traffic Infrastructure.",
+      titleLine2: "At Global Scale.",
       subtitle:
-        "Bots, reviewers, and unwanted visitors filtered before touching your pages. Intelligent edge routing executed in under 18ms.",
-      startFree: "Get Started Free",
-      explore: "How it works",
-      latency: "Edge Latency: 18ms",
+        "Deterministic edge routing with real-time bot filtering, transparent Reverse Proxy delivery (HTTP 200 OK without redirects), and full ad reviewer shielding.",
+      startFree: "Create Free Account",
+      explore: "Explore Architecture",
+      latency: "Edge Latency: < 14ms",
       cluster: "Global Cluster: 14 Active PoPs",
-      cleanTraffic: "99.98% Clean Traffic",
+      cleanTraffic: "Delivery: Reverse Proxy 200 OK",
+      proxyBadge: "6-Layer Filter Active",
     },
     demo: {
       title: "The interface in action.",
@@ -108,16 +111,17 @@ const translations: Record<Language, Translations> = {
       getStarted: "Comenzar gratis",
     },
     hero: {
-      eyebrow: "DOBLE CAPA DE PROTECCIÓN E INTELIGENCIA",
-      titleLine1: "Todo su tráfico.",
-      titleLine2: "Bajo control global.",
+      eyebrow: "ARQUITECTURA DE BORDE • CLOAKILIOSHIELD V2.4",
+      titleLine1: "Infraestructura de Tráfico Invisible.",
+      titleLine2: "A Escala Global.",
       subtitle:
-        "Bots, revisores y visitas no deseadas filtrados antes de tocar sus páginas. Enrutamiento inteligente en el borde en menos de 18ms.",
-      startFree: "Comenzar gratis",
-      explore: "Cómo funciona",
-      latency: "Latencia de Borde: 18ms",
+        "Enrutamiento determinista en el borde con filtrado de bots en tiempo real, entrega transparente mediante Proxy Inverso (HTTP 200 OK sin redirecciones) y protección de atribución.",
+      startFree: "Crear Cuenta Gratuita",
+      explore: "Explorar la Arquitectura",
+      latency: "Latencia de Borde: < 14ms",
       cluster: "Cluster Global: 14 PoPs Activos",
-      cleanTraffic: "99.98% Tráfico Limpio",
+      cleanTraffic: "Entrega: Proxy Inverso 200 OK",
+      proxyBadge: "Filtro 6 Capas Activo",
     },
     demo: {
       title: "La interfaz en acción.",

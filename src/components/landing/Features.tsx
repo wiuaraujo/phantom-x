@@ -2,58 +2,58 @@
 
 import React from "react";
 import {
-  Activity,
-  Globe2,
-  Layers,
-  Filter,
-  Server,
-  BarChart3,
+  ArrowRightLeft,
+  Cpu,
+  Fingerprint,
+  ShieldCheck,
+  MonitorCheck,
+  Zap,
   ArrowUpRight,
 } from "lucide-react";
 
 export const Features: React.FC = () => {
   const features = [
     {
-      title: "Monitoramento em tempo real",
+      title: "Proxy Reverso Transparente (HTTP 200 OK)",
       description:
-        "Acompanhe os eventos recebidos pelo sistema e visualize a atividade recente em milissegundos com stream contínuo.",
-      icon: Activity,
-      tag: "Live Stream",
+        "Elimine redirecionamentos 301/302 suspeitos para crawlers. O Cloudflare Worker busca e injeta a página de oferta diretamente no mesmo domínio, preservando a barra de navegação, cookies e parâmetros de conversão.",
+      icon: ArrowRightLeft,
+      tag: "Reverse Proxy 200",
     },
     {
-      title: "Mapa global de acessos",
+      title: "Filtro de ASN & Datacenters de Moderação",
       description:
-        "Explore a distribuição geográfica aproximada dos acessos através de um mapa interativo com telemetria por país e cidade.",
-      icon: Globe2,
-      tag: "Geolocalização",
+        "Blacklist em memória dos Autonomous System Numbers (ASNs) de servidores da Meta (AS32934), Google (AS15169), AWS (AS16509), Hetzner, DigitalOcean e ferramentas de espionagem (AdPlexity, SpyFu).",
+      icon: Cpu,
+      tag: "ASN Intelligence",
     },
     {
-      title: "Análise de campanhas",
+      title: "Validação Estrita de Tokens de Tráfego Pago",
       description:
-        "Organize eventos por domínio, campanha, origem e parâmetros UTM completos (source, medium, campaign, content).",
-      icon: Layers,
-      tag: "Atribuição",
+        "Exigência de clique verificado. Qualquer acesso direto, robô explorador ou requisição sem token legítimo (fbclid ou utm_source) é imediatamente direcionado à Whitepage de conformidade institucional.",
+      icon: Fingerprint,
+      tag: "Token Attribution",
     },
     {
-      title: "Proteção contra tráfego automatizado",
+      title: "Threat Intelligence em Tempo Real",
       description:
-        "Identifique padrões suspeitos, aplique limites de requisições (rate limit) e consulte registros detalhados de segurança.",
-      icon: Filter,
-      tag: "Mitigação",
+        "Consulta resiliente de reputação de IP com fallback gracioso. Identifique e barre instantaneamente redes Tor, VPNs comerciais, proxies residenciais de crawlers e nós de saída suspeitos.",
+      icon: ShieldCheck,
+      tag: "Threat Intel",
     },
     {
-      title: "Gestão de domínios",
+      title: "Fingerprint Client-Side de Hardware (GPU WebGL)",
       description:
-        "Organize domínios cadastrados e acompanhe o status de apontamento DNS e certificados SSL em tempo real.",
-      icon: Server,
-      tag: "Infraestrutura",
+        "Camada 7 de telemetria no navegador do visitante. Detecta renderizadores de software virtuais (SwiftShader, llvmpipe), ambientes headless (navigator.webdriver) e hash Canvas 2D.",
+      icon: MonitorCheck,
+      tag: "Hardware GPU",
     },
     {
-      title: "Relatórios e histórico",
+      title: "Gerador Instantâneo de Cloudflare Worker",
       description:
-        "Consulte tendências históricas, períodos personalizados, principais origens de tráfego e métricas consolidadas.",
-      icon: BarChart3,
-      tag: "Analytics",
+        "Compile e baixe o código JavaScript completo do Worker com 1 clique diretamente do console operacional. Código otimizado, sem dependências externas, pronto para implantação no Cloudflare Workers.",
+      icon: Zap,
+      tag: "Edge Engine",
     },
   ];
 
@@ -62,12 +62,15 @@ export const Features: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+          <span className="text-xs font-mono tracking-widest uppercase text-brand-secondary">
+            ARQUITETURA DE BLINDAGEM DETERMINÍSTICA
+          </span>
           <h2 className="text-2xl sm:text-4xl font-bold text-brand-white tracking-tight mt-3 mb-4">
             Controle absoluto sobre cada requisição.
           </h2>
           <p className="text-sm sm:text-base text-brand-secondary font-normal">
-            Construído para operações que demandam visibilidade instantânea, segurança de borda
-            e clareza analítica em escala.
+            Engenharia de borda desenvolvida especificamente para operações que demandam imunidade a moderação,
+            zero rastros para robôs e máxima taxa de conversão.
           </p>
         </div>
 
