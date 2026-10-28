@@ -180,9 +180,8 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center space-x-2">
-                <span>Criar Conta no</span>
-                <span className="font-mono tracking-widest">PHANTOM X</span>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                Crie sua conta
               </h1>
               <p className="text-xs text-brand-secondary mt-1 max-w-xs">
                 Configure seu acesso de operador e tenha visibilidade total sobre seu tráfego.
