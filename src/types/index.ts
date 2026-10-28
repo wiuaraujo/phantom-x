@@ -45,6 +45,8 @@ export interface User {
   name: string;
   nickname?: string;
   email: string;
+  phone?: string;
+  phoneCountryCode?: string;
   role: "admin" | "member" | "viewer";
   timezone?: string;
   organizationId: string;

@@ -10,9 +10,16 @@ import { RotatingGlobe } from "@/components/ui/RotatingGlobe";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { TIMEZONE_REGIONS, DEFAULT_TIMEZONE } from "@/lib/timezones";
 import {
+  COUNTRY_CALLING_CODES,
+  DEFAULT_COUNTRY_CALLING_CODE,
+  CountryCallingCode,
+  formatPhoneNumber,
+} from "@/lib/countryCodes";
+import {
   Lock,
   Mail,
   User,
+  Phone,
   ArrowRight,
   Globe2,
   Eye,
@@ -30,6 +37,8 @@ function SignupFormInner() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<CountryCallingCode>(DEFAULT_COUNTRY_CALLING_CODE);
   const [timezone, setTimezone] = useState(DEFAULT_TIMEZONE);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,8 +60,16 @@ function SignupFormInner() {
     setError(null);
     setIsExistingUser(false);
 
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !email || !phone || !password || !confirmPassword) {
       setError("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    const rawPhoneDigits = phone.replace(/\D/g, "");
+    if (rawPhoneDigits.length < selectedCountry.minDigits) {
+      setError(
+        `Por favor, informe um número de telefone válido com DDD (${selectedCountry.minDigits} a ${selectedCountry.maxDigits} dígitos).`
+      );
       return;
     }
 
@@ -77,6 +94,8 @@ function SignupFormInner() {
       const result = await auth.signup({
         name,
         email,
+        phone,
+        phoneCountryCode: selectedCountry.code,
         password,
         timezone,
       });
@@ -198,6 +217,63 @@ function SignupFormInner() {
                 autoComplete="email"
                 className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
               />
+            </div>
+          </div>
+
+          {/* TELEFONE COM SELETOR DE DDD/PAÍS COM BANDEIRA */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-mono text-brand-secondary font-medium">
+                NÚMERO DE TELEFONE (WHATSAPP)
+              </label>
+              <span className="text-[10px] font-mono text-brand-muted">
+                DDD Obrigatório
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              {/* Dropdown com Bandeira do País e DDI */}
+              <div className="relative shrink-0 w-[110px] sm:w-[124px]">
+                <select
+                  value={`${selectedCountry.code}_${selectedCountry.iso}`}
+                  onChange={(e) => {
+                    const [code, iso] = e.target.value.split("_");
+                    const found =
+                      COUNTRY_CALLING_CODES.find((c) => c.code === code && c.iso === iso) ||
+                      DEFAULT_COUNTRY_CALLING_CODE;
+                    setSelectedCountry(found);
+                    setPhone(formatPhoneNumber(phone, found.code));
+                  }}
+                  aria-label="Código do País e DDD"
+                  className="w-full h-[38px] sm:h-[40px] pl-2.5 pr-6 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white focus:outline-none focus:border-brand-borderHighlight transition font-mono appearance-none cursor-pointer flex items-center"
+                >
+                  {COUNTRY_CALLING_CODES.map((country) => (
+                    <option
+                      key={`${country.iso}-${country.code}`}
+                      value={`${country.code}_${country.iso}`}
+                      className="bg-brand-surface text-brand-white py-1"
+                    >
+                      {country.flag} {country.name} ({country.code})
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-2 top-3 pointer-events-none text-brand-muted text-[10px]">
+                  ▼
+                </div>
+              </div>
+
+              {/* Input com Máscara e Ícone de Telefone */}
+              <div className="relative flex-1">
+                <Phone className="w-4 h-4 text-brand-muted absolute left-3 top-3 pointer-events-none" />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(formatPhoneNumber(e.target.value, selectedCountry.code))}
+                  placeholder={selectedCountry.placeholder}
+                  required
+                  autoComplete="tel"
+                  className="w-full h-[38px] sm:h-[40px] pl-9 pr-3 py-2 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
+                />
+              </div>
             </div>
           </div>
 

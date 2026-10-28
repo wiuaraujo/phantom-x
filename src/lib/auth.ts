@@ -6,6 +6,8 @@ export interface RegisteredUser {
   nickname?: string; // Apelido para saudações e dashboard (ex: Will)
   username: string; // normalizado em minúsculas
   email: string; // normalizado em minúsculas
+  phone?: string; // Telefone com DDD/DDI
+  phoneCountryCode?: string; // DDI selecionado (ex: +55)
   passwordHash: string;
   salt: string;
   role: "admin" | "operator";
@@ -47,6 +49,8 @@ const SEED_USERS: RegisteredUser[] = [
     nickname: "Will",
     username: "admin",
     email: "admin@phantomx.pro",
+    phone: "(11) 99999-9999",
+    phoneCountryCode: "+55",
     passwordHash: MASTER_ADMIN_HASH,
     salt: MASTER_ADMIN_SALT,
     role: "admin",
@@ -243,6 +247,8 @@ export const auth = {
         name: user.name,
         nickname: user.nickname || user.name.split(" ")[0],
         email: user.email,
+        phone: user.phone,
+        phoneCountryCode: user.phoneCountryCode || "+55",
         role: user.role === "admin" ? "admin" : "member",
         timezone: user.timezone || "America/Sao_Paulo",
         organizationId: user.organizationId,
@@ -270,10 +276,20 @@ export const auth = {
     email: string;
     password: string;
     timezone?: string;
+    phone?: string;
+    phoneCountryCode?: string;
   }): Promise<AuthResult> {
-    const { name, email, password, timezone = "America/Sao_Paulo" } = params;
+    const {
+      name,
+      email,
+      password,
+      timezone = "America/Sao_Paulo",
+      phone = "",
+      phoneCountryCode = "+55",
+    } = params;
     const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
+    const cleanPhone = phone.trim();
 
     if (!cleanName || cleanName.length < 3) {
       return { success: false, error: "O nome de operador deve conter ao menos 3 caracteres." };
@@ -282,6 +298,14 @@ export const auth = {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(cleanEmail)) {
       return { success: false, error: "Por favor, insira um endereço de e-mail válido." };
+    }
+
+    const phoneDigits = cleanPhone.replace(/\D/g, "");
+    if (!cleanPhone || phoneDigits.length < 8) {
+      return {
+        success: false,
+        error: "Por favor, informe um número de telefone válido com DDD.",
+      };
     }
 
     if (!password || password.length < 8) {
@@ -321,6 +345,8 @@ export const auth = {
       nickname: cleanName.split(" ")[0],
       username,
       email: cleanEmail,
+      phone: cleanPhone,
+      phoneCountryCode,
       passwordHash,
       salt,
       role: "operator",
@@ -355,6 +381,8 @@ export const auth = {
         name: newUser.name,
         nickname: newUser.nickname,
         email: newUser.email,
+        phone: newUser.phone,
+        phoneCountryCode: newUser.phoneCountryCode,
         role: "member",
         timezone: newUser.timezone,
         organizationId: newUser.organizationId,
@@ -415,7 +443,13 @@ export const auth = {
   /**
    * Atualiza o perfil e configurações da conta do usuário autenticado
    */
-  updateCurrentUserProfile(data: { name?: string; nickname?: string; timezone?: string }): {
+  updateCurrentUserProfile(data: {
+    name?: string;
+    nickname?: string;
+    timezone?: string;
+    phone?: string;
+    phoneCountryCode?: string;
+  }): {
     success: boolean;
     user?: User;
     error?: string;
@@ -438,6 +472,12 @@ export const auth = {
     if (data.timezone) {
       user.timezone = data.timezone;
     }
+    if (data.phone !== undefined) {
+      user.phone = data.phone.trim();
+    }
+    if (data.phoneCountryCode !== undefined) {
+      user.phoneCountryCode = data.phoneCountryCode;
+    }
 
     users[idx] = user;
     this.saveUsers(users);
@@ -447,6 +487,8 @@ export const auth = {
       name: user.name,
       nickname: user.nickname,
       timezone: user.timezone,
+      phone: user.phone,
+      phoneCountryCode: user.phoneCountryCode,
     };
 
     session.user = updatedUser;

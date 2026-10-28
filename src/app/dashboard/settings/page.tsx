@@ -12,6 +12,12 @@ import { PhantomCloakerConfig, CloakerMode } from "@/types";
 import { TIMEZONE_REGIONS } from "@/lib/timezones";
 import { getDashboardGreeting } from "@/lib/userGreeting";
 import {
+  COUNTRY_CALLING_CODES,
+  DEFAULT_COUNTRY_CALLING_CODE,
+  CountryCallingCode,
+  formatPhoneNumber,
+} from "@/lib/countryCodes";
+import {
   Key,
   Copy,
   Check,
@@ -23,6 +29,7 @@ import {
   Cpu,
   Download,
   Smartphone,
+  Phone,
   Monitor,
   ShieldAlert,
   Fingerprint,
@@ -81,6 +88,11 @@ function SettingsPageContent() {
   const [profileTimezone, setProfileTimezone] = useState(
     session?.user?.timezone || "America/Sao_Paulo"
   );
+  const [profilePhone, setProfilePhone] = useState(session?.user?.phone || "");
+  const [profileCountry, setProfileCountry] = useState<CountryCallingCode>(() => {
+    const code = session?.user?.phoneCountryCode || "+55";
+    return COUNTRY_CALLING_CODES.find((c) => c.code === code) || DEFAULT_COUNTRY_CALLING_CODE;
+  });
   const [profileSavedSuccess, setProfileSavedSuccess] = useState(false);
 
   // API Key & Telemetry state
@@ -103,6 +115,8 @@ function SettingsPageContent() {
       name: profileName,
       nickname: profileNickname,
       timezone: profileTimezone,
+      phone: profilePhone,
+      phoneCountryCode: profileCountry.code,
     });
     if (res.success) {
       setProfileSavedSuccess(true);
@@ -819,6 +833,55 @@ function SettingsPageContent() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Phone with DDI and Country flag */}
+                  <div>
+                    <label className="block text-brand-muted text-[11px] font-mono mb-1.5 flex items-center justify-between">
+                      <span>NÚMERO DE TELEFONE (WHATSAPP)</span>
+                      <span className="text-[10px] text-brand-secondary">Com DDD</span>
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <div className="relative shrink-0 w-[110px] sm:w-[124px]">
+                        <select
+                          value={`${profileCountry.code}_${profileCountry.iso}`}
+                          onChange={(e) => {
+                            const [code, iso] = e.target.value.split("_");
+                            const found =
+                              COUNTRY_CALLING_CODES.find((c) => c.code === code && c.iso === iso) ||
+                              DEFAULT_COUNTRY_CALLING_CODE;
+                            setProfileCountry(found);
+                            setProfilePhone(formatPhoneNumber(profilePhone, found.code));
+                          }}
+                          aria-label="Código do País e DDD"
+                          className="w-full px-2 py-2 bg-white dark:bg-brand-black border border-brand-border rounded-lg text-neutral-900 dark:text-white focus:outline-none focus:border-white transition font-mono text-xs appearance-none cursor-pointer"
+                        >
+                          {COUNTRY_CALLING_CODES.map((country) => (
+                            <option
+                              key={`${country.iso}-${country.code}`}
+                              value={`${country.code}_${country.iso}`}
+                            >
+                              {country.flag} {country.name} ({country.code})
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute right-2 top-2.5 pointer-events-none text-brand-muted text-[10px]">
+                          ▼
+                        </div>
+                      </div>
+                      <div className="relative flex-1">
+                        <Phone className="w-3.5 h-3.5 text-brand-muted absolute left-2.5 top-2.5 pointer-events-none" />
+                        <input
+                          type="tel"
+                          value={profilePhone}
+                          onChange={(e) =>
+                            setProfilePhone(formatPhoneNumber(e.target.value, profileCountry.code))
+                          }
+                          placeholder={profileCountry.placeholder}
+                          className="w-full pl-8 pr-3 py-2 bg-white dark:bg-brand-black border border-brand-border rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Timezone Selector */}
                   <div>
                     <label className="block text-brand-muted text-[11px] font-mono mb-1.5">
@@ -840,9 +903,11 @@ function SettingsPageContent() {
                       ))}
                     </select>
                   </div>
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Email (Readonly) */}
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="block text-brand-muted text-[11px] font-mono mb-1.5 flex items-center justify-between">
                       <span>E-MAIL DA CONTA</span>
                       <span className="text-[10px] text-emerald-500 font-mono">Autenticado</span>
