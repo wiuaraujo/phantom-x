@@ -18,8 +18,6 @@ import {
   Code,
   Globe,
   RefreshCw,
-  Sun,
-  Moon,
   Sliders,
   Cpu,
   Download,
@@ -796,75 +794,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* 4. APPEARANCE & THEME CARD */}
-        <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
-          <div className="border-b border-brand-border pb-3">
-            <h3 className="text-sm font-bold text-brand-white">Aparência &amp; Tema da Interface</h3>
-            <p className="text-brand-secondary text-[11px]">
-              Personalize o modo de visualização do dashboard e de toda a plataforma Phantom-X
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-            {/* Dark Theme Card */}
-            <button
-              onClick={() => setTheme("dark")}
-              type="button"
-              className={`p-4 rounded-xl border text-left transition flex items-start space-x-3.5 ${
-                theme === "dark"
-                  ? "bg-brand-hover border-white/40 ring-1 ring-white/20 shadow-glow-sm"
-                  : "bg-brand-black/50 border-brand-border hover:border-brand-borderHighlight"
-              }`}
-            >
-              <div className="w-9 h-9 rounded-lg bg-black border border-white/20 flex items-center justify-center shrink-0">
-                <Moon className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-brand-white text-xs">Tema Escuro (Obsidian)</span>
-                  {theme === "dark" && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-black font-semibold">
-                      Ativo
-                    </span>
-                  )}
-                </div>
-                <p className="text-brand-secondary text-[11px] mt-1 leading-normal font-sans">
-                  Estilo furtivo de alto contraste com fundo preto profundo (#050505) e detalhes em titânio.
-                </p>
-              </div>
-            </button>
-
-            {/* Light Theme Card */}
-            <button
-              onClick={() => setTheme("light")}
-              type="button"
-              className={`p-4 rounded-xl border text-left transition flex items-start space-x-3.5 ${
-                theme === "light"
-                  ? "bg-brand-hover border-neutral-700/80 ring-1 ring-neutral-400 shadow-glow-sm"
-                  : "bg-brand-black/50 border-brand-border hover:border-brand-borderHighlight"
-              }`}
-            >
-              <div className="w-9 h-9 rounded-lg bg-white border border-neutral-300 flex items-center justify-center shrink-0">
-                <Sun className="w-4 h-4 text-amber-500" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-brand-white text-xs">Tema Claro (Titanium)</span>
-                  {theme === "light" && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-900 text-white font-semibold">
-                      Ativo
-                    </span>
-                  )}
-                </div>
-                <p className="text-brand-secondary text-[11px] mt-1 leading-normal font-sans">
-                  Visual minimalista com superfícies limpas, tipografia legível e contraste balanceado.
-                </p>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* 5. API CREDENTIALS */}
+        {/* 4. API CREDENTIALS */}
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
           <div className="border-b border-brand-border pb-3 flex justify-between items-center">
             <div>

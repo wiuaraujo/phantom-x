@@ -109,12 +109,10 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: Actions & Controls */}
         <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-          {/* Live Personalized Greeting Pill (Ex: Quinta-feira 14:00, Olá, Will) */}
+          {/* Live Clock Pill (Somente data e horário) */}
           <div className="hidden md:flex items-center space-x-2 bg-brand-surface border border-brand-border px-3 py-1.5 rounded-xl text-xs font-mono">
             <Clock className="w-3.5 h-3.5 text-brand-white shrink-0" />
-            <span className="text-brand-secondary font-medium">{greeting.dayAndTime}</span>
-            <span className="text-brand-muted">•</span>
-            <span className="text-brand-white font-semibold">Olá, {greeting.displayName}</span>
+            <span className="text-brand-white font-medium">{greeting.dayAndTime}</span>
           </div>
 
           {/* Desktop-only: Real Backend Connection Badge */}

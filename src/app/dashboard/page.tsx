@@ -90,41 +90,31 @@ export default function DashboardOverview() {
       <div className="p-3 sm:p-6 lg:p-8 space-y-5 sm:space-y-7 max-w-[1600px] w-full mx-auto">
         {/* 
           ======================================================================
-          0. PERSONALIZED OPERATIONAL GREETING BANNER
-          "exemplo: Quinta-feira 14:00, Olá, Will algo assim... baseando-se no apelido
-          que o usuário configurou e data e horário referente ao fuso-horário"
+          0. CLEAN OPERATIONAL GREETING BANNER
+          "deixe somente olá e o nome da pessoa. Abaixo, pode remover esse centro de
+          comando sincronizado com o fuso horário e tal. Deixar bem clean essa parte."
           ======================================================================
         */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl bg-brand-surface border border-brand-border shadow-sm">
-          <div className="flex items-center space-x-3.5">
-            <div className="w-10 h-10 rounded-xl bg-white text-black font-mono font-bold text-base flex items-center justify-center shrink-0 shadow-sm">
-              {greeting.displayName[0] ? greeting.displayName[0].toUpperCase() : "W"}
-            </div>
-            <div>
-              <div className="text-sm sm:text-base font-bold text-brand-white font-sans flex items-center space-x-2">
-                <span>{greeting.fullGreeting}</span>
-              </div>
-              <p className="text-xs text-brand-secondary mt-0.5">
-                Centro de comando sincronizado com o fuso-horário{" "}
-                <span className="font-mono text-brand-white font-medium">{greeting.timezone}</span>.
-              </p>
-            </div>
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 rounded-2xl bg-brand-surface border border-brand-border shadow-sm">
+          <div>
+            <h2 className="text-sm sm:text-base font-bold text-brand-white tracking-tight">
+              Olá, {greeting.displayName}!
+            </h2>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0 self-start sm:self-auto text-xs font-mono">
-            <Link
-              href="/dashboard/settings"
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-hover text-brand-secondary hover:text-white border border-brand-border transition"
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              <span>Configurações de Conta</span>
-            </Link>
-          </div>
+          <Link
+            href="/dashboard/settings"
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-hover text-brand-secondary hover:text-white border border-brand-border transition text-xs font-mono shrink-0"
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Configurações de Conta</span>
+          </Link>
         </div>
         {/* 
           ======================================================================
-          1. IMMERSIVE MAIN BANNER: DIGITAL MATRIX WORLD MAP
-          "o mapa tem que ser estendido de forma imersiva como banner principal"
+          1. IMMERSIVE MAIN BANNER: DIGITAL MATRIX WORLD MAP 360° OVAL
+          "manter esse estilo de mapa, porém com dinâmica de 360 graus baseado
+          no mapa mundi, meio que oval"
           ======================================================================
         */}
         <div className="relative w-full h-[380px] sm:h-[480px] lg:h-[620px] rounded-2xl bg-brand-surface border border-brand-border overflow-hidden shadow-sm flex flex-col">
@@ -134,12 +124,18 @@ export default function DashboardOverview() {
             <div className="flex items-center space-x-2 pointer-events-auto min-w-0">
               <div className="flex items-center space-x-1.5 sm:space-x-2 bg-brand-surface/90 backdrop-blur-md border border-brand-border px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-mono shrink-0">
                 <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-brand-white font-semibold tracking-wider">MATRIZ GLOBAL</span>
+                <span className="text-brand-white font-semibold tracking-wider">MATRIZ GLOBAL 360°</span>
               </div>
               <div className="hidden md:flex items-center space-x-2 text-[11px] text-brand-muted font-mono bg-brand-surface/60 px-2.5 py-1 rounded-md border border-brand-border/60">
-                <span>14 PoPs operacionais</span>
-                <span>•</span>
-                <span>&lt; 18ms latência</span>
+                {geoData.length > 0 ? (
+                  <>
+                    <span>{geoData.length} {geoData.length === 1 ? "nó ativo" : "nós ativos"}</span>
+                    <span>•</span>
+                    <span>&lt; 18ms latência</span>
+                  </>
+                ) : (
+                  <span>Aguardando Ingestão de Tráfego • Nós em Standby</span>
+                )}
               </div>
             </div>
 
