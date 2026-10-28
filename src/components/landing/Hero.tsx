@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ChevronDown, Zap, Shield, ArrowRightLeft } from "lucide-react";
 import { TechGlobe } from "../globe/TechGlobe";
 import { RoutingDiagram } from "./RoutingDiagram";
+import { PlatformLogosMarquee } from "./PlatformLogosMarquee";
 import { useLanguage } from "@/lib/i18n";
 
 export const Hero: React.FC = () => {
@@ -113,6 +114,9 @@ export const Hero: React.FC = () => {
           {t.hero.cleanTraffic}
         </div>
       </div>
+
+      {/* Marquee de Logotipos das Plataformas Homologadas (Passando da direita para a esquerda) */}
+      <PlatformLogosMarquee />
     </section>
   );
 };

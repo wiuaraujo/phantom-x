@@ -382,3 +382,30 @@ html.light ::selection {
   background: #000000;
   color: #ffffff;
 }
+
+/* 8. Infinite Platform Marquee (Passando da direita para a esquerda) */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marqueeScroll 32s linear infinite;
+}
+
+.animate-marquee-infinite:hover {
+  animation-play-state: paused;
+}
+
+@media (max-width: 640px) {
+  .animate-marquee-infinite {
+    animation-duration: 22s;
+  }
+}
