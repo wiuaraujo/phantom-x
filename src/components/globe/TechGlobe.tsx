@@ -41,7 +41,10 @@ function latLonToVector3(lat: number, lon: number, radius: number): THREE.Vector
   return new THREE.Vector3(x, y, z);
 }
 
-export const TechGlobe: React.FC<{ className?: string }> = ({ className = "" }) => {
+export const TechGlobe: React.FC<{ className?: string; enableZoom?: boolean }> = ({
+  className = "",
+  enableZoom = false,
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [webGLFailed, setWebGLFailed] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
@@ -428,8 +431,9 @@ export const TechGlobe: React.FC<{ className?: string }> = ({ className = "" }) 
       } catch {}
     };
 
-    // Zoom on wheel
+    // Zoom on wheel (Desabilitado por padrão para evitar zoom acidental e travamento de scroll da página)
     const onWheel = (e: WheelEvent) => {
+      if (!enableZoom) return;
       e.preventDefault();
       setHasUserInteracted(true);
       cameraZRef.current = Math.max(160, Math.min(290, cameraZRef.current + e.deltaY * 0.08));
@@ -440,7 +444,9 @@ export const TechGlobe: React.FC<{ className?: string }> = ({ className = "" }) 
     container.addEventListener("pointermove", onPointerMove);
     container.addEventListener("pointerup", onPointerUp);
     container.addEventListener("pointercancel", onPointerUp);
-    container.addEventListener("wheel", onWheel, { passive: false });
+    if (enableZoom) {
+      container.addEventListener("wheel", onWheel, { passive: false });
+    }
 
     const onResize = () => {
       if (!container) return;
@@ -504,7 +510,9 @@ export const TechGlobe: React.FC<{ className?: string }> = ({ className = "" }) 
       container.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerup", onPointerUp);
       container.removeEventListener("pointercancel", onPointerUp);
-      container.removeEventListener("wheel", onWheel);
+      if (enableZoom) {
+        container.removeEventListener("wheel", onWheel);
+      }
       window.removeEventListener("resize", onResize);
 
       renderer.dispose();

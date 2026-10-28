@@ -48,21 +48,39 @@ export const Sidebar: React.FC = () => {
       {/* Top Section */}
       <div>
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-brand-border">
-          <Link href="/dashboard" className="flex items-center space-x-3 overflow-hidden group">
-            <Logo size={36} className="group-hover:scale-105 transition-transform shrink-0" />
+        <div
+          className={`h-16 flex items-center border-b border-brand-border relative transition-all duration-200 ${
+            collapsed ? "justify-center px-2" : "justify-between px-4"
+          }`}
+        >
+          <Link
+            href="/dashboard"
+            className="flex items-center space-x-3 group min-w-0"
+            title={siteConfig.name}
+          >
+            <Logo
+              size={36}
+              className="group-hover:scale-105 transition-transform shrink-0"
+            />
             {!collapsed && (
               <span className="font-poppins text-base font-bold tracking-tight text-brand-white truncate">
                 {siteConfig.name}
               </span>
             )}
           </Link>
+
+          {/* Minimize / Expand Toggle Button */}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1 rounded-md hover:bg-brand-surface text-brand-secondary hover:text-brand-white transition shrink-0"
+            className={`transition shrink-0 ${
+              collapsed
+                ? "absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-brand-surface border border-brand-border flex items-center justify-center text-brand-secondary hover:text-brand-white shadow-md z-40 hover:scale-110"
+                : "p-1.5 rounded-lg hover:bg-brand-surface text-brand-secondary hover:text-brand-white"
+            }`}
             title={collapsed ? "Expandir menu" : "Recolher menu"}
+            aria-label={collapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
           >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
@@ -76,7 +94,9 @@ export const Sidebar: React.FC = () => {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center px-3 py-2.5 rounded-xl text-xs font-medium transition-all group ${
+                className={`flex items-center ${
+                  collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
+                } rounded-xl text-xs font-medium transition-all group ${
                   isActive
                     ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
                     : "text-brand-secondary hover:text-brand-white hover:bg-brand-surface"
@@ -116,15 +136,18 @@ export const Sidebar: React.FC = () => {
           </div>
         )}
 
-        {!collapsed && (
-          <Link
-            href="/dashboard/settings"
-            className="p-2.5 rounded-xl bg-brand-surface border border-brand-border flex items-center space-x-2.5 hover:bg-brand-hover transition block"
-            title="Acessar Perfil e Configurações"
-          >
-            <div className="w-8 h-8 rounded-full bg-white text-black font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
-              {displayName[0] ? displayName[0].toUpperCase() : "W"}
-            </div>
+        {/* User Profile Card */}
+        <Link
+          href="/dashboard/settings"
+          className={`rounded-xl bg-brand-surface border border-brand-border flex items-center ${
+            collapsed ? "justify-center p-2" : "p-2.5 space-x-2.5"
+          } hover:bg-brand-hover transition block`}
+          title={`Perfil: ${displayName} (${session?.user?.timezone || "America/Sao_Paulo"})`}
+        >
+          <div className="w-8 h-8 rounded-full bg-white text-black font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
+            {displayName[0] ? displayName[0].toUpperCase() : "W"}
+          </div>
+          {!collapsed && (
             <div className="min-w-0 flex-1">
               <div className="text-xs font-semibold text-brand-white truncate">
                 {displayName}
@@ -133,28 +156,33 @@ export const Sidebar: React.FC = () => {
                 {session?.user?.timezone || "America/Sao_Paulo"}
               </div>
             </div>
-          </Link>
-        )}
+          )}
+        </Link>
 
         <Link
           href="/"
-          className="flex items-center px-3 py-2 rounded-xl text-xs text-brand-secondary hover:text-white hover:bg-brand-surface transition"
+          className={`flex items-center ${
+            collapsed ? "justify-center px-0 py-2" : "px-3 py-2"
+          } rounded-xl text-xs text-brand-secondary hover:text-white hover:bg-brand-surface transition`}
           title={collapsed ? "Landing Page" : undefined}
         >
           <ExternalLink className="w-4 h-4 shrink-0" />
           {!collapsed && <span className="ml-3">Landing Page</span>}
         </Link>
 
+        {/* Sair do Sistema / Desconectar */}
         <button
           onClick={() => {
             auth.logout();
             window.location.href = "/login";
           }}
-          className="w-full flex items-center px-3 py-2 rounded-xl text-xs text-brand-secondary hover:text-white hover:bg-brand-surface transition"
-          title={collapsed ? "Desconectar" : undefined}
+          className={`w-full flex items-center ${
+            collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
+          } rounded-xl text-xs text-rose-500 hover:text-white hover:bg-rose-600 transition group font-medium`}
+          title="Sair do Sistema / Desconectar"
         >
-          <LogOut className="w-4 h-4 shrink-0" />
-          {!collapsed && <span className="ml-3">Desconectar</span>}
+          <LogOut className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
+          {!collapsed && <span className="ml-3 font-semibold">Sair do Sistema</span>}
         </button>
       </div>
     </aside>

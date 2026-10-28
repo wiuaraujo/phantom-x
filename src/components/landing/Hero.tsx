@@ -12,17 +12,18 @@ export const Hero: React.FC = () => {
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-start pt-28 sm:pt-36 md:pt-44 pb-20 overflow-hidden bg-brand-black">
-      {/* Hero Headline & Content Area with Globe anchored directly behind it */}
+      {/* 
+        3D Rotating Dotted Globe:
+        Enlarged to fill the hero tab, anchored strictly below the navbar, with zoom disabled.
+      */}
+      <div className="absolute top-20 sm:top-24 md:top-24 left-1/2 -translate-x-1/2 w-[340px] h-[340px] xs:w-[440px] xs:h-[440px] sm:w-[700px] sm:h-[700px] md:w-[920px] md:h-[920px] lg:w-[1150px] lg:h-[1150px] xl:w-[1300px] xl:h-[1300px] max-w-[98vw] pointer-events-auto z-0 opacity-90 sm:opacity-95 flex items-center justify-center select-none">
+        {/* Subtle Ambient Radial Backlight */}
+        <div className="absolute inset-0 rounded-full dark:bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.04)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+        <TechGlobe className="w-full h-full" enableZoom={false} />
+      </div>
+
+      {/* Hero Headline & Content Area */}
       <div className="relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center">
-        {/* 
-          3D Rotating Dotted Globe:
-          Anchored directly below the navbar, centered behind the headline.
-        */}
-        <div className="absolute top-48 sm:top-60 md:top-64 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] max-w-[95vw] xs:w-[380px] xs:h-[380px] sm:w-[500px] sm:h-[500px] md:w-[600px] md:h-[600px] pointer-events-auto z-0 opacity-90 sm:opacity-95 flex items-center justify-center">
-          {/* Subtle Ambient Radial Backlight */}
-          <div className="absolute inset-0 rounded-full dark:bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.04)_0%,transparent_70%)] blur-2xl pointer-events-none" />
-          <TechGlobe className="w-full h-full" />
-        </div>
 
         {/* Main Headline */}
         <h1 className="relative z-10 text-3xl xs:text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-brand-white leading-[1.12] mb-4 sm:mb-6 font-sans drop-shadow-md select-none pointer-events-none">

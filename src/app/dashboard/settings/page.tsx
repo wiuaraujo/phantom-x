@@ -37,6 +37,7 @@ import {
   Clock,
   Sparkle,
   Smile,
+  LogOut,
 } from "lucide-react";
 
 const COMMON_GEOS = [
@@ -899,6 +900,30 @@ export default function SettingsPage() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* 6. SESSÃO E DESCONEXÃO */}
+        <div className="bg-brand-surface border border-rose-500/20 rounded-xl p-6 shadow-glow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-bold text-rose-500 flex items-center space-x-2">
+              <LogOut className="w-4 h-4 text-rose-500" />
+              <span>Sessão de Usuário</span>
+            </h3>
+            <p className="text-brand-secondary text-[11px] mt-0.5">
+              Encerra a sessão ativa de {profileNickname || profileName || "operador"} neste dispositivo e retorna para a tela de autenticação.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              auth.logout();
+              window.location.href = "/login";
+            }}
+            className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition shadow-sm flex items-center space-x-2 shrink-0"
+          >
+            <LogOut className="w-3.5 h-3.5 text-white" />
+            <span>Sair do Sistema</span>
+          </button>
         </div>
       </div>
     </div>

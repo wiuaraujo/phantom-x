@@ -312,13 +312,13 @@ export const SystemPreview: React.FC = () => {
 
             {/* Direct Link to Live Dashboard & Theme Toggle */}
             <div className="flex items-center space-x-2 text-xs font-sans">
-              <ThemeToggle />
+              <ThemeToggle className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white border-neutral-700 shadow-sm" />
               <Link
                 href="/dashboard"
-                className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-100 transition shadow-sm group"
               >
-                <span>Abrir Console</span>
-                <Maximize2 className="w-3 h-3 text-black" />
+                <span className="text-black font-semibold">Abrir Console</span>
+                <Maximize2 className="w-3.5 h-3.5 text-black group-hover:scale-110 transition-transform" />
               </Link>
             </div>
           </div>
@@ -453,16 +453,16 @@ export const SystemPreview: React.FC = () => {
                 {/* Cloaker Operational Mode Switcher Pill */}
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Mode Selector */}
-                  <div className="flex items-center bg-brand-surface border border-brand-border p-1 rounded-xl text-[11px] font-mono">
+                  <div className="flex items-center bg-white dark:bg-brand-surface border border-neutral-300 dark:border-brand-border p-1 rounded-xl text-[11px] font-mono shadow-sm">
                     <button
                       onClick={() => {
                         setCloakerMode("AUTOMATICO");
                         showToast("Modo Operacional: AUTOMÁTICO (6 Camadas Ativas)");
                       }}
-                      className={`px-2.5 py-1 rounded-lg transition ${
+                      className={`px-3 py-1 rounded-lg transition font-medium ${
                         cloakerMode === "AUTOMATICO"
-                          ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
-                          : "text-brand-secondary hover:text-brand-white"
+                          ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-sm"
+                          : "text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10"
                       }`}
                     >
                       AUTOMÁTICO
@@ -472,10 +472,10 @@ export const SystemPreview: React.FC = () => {
                         setCloakerMode("SO_WHITEPAGE");
                         showToast("Modo Operacional: SÓ WHITEPAGE (100% de Proteção)");
                       }}
-                      className={`px-2.5 py-1 rounded-lg transition ${
+                      className={`px-3 py-1 rounded-lg transition font-medium ${
                         cloakerMode === "SO_WHITEPAGE"
-                          ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
-                          : "text-brand-secondary hover:text-brand-white"
+                          ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-sm"
+                          : "text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10"
                       }`}
                     >
                       SÓ WHITEPAGE
@@ -485,10 +485,10 @@ export const SystemPreview: React.FC = () => {
                         setCloakerMode("SO_OFERTA");
                         showToast("Modo Operacional: SÓ OFERTA (Entrega Direta)");
                       }}
-                      className={`px-2.5 py-1 rounded-lg transition ${
+                      className={`px-3 py-1 rounded-lg transition font-medium ${
                         cloakerMode === "SO_OFERTA"
-                          ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
-                          : "text-brand-secondary hover:text-brand-white"
+                          ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-sm"
+                          : "text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10"
                       }`}
                     >
                       SÓ OFERTA
@@ -498,28 +498,28 @@ export const SystemPreview: React.FC = () => {
                   {/* Simulator Buttons */}
                   <button
                     onClick={handleSimulateHuman}
-                    className="hover:bg-brand-hover flex items-center space-x-1.5 text-[11px] bg-brand-surface px-2.5 py-1.5 rounded-lg border border-brand-border text-brand-white transition font-medium"
+                    className="hover:bg-black/5 dark:hover:bg-brand-hover flex items-center space-x-1.5 text-[11px] bg-white dark:bg-brand-surface px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-brand-border text-neutral-900 dark:text-white transition font-medium shadow-sm"
                     title="Injetar Lead Humano Real com token fbclid"
                   >
-                    <Send className="w-3 h-3 text-brand-white" />
-                    <span className="hidden lg:inline">Simular Lead Real</span>
+                    <Send className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span className="hidden lg:inline font-semibold">Simular Lead Real</span>
                   </button>
 
                   <button
                     onClick={handleSimulateBot}
-                    className="hover:bg-brand-hover flex items-center space-x-1.5 text-[11px] bg-brand-surface px-2.5 py-1.5 rounded-lg border border-brand-border text-brand-secondary hover:text-brand-white transition font-medium"
+                    className="hover:bg-black/5 dark:hover:bg-brand-hover flex items-center space-x-1.5 text-[11px] bg-white dark:bg-brand-surface px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-brand-border text-neutral-900 dark:text-white transition font-medium shadow-sm"
                     title="Injetar Robô de Moderação Meta Ads (AS32934)"
                   >
-                    <ShieldAlert className="w-3 h-3 text-brand-secondary" />
-                    <span className="hidden lg:inline">Simular Bot Meta</span>
+                    <ShieldAlert className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span className="hidden lg:inline font-semibold">Simular Bot Meta</span>
                   </button>
 
                   <button
                     onClick={loadData}
-                    className="p-1.5 rounded-lg bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-secondary hover:text-brand-white transition"
+                    className="p-1.5 rounded-lg bg-white dark:bg-brand-surface hover:bg-black/5 dark:hover:bg-brand-hover border border-neutral-300 dark:border-brand-border text-neutral-700 dark:text-brand-secondary hover:text-black dark:hover:text-white transition shadow-sm"
                     title="Atualizar dados"
                   >
-                    <RefreshCw className="w-3 h-3" />
+                    <RefreshCw className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-300" />
                   </button>
                 </div>
               </div>

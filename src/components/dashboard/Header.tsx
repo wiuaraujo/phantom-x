@@ -1,7 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Bell, CheckCircle2, ChevronDown, Radio, Menu, Clock } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import {
+  Bell,
+  CheckCircle2,
+  ChevronDown,
+  Radio,
+  Menu,
+  Clock,
+  LogOut,
+  Settings,
+  User,
+} from "lucide-react";
 import { auth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useDashboardNav } from "./DashboardNavContext";
@@ -30,6 +41,8 @@ export const Header: React.FC<HeaderProps> = ({
   const { openDrawer } = useDashboardNav();
   const [showNotifications, setShowNotifications] = useState(false);
   const [domainDropdown, setDomainDropdown] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const [greeting, setGreeting] = useState(() => getDashboardGreeting(session?.user));
 
@@ -40,6 +53,29 @@ export const Header: React.FC<HeaderProps> = ({
     }, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const handleDocClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleDocClick);
+    return () => document.removeEventListener("mousedown", handleDocClick);
+  }, []);
+
+  const handleLogout = () => {
+    auth.logout();
+    window.location.href = "/login";
+  };
+
+  const handleAvatarClick = () => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      openDrawer();
+    } else {
+      setShowUserMenu(!showUserMenu);
+    }
+  };
 
   return (
     <>
@@ -181,23 +217,73 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* User Avatar */}
-          <div
-            onClick={openDrawer}
-            className="flex items-center space-x-2 pl-1.5 sm:pl-2 border-l border-brand-border cursor-pointer"
-            title="Abrir perfil de operador"
+          {/* Quick Logout Button (Visible on md+) */}
+          <button
+            onClick={handleLogout}
+            className="p-1.5 sm:p-2 rounded-lg bg-brand-surface hover:bg-rose-500/10 border border-brand-border hover:border-rose-500/30 text-brand-secondary hover:text-rose-500 transition"
+            title="Sair do Sistema / Desconectar"
+            aria-label="Sair do Sistema"
           >
-            <div className="w-7 h-7 rounded-full bg-white text-black font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
-              {greeting.displayName[0] ? greeting.displayName[0].toUpperCase() : "A"}
-            </div>
-            <div className="hidden xl:block text-left">
-              <div className="text-xs font-medium text-white truncate max-w-[120px]">
-                {greeting.displayName}
+            <LogOut className="w-4 h-4" />
+          </button>
+
+          {/* User Avatar & Dropdown Menu */}
+          <div ref={userMenuRef} className="relative">
+            <div
+              onClick={handleAvatarClick}
+              className="flex items-center space-x-2 pl-1.5 sm:pl-2 border-l border-brand-border cursor-pointer select-none group"
+              title="Perfil e Opções de Conta"
+            >
+              <div className="w-7 h-7 rounded-full bg-white text-black font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                {greeting.displayName[0] ? greeting.displayName[0].toUpperCase() : "A"}
               </div>
-              <div className="text-[10px] text-brand-muted font-mono truncate max-w-[120px]">
-                {greeting.dayAndTime}
+              <div className="hidden xl:block text-left">
+                <div className="text-xs font-semibold text-brand-white truncate max-w-[120px]">
+                  {greeting.displayName}
+                </div>
+                <div className="text-[10px] text-brand-muted font-mono truncate max-w-[120px]">
+                  {greeting.dayAndTime}
+                </div>
               </div>
+              <ChevronDown className="w-3 h-3 text-brand-muted group-hover:text-brand-white hidden sm:block transition" />
             </div>
+
+            {/* Desktop User Profile Popover */}
+            {showUserMenu && (
+              <div className="hidden lg:block absolute right-0 mt-2 w-64 bg-brand-surface border border-brand-border rounded-xl shadow-glow py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="px-4 py-2.5 border-b border-brand-borderSubtle">
+                  <div className="text-xs font-semibold text-brand-white flex items-center space-x-1.5">
+                    <User className="w-3.5 h-3.5 text-brand-secondary" />
+                    <span>{session?.user?.name || "Operador Phantom"}</span>
+                  </div>
+                  <div className="text-[11px] text-brand-muted font-mono mt-0.5 truncate">
+                    {session?.user?.email || "operador@phantomx.pro"}
+                  </div>
+                  <div className="text-[10px] text-brand-secondary font-mono mt-1">
+                    Fuso: {session?.user?.timezone || "America/Sao_Paulo"}
+                  </div>
+                </div>
+
+                <div className="p-1 space-y-0.5 text-xs font-sans">
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setShowUserMenu(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-brand-secondary hover:text-brand-white hover:bg-brand-hover transition"
+                  >
+                    <Settings className="w-3.5 h-3.5 text-brand-secondary" />
+                    <span>Configurações & Perfil</span>
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg text-rose-500 hover:text-white hover:bg-rose-600 transition text-left font-medium"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sair do Sistema</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
