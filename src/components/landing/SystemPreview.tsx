@@ -533,7 +533,7 @@ export const SystemPreview: React.FC = () => {
                 </div>
 
                 {/* Cloaker Operational Mode Switcher Pill */}
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="system-preview-ribbon flex flex-wrap items-center gap-2">
                   {/* Mode Selector */}
                   <div className="flex items-center bg-white dark:bg-brand-surface border border-neutral-300 dark:border-brand-border p-1 rounded-xl text-[11px] font-mono shadow-sm">
                     <button
@@ -541,67 +541,73 @@ export const SystemPreview: React.FC = () => {
                         setCloakerMode("AUTOMATICO");
                         showToast("Modo Operacional: AUTOMÁTICO (6 Camadas Ativas)");
                       }}
-                      className={`px-3 py-1 rounded-lg transition font-medium ${
+                      className={`px-3 py-1 rounded-lg transition font-semibold cursor-pointer ${
                         cloakerMode === "AUTOMATICO"
-                          ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-sm"
-                          : "text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10"
+                          ? "active-mode bg-black text-white dark:bg-white dark:text-black shadow-sm"
+                          : "text-neutral-900 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/10"
                       }`}
                     >
-                      AUTOMÁTICO
+                      <span className={cloakerMode === "AUTOMATICO" ? "text-white dark:text-black font-bold" : "text-neutral-900 dark:text-neutral-300 font-semibold"}>
+                        AUTOMÁTICO
+                      </span>
                     </button>
                     <button
                       onClick={() => {
                         setCloakerMode("SO_WHITEPAGE");
                         showToast("Modo Operacional: SÓ WHITEPAGE (100% de Proteção)");
                       }}
-                      className={`px-3 py-1 rounded-lg transition font-medium ${
+                      className={`px-3 py-1 rounded-lg transition font-semibold cursor-pointer ${
                         cloakerMode === "SO_WHITEPAGE"
-                          ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-sm"
-                          : "text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10"
+                          ? "active-mode bg-black text-white dark:bg-white dark:text-black shadow-sm"
+                          : "text-neutral-900 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/10"
                       }`}
                     >
-                      SÓ WHITEPAGE
+                      <span className={cloakerMode === "SO_WHITEPAGE" ? "text-white dark:text-black font-bold" : "text-neutral-900 dark:text-neutral-300 font-semibold"}>
+                        SÓ WHITEPAGE
+                      </span>
                     </button>
                     <button
                       onClick={() => {
                         setCloakerMode("SO_OFERTA");
                         showToast("Modo Operacional: SÓ OFERTA (Entrega Direta)");
                       }}
-                      className={`px-3 py-1 rounded-lg transition font-medium ${
+                      className={`px-3 py-1 rounded-lg transition font-semibold cursor-pointer ${
                         cloakerMode === "SO_OFERTA"
-                          ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-sm"
-                          : "text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10"
+                          ? "active-mode bg-black text-white dark:bg-white dark:text-black shadow-sm"
+                          : "text-neutral-900 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/10"
                       }`}
                     >
-                      SÓ OFERTA
+                      <span className={cloakerMode === "SO_OFERTA" ? "text-white dark:text-black font-bold" : "text-neutral-900 dark:text-neutral-300 font-semibold"}>
+                        SÓ OFERTA
+                      </span>
                     </button>
                   </div>
 
                   {/* Simulator Buttons */}
                   <button
                     onClick={handleSimulateHuman}
-                    className="hover:bg-black/5 dark:hover:bg-brand-hover flex items-center space-x-1.5 text-[11px] bg-white dark:bg-brand-surface px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-brand-border text-neutral-900 dark:text-white transition font-medium shadow-sm"
+                    className="flex items-center space-x-1.5 text-[11px] bg-white dark:bg-brand-surface px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-brand-border text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-brand-hover transition font-medium shadow-sm cursor-pointer"
                     title="Injetar Lead Humano Real com token fbclid"
                   >
                     <Send className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span className="hidden lg:inline font-semibold">Simular Lead Real</span>
+                    <span className="inline text-neutral-900 dark:text-white font-semibold">Simular Lead Real</span>
                   </button>
 
                   <button
                     onClick={handleSimulateBot}
-                    className="hover:bg-black/5 dark:hover:bg-brand-hover flex items-center space-x-1.5 text-[11px] bg-white dark:bg-brand-surface px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-brand-border text-neutral-900 dark:text-white transition font-medium shadow-sm"
+                    className="flex items-center space-x-1.5 text-[11px] bg-white dark:bg-brand-surface px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-brand-border text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-brand-hover transition font-medium shadow-sm cursor-pointer"
                     title="Injetar Robô de Moderação Meta Ads (AS32934)"
                   >
                     <ShieldAlert className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span className="hidden lg:inline font-semibold">Simular Bot Meta</span>
+                    <span className="inline text-neutral-900 dark:text-white font-semibold">Simular Bot Meta</span>
                   </button>
 
                   <button
                     onClick={loadData}
-                    className="p-1.5 rounded-lg bg-white dark:bg-brand-surface hover:bg-black/5 dark:hover:bg-brand-hover border border-neutral-300 dark:border-brand-border text-neutral-700 dark:text-brand-secondary hover:text-black dark:hover:text-white transition shadow-sm"
+                    className="p-1.5 rounded-lg bg-white dark:bg-brand-surface hover:bg-neutral-100 dark:hover:bg-brand-hover border border-neutral-300 dark:border-brand-border text-neutral-900 dark:text-brand-secondary hover:text-black dark:hover:text-white transition shadow-sm cursor-pointer"
                     title="Atualizar dados"
                   >
-                    <RefreshCw className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-300" />
+                    <RefreshCw className="w-3.5 h-3.5 text-neutral-900 dark:text-neutral-300" />
                   </button>
                 </div>
               </div>
