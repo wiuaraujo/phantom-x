@@ -228,7 +228,7 @@ export const SystemPreview: React.FC = () => {
                       <MetricCards metrics={metrics} layout="compact" />
                     </div>
 
-                    <div className="bg-gradient-to-r from-[#141414] via-[#0f0f0f] to-[#080808] border border-brand-border rounded-xl p-3 flex items-center justify-between text-xs">
+                    <div className="bg-brand-surface border border-brand-border rounded-xl p-3 flex items-center justify-between text-xs">
                       <div className="flex items-center space-x-2.5">
                         <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                         <div>
@@ -243,7 +243,7 @@ export const SystemPreview: React.FC = () => {
                   </div>
 
                   {/* Right Column: Digital Matrix World Map STRETCHED WIDE */}
-                  <div className="lg:col-span-7 xl:col-span-8 flex flex-col bg-gradient-to-b from-[#141414] via-[#090909] to-[#000000] border border-brand-border rounded-2xl p-4 sm:p-5 shadow-glow-sm">
+                  <div className="lg:col-span-7 xl:col-span-8 flex flex-col bg-brand-surface border border-brand-border rounded-2xl p-4 sm:p-5 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-3 text-xs">
                       <div className="flex items-center space-x-2 font-medium text-white">
                         <Radio className="w-3.5 h-3.5 text-white" />
@@ -271,7 +271,7 @@ export const SystemPreview: React.FC = () => {
                 <TrafficCharts timeSeries={timeSeries} geoData={geoData} />
 
                 {/* REAL LIVE ACTIVITY FEED TABLE */}
-                <div className="bg-gradient-to-b from-[#121212] to-[#080808] border border-brand-border rounded-xl p-4 sm:p-5 shadow-glow-sm">
+                <div className="bg-brand-surface border border-brand-border rounded-xl p-4 sm:p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="text-xs sm:text-sm font-semibold text-white tracking-wide flex items-center space-x-2">

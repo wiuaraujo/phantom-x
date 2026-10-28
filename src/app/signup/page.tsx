@@ -214,7 +214,7 @@ export default function SignupPage() {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Seu nome ou apelido operacional"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono"
+                    className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
                   />
                 </div>
               </div>
@@ -232,7 +232,7 @@ export default function SignupPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="operador@suaempresa.com"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono"
+                    className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
                   />
                 </div>
               </div>
@@ -252,16 +252,16 @@ export default function SignupPage() {
                   <select
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full pl-9 pr-8 py-2.5 bg-black/70 border border-white/15 rounded-xl text-xs text-white focus:outline-none focus:border-white transition font-mono appearance-none cursor-pointer"
+                    className="w-full pl-9 pr-8 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white focus:outline-none focus:border-brand-borderHighlight transition font-mono appearance-none cursor-pointer"
                   >
                     {TIMEZONE_REGIONS.map((group) => (
                       <optgroup
                         key={group.region}
                         label={`${group.flag} ${group.region}`}
-                        className="bg-[#0e1017] text-white font-mono"
+                        className="bg-brand-surface text-brand-white font-mono"
                       >
                         {group.timezones.map((tz) => (
-                          <option key={tz.value} value={tz.value} className="bg-black text-white">
+                          <option key={tz.value} value={tz.value} className="bg-brand-surface text-brand-white">
                             {tz.flag} {tz.label} ({tz.offset})
                           </option>
                         ))}
@@ -287,7 +287,7 @@ export default function SignupPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     required
-                    className="w-full pl-9 pr-9 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono"
+                    className="w-full pl-9 pr-9 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
                   />
                   <button
                     type="button"
@@ -312,7 +312,7 @@ export default function SignupPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••••••"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono"
+                    className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
                   />
                 </div>
               </div>
@@ -324,15 +324,15 @@ export default function SignupPage() {
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="rounded border-white/20 bg-black text-white focus:ring-0 mt-0.5"
+                    className="rounded border-brand-border bg-brand-surface text-brand-white focus:ring-0 mt-0.5"
                   />
                   <span className="text-[11px] leading-tight">
                     Concordo com os{" "}
-                    <Link href="/terms" className="text-white underline hover:text-neutral-300">
+                    <Link href="/terms" className="text-brand-white underline hover:text-brand-secondary">
                       Termos de Serviço
                     </Link>{" "}
                     e com a{" "}
-                    <Link href="/privacy" className="text-white underline hover:text-neutral-300">
+                    <Link href="/privacy" className="text-brand-white underline hover:text-brand-secondary">
                       Política de Privacidade
                     </Link>
                     .
@@ -344,7 +344,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-4 py-3 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center space-x-2 disabled:opacity-50"
+                className="w-full mt-4 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
               >
                 {loading ? (
                   <span className="font-mono text-xs animate-pulse">

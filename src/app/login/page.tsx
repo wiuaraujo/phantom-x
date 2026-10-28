@@ -198,7 +198,7 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="operador@suaempresa.com"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono"
+                    className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
                   />
                 </div>
               </div>
@@ -211,7 +211,7 @@ export default function LoginPage() {
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="text-[11px] font-mono text-brand-muted hover:text-white transition"
+                    className="text-[11px] font-mono text-brand-muted hover:text-brand-white transition"
                   >
                     Esqueceu?
                   </Link>
@@ -224,7 +224,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     required
-                    className="w-full pl-9 pr-9 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono"
+                    className="w-full pl-9 pr-9 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
                   />
                   <button
                     type="button"
@@ -243,7 +243,7 @@ export default function LoginPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-white/20 bg-black text-white focus:ring-0"
+                    className="rounded border-brand-border bg-brand-surface text-brand-white focus:ring-0"
                   />
                   <span className="text-[11px]">Manter sessão ativa neste terminal</span>
                 </label>
@@ -253,7 +253,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-4 py-3 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center space-x-2 disabled:opacity-50"
+                className="w-full mt-4 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
               >
                 {loading ? (
                   <span className="font-mono text-xs animate-pulse">

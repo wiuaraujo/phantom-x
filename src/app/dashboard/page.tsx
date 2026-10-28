@@ -83,7 +83,7 @@ export default function DashboardOverview() {
           "o mapa tem que ser estendido de forma imersiva como banner principal"
           ======================================================================
         */}
-        <div className="relative w-full h-[480px] sm:h-[540px] lg:h-[620px] rounded-2xl bg-gradient-to-b from-[#141414] via-[#090909] to-[#000000] border border-brand-border overflow-hidden shadow-2xl flex flex-col">
+        <div className="relative w-full h-[480px] sm:h-[540px] lg:h-[620px] rounded-2xl bg-brand-surface border border-brand-border overflow-hidden shadow-sm flex flex-col">
           {/* Panoramic Map Header Floating Overlay */}
           <div className="absolute top-0 inset-x-0 z-20 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none">
             {/* Title & Live Badge */}
@@ -160,7 +160,7 @@ export default function DashboardOverview() {
           ======================================================================
         */}
         {metrics.totalEvents === 0 && (
-          <div className="bg-gradient-to-r from-[#141414] via-[#0f0f0f] to-[#080808] border border-brand-border rounded-2xl p-6 sm:p-7 shadow-glow-sm">
+          <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 sm:p-7 shadow-sm">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="space-y-2 max-w-2xl">
                 <div className="flex items-center space-x-2 text-xs font-mono text-brand-secondary">
@@ -221,7 +221,7 @@ export default function DashboardOverview() {
           5. LIVE FEED TABLE (RECENT TRAFFIC ACTIVITY)
           ======================================================================
         */}
-        <div className="bg-gradient-to-b from-[#121212] to-[#080808] border border-brand-border rounded-xl p-5 shadow-glow-sm">
+        <div className="bg-brand-surface border border-brand-border rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-semibold text-white tracking-wide flex items-center space-x-2">

@@ -20,7 +20,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-sans">
       {/* 1. Time Series Chart (Volume de Tráfego por Hora) */}
-      <div className="lg:col-span-2 bg-gradient-to-b from-[#131313] via-[#0e0e0e] to-[#080808] border border-brand-border rounded-xl p-5 shadow-glow-sm">
+      <div className="lg:col-span-2 bg-brand-surface border border-brand-border rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-semibold text-white tracking-wide">
@@ -82,7 +82,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
       </div>
 
       {/* 2. Device Breakdown & Origin breakdown */}
-      <div className="bg-gradient-to-b from-[#131313] via-[#0e0e0e] to-[#080808] border border-brand-border rounded-xl p-5 shadow-glow-sm flex flex-col justify-between">
+      <div className="bg-brand-surface border border-brand-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
         <div>
           <h3 className="text-sm font-semibold text-white tracking-wide mb-1">
             Distribuição por Dispositivo

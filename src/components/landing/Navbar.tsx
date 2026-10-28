@@ -59,7 +59,7 @@ export const Navbar: React.FC = () => {
           </Link>
           <Link
             href="/signup"
-            className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white text-black hover:bg-zinc-200 transition shadow-glow-sm flex items-center space-x-1.5 group"
+            className="px-4 py-1.5 rounded-full text-xs font-semibold bg-neutral-900 dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-zinc-200 transition shadow-sm flex items-center space-x-1.5 group"
           >
             <span>{t.nav.getStarted}</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

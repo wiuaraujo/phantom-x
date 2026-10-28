@@ -34,10 +34,10 @@ html.dark {
 }
 
 html.light {
-  --bg-page: 250, 250, 250;
-  --bg-dark: 244, 244, 245;
+  --bg-page: 250, 250, 252;
+  --bg-dark: 244, 244, 246;
   --bg-surface: 255, 255, 255;
-  --bg-hover: 244, 244, 245;
+  --bg-hover: 244, 244, 246;
   --border-color: 228, 228, 231;
   --border-subtle: 238, 238, 240;
   --border-highlight: 212, 212, 216;
@@ -61,62 +61,39 @@ html.dark body {
 }
 
 html.light body {
-  background-color: #fafafa;
+  background-color: #fafafc;
   color: #0f0f12;
 }
 
-/* Light Mode Overrides for Hardcoded Text & Surfaces */
+/* ==========================================================================
+   LIGHT MODE TARGETED REFINEMENTS (Clean, high-contrast, zero-bug)
+   ========================================================================== */
+
+/* 1. Logo in Light Mode MUST BE SOLID BLACK */
+html.light img[alt="Phantom-X Logo"],
+html.light .phantom-logo img,
+html.light img.phantom-logo {
+  filter: invert(1) brightness(0) drop-shadow(0 0 4px rgba(0, 0, 0, 0.2)) !important;
+}
+
+html.dark img[alt="Phantom-X Logo"],
+html.dark .phantom-logo img,
+html.dark img.phantom-logo {
+  filter: invert(0) brightness(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.45)) !important;
+}
+
+/* 2. Headings & Typography */
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light h5,
+html.light h6 {
+  color: #0f0f12 !important;
+}
+
 html.light .text-white {
   color: #0f0f12;
-}
-
-html.light .bg-white.text-black {
-  background-color: #0f0f12 !important;
-  color: #ffffff !important;
-}
-
-html.light .bg-white.text-black:hover {
-  background-color: #27272a !important;
-}
-
-html.light .border-white\/10 {
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-html.light .border-white\/15 {
-  border-color: rgba(0, 0, 0, 0.10) !important;
-}
-
-html.light .border-white\/20 {
-  border-color: rgba(0, 0, 0, 0.12) !important;
-}
-
-html.light .border-white\/30 {
-  border-color: rgba(0, 0, 0, 0.18) !important;
-}
-
-html.light .bg-white\/5 {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-}
-
-html.light .bg-white\/10 {
-  background-color: rgba(0, 0, 0, 0.06) !important;
-}
-
-html.light .bg-white\/\[0\.03\] {
-  background-color: rgba(0, 0, 0, 0.03) !important;
-}
-
-html.light .bg-white\/\[0\.04\] {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-}
-
-html.light .bg-black\/60 {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-}
-
-html.light .bg-black\/80 {
-  background-color: rgba(255, 255, 255, 0.95) !important;
 }
 
 html.light .text-neutral-200 {
@@ -131,7 +108,53 @@ html.light .text-neutral-400 {
   color: #52525b !important;
 }
 
-/* Custom Minimalist Scrollbars */
+/* 3. Primary Buttons (inverted in light mode for elegance) */
+html.light .bg-white.text-black {
+  background-color: #0f0f12 !important;
+  color: #ffffff !important;
+}
+
+html.light .bg-white.text-black * {
+  color: #ffffff !important;
+}
+
+html.light .bg-white.text-black:hover {
+  background-color: #27272a !important;
+}
+
+/* 4. Glass and Border Overrides in Light Mode */
+html.light .border-white\/10,
+html.light .border-white\/15,
+html.light .border-white\/20,
+html.light .border-white\/30 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .bg-white\/5,
+html.light .bg-white\/10,
+html.light .bg-white\/\[0\.03\],
+html.light .bg-white\/\[0\.04\] {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light .bg-black\/60,
+html.light .bg-black\/80,
+html.light .bg-black\/90 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* 5. Transform any dark card hex gradients to pure surface in light mode */
+html.light [class*="from-[#131313]"],
+html.light [class*="from-[#141414]"],
+html.light [class*="from-[#161616]"],
+html.light [class*="from-[#121212]"],
+html.light [class*="from-[#101010]"] {
+  background: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 6. Custom Minimalist Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -151,7 +174,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 }
 
 html.light ::-webkit-scrollbar-track {
-  background: #fafafa;
+  background: #fafafc;
 }
 
 html.light ::-webkit-scrollbar-thumb {
@@ -163,7 +186,7 @@ html.light ::-webkit-scrollbar-thumb:hover {
   background: #a1a1aa;
 }
 
-/* Selection */
+/* 7. Selection */
 html.dark ::selection {
   background: #ffffff;
   color: #000000;

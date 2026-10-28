@@ -57,7 +57,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
           return (
             <div
               key={i}
-              className="bg-gradient-to-br from-[#161616] via-[#101010] to-[#0a0a0a] border border-brand-border rounded-xl p-3.5 transition-all hover:border-neutral-600 hover:shadow-glow-sm flex flex-col justify-between"
+              className="bg-brand-surface border border-brand-border rounded-xl p-3.5 transition-all hover:border-brand-borderHighlight hover:shadow-sm flex flex-col justify-between"
             >
               <div className="flex items-center justify-between text-brand-secondary mb-2">
                 <span className="text-[11px] font-medium tracking-wide">{card.title}</span>
@@ -89,7 +89,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
         })}
 
         {/* 5th Card spanning full width in compact column */}
-        <div className="col-span-2 bg-gradient-to-r from-[#161616] via-[#101010] to-[#0c0c0c] border border-brand-border rounded-xl p-3.5 transition-all hover:border-neutral-600 flex items-center justify-between">
+        <div className="col-span-2 bg-brand-surface border border-brand-border rounded-xl p-3.5 transition-all hover:border-brand-borderHighlight flex items-center justify-between">
           <div>
             <div className="text-[11px] font-medium text-brand-secondary flex items-center space-x-1.5">
               <Globe className="w-3.5 h-3.5 text-brand-muted" />
@@ -117,7 +117,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
         return (
           <div
             key={i}
-            className="bg-gradient-to-br from-[#161616] via-[#101010] to-[#0a0a0a] border border-brand-border rounded-xl p-4 transition-all hover:border-neutral-600 hover:shadow-glow-sm flex flex-col justify-between"
+            className="bg-brand-surface border border-brand-border rounded-xl p-4 transition-all hover:border-brand-borderHighlight hover:shadow-sm flex flex-col justify-between"
           >
             <div className="flex items-center justify-between text-brand-secondary mb-3">
               <span className="text-xs font-medium tracking-wide">{card.title}</span>

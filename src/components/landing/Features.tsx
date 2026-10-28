@@ -78,11 +78,11 @@ export const Features: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="group relative bg-gradient-to-b from-[#131313] via-[#0f0f0f] to-[#080808] border border-brand-border hover:border-neutral-600 rounded-2xl p-7 transition-all duration-300 hover:shadow-glow-sm flex flex-col justify-between"
+                className="group relative bg-brand-surface border border-brand-border hover:border-brand-borderHighlight rounded-2xl p-7 transition-all duration-300 hover:shadow-glow-sm flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-white group-hover:border-white transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-brand-hover border border-brand-border flex items-center justify-center text-white group-hover:border-brand-borderHighlight transition-colors">
                       <Icon className="w-5 h-5" />
                     </div>
                     <span className="text-[11px] font-mono text-brand-muted uppercase tracking-wider">

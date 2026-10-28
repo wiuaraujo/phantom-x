@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
 
       {/* Card Form */}
       <div className="w-full max-w-md mx-auto my-auto py-8 font-sans">
-        <div className="bg-gradient-to-b from-[#141414] via-[#0f0f0f] to-[#080808] border border-brand-border rounded-2xl p-8 shadow-glow">
+        <div className="bg-brand-surface border border-brand-border rounded-2xl p-8 shadow-sm">
           <div className="mb-6 text-center">
             <h1 className="text-2xl font-bold text-white tracking-tight">
               Vamos recuperar seu acesso.

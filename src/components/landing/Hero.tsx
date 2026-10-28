@@ -23,7 +23,7 @@ export const Hero: React.FC = () => {
         */}
         <div className="absolute top-24 sm:top-36 md:top-40 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] xs:w-[380px] xs:h-[380px] sm:w-[540px] sm:h-[540px] md:w-[680px] md:h-[680px] pointer-events-none z-0 opacity-70 sm:opacity-75 flex items-center justify-center">
           {/* Subtle Ambient Radial Backlight */}
-          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)] blur-2xl pointer-events-none" />
+          <div className="absolute inset-0 rounded-full dark:bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.04)_0%,transparent_70%)] blur-2xl pointer-events-none" />
           <TechGlobe className="w-full h-full" />
         </div>
 
@@ -42,7 +42,7 @@ export const Hero: React.FC = () => {
         <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
           <Link
             href="/signup"
-            className="w-full sm:w-auto px-7 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-neutral-200 transition shadow-glow flex items-center justify-center space-x-2 group"
+            className="w-full sm:w-auto px-7 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 group"
           >
             <span>{t.hero.startFree}</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -50,7 +50,7 @@ export const Hero: React.FC = () => {
 
           <a
             href="#how-it-works"
-            className="w-full sm:w-auto px-7 py-3 rounded-xl bg-brand-surface/90 backdrop-blur hover:bg-brand-hover text-white font-medium text-sm border border-brand-border transition flex items-center justify-center space-x-2"
+            className="w-full sm:w-auto px-7 py-3 rounded-xl bg-brand-surface/90 backdrop-blur hover:bg-brand-hover text-brand-white font-medium text-sm border border-brand-border transition flex items-center justify-center space-x-2"
           >
             <span>{t.hero.explore}</span>
             <ChevronDown className="w-4 h-4 text-brand-secondary" />

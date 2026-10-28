@@ -31,12 +31,12 @@ export const Pricing: React.FC = () => {
                 key={plan.id}
                 className={`relative rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 ${
                   plan.highlighted
-                    ? "bg-brand-surface border-2 border-white shadow-glow"
-                    : "bg-brand-surface/60 border border-brand-border hover:border-brand-borderHighlight"
+                    ? "bg-brand-surface border-2 border-neutral-900 dark:border-white shadow-glow-sm"
+                    : "bg-brand-surface border border-brand-border hover:border-brand-borderHighlight"
                 }`}
               >
                 {plan.highlighted && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white text-black text-[10px] font-mono font-bold tracking-wider uppercase shadow-glow-sm">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black text-[10px] font-mono font-bold tracking-wider uppercase shadow-sm">
                     Recomendado
                   </div>
                 )}
@@ -66,7 +66,7 @@ export const Pricing: React.FC = () => {
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feat, i) => (
                       <li key={i} className="flex items-start text-xs text-brand-secondary">
-                        <Check className="w-4 h-4 text-white shrink-0 mr-2.5 mt-0.5" />
+                        <Check className="w-4 h-4 text-neutral-900 dark:text-white shrink-0 mr-2.5 mt-0.5" />
                         <span className="leading-snug">{feat}</span>
                       </li>
                     ))}
@@ -77,8 +77,8 @@ export const Pricing: React.FC = () => {
                   href="/signup"
                   className={`w-full py-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition ${
                     plan.highlighted
-                      ? "bg-white text-black hover:bg-neutral-200 shadow-glow-sm"
-                      : "bg-brand-black hover:bg-brand-surface text-white border border-brand-border"
+                      ? "bg-neutral-900 dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 shadow-sm"
+                      : "bg-brand-hover hover:bg-brand-surface text-brand-white border border-brand-border"
                   }`}
                 >
                   <span>Começar no plano {plan.name}</span>
