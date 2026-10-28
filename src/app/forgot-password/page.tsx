@@ -25,9 +25,9 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-brand-black flex flex-col justify-between p-6">
       {/* Top Header */}
       <div className="flex justify-between items-center max-w-5xl mx-auto w-full">
-        <Link href="/" className="flex items-center space-x-3">
-          <Logo size={28} />
-          <span className="font-mono text-sm font-bold text-brand-white tracking-widest">
+        <Link href="/" className="flex items-center space-x-3 group">
+          <Logo size={36} className="group-hover:scale-105 transition-transform" />
+          <span className="font-poppins text-base sm:text-lg font-bold tracking-tight text-brand-white">
             {siteConfig.name}
           </span>
         </Link>

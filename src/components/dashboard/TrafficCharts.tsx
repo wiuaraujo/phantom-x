@@ -20,8 +20,8 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-sans">
       {/* 1. Time Series Chart (Volume de Tráfego por Hora) */}
-      <div className="lg:col-span-2 bg-brand-surface border border-brand-border rounded-xl p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+      <div className="lg:col-span-2 bg-brand-surface border border-brand-border rounded-xl p-3.5 sm:p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <h3 className="text-sm font-semibold text-brand-white tracking-wide">
               Volume de Requisições (Últimas 24h)
@@ -30,7 +30,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
               Distribuição temporal de eventos limpos vs. tráfego automatizado
             </p>
           </div>
-          <div className="flex items-center space-x-4 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
             <div className="flex items-center space-x-1.5">
               <span className="w-2.5 h-2.5 rounded-sm bg-neutral-900 dark:bg-white" />
               <span className="text-brand-secondary">Acessos Reais</span>

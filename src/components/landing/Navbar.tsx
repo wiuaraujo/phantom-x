@@ -20,12 +20,12 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
-      <nav className="w-full max-w-[1100px] h-14 rounded-full bg-brand-black/80 backdrop-blur-xl border border-brand-border px-5 flex items-center justify-between shadow-glow-sm transition-all hover:border-brand-borderHighlight">
+    <header className="fixed top-4 sm:top-6 left-0 right-0 z-50 flex justify-center px-3 sm:px-4">
+      <nav className="w-full max-w-[1100px] h-14 sm:h-16 rounded-full bg-brand-black/85 backdrop-blur-xl border border-brand-border px-3.5 sm:px-5 flex items-center justify-between shadow-glow-sm transition-all hover:border-brand-borderHighlight">
         {/* Brand Logo & Name */}
-        <Link href="/" className="flex items-center space-x-3 group">
-          <Logo size={28} className="group-hover:scale-105 transition-transform" />
-          <span className="font-mono text-sm font-bold text-brand-white tracking-widest">
+        <Link href="/" className="flex items-center space-x-2.5 sm:space-x-3 group shrink-0">
+          <Logo size={36} className="group-hover:scale-105 transition-transform" />
+          <span className="font-poppins text-base sm:text-lg font-bold tracking-tight text-brand-white">
             {siteConfig.name}
           </span>
         </Link>
@@ -82,8 +82,14 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="absolute top-16 left-4 right-4 bg-brand-black/95 backdrop-blur-2xl border border-brand-border rounded-2xl p-6 shadow-glow z-50 flex flex-col space-y-4 md:hidden">
-          <div className="flex flex-col space-y-3 text-sm">
+        <div className="absolute top-16 left-3 right-3 bg-brand-surface/98 backdrop-blur-2xl border border-brand-border rounded-2xl p-5 shadow-2xl z-50 flex flex-col space-y-4 md:hidden">
+          <div className="flex items-center space-x-2.5 pb-3 border-b border-brand-border">
+            <Logo size={32} />
+            <span className="font-poppins text-base font-bold tracking-tight text-brand-white">
+              {siteConfig.name}
+            </span>
+          </div>
+          <div className="flex flex-col space-y-3 text-sm font-poppins">
             {navLinks.map((item) => (
               <Link
                 key={item.href}

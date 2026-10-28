@@ -39,7 +39,7 @@ export default function GlobalMapPage() {
             geoData={geoData}
             selectedCountry={selectedCountry}
             onSelectCountry={setSelectedCountry}
-            className="h-[520px]"
+            className="h-[360px] sm:h-[460px] md:h-[540px] w-full rounded-2xl border border-brand-border"
           />
         </div>
 

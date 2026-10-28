@@ -7,7 +7,7 @@ interface LogoProps {
   darkBg?: boolean;
 }
 
-export const Logo: React.FC<LogoProps> = ({ className = "", size = 30, darkBg = false }) => {
+export const Logo: React.FC<LogoProps> = ({ className = "", size = 36, darkBg = false }) => {
   return (
     <div
       className={`relative flex items-center justify-center shrink-0 phantom-logo-container ${className}`}

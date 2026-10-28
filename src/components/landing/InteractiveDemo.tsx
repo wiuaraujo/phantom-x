@@ -51,7 +51,7 @@ export const InteractiveDemo: React.FC = () => {
         </div>
 
         {/* Dashboard Preview Container with 100% Solid Black Background */}
-        <div className="bg-black border border-brand-border rounded-2xl p-6 shadow-glow space-y-6">
+        <div className="bg-black border border-brand-border rounded-2xl p-3.5 sm:p-5 md:p-6 shadow-glow space-y-6">
           {/* Top Demo Bar */}
           <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-brand-borderSubtle">
             <div className="flex items-center space-x-3">
@@ -87,12 +87,12 @@ export const InteractiveDemo: React.FC = () => {
 
           {/* Dotted World Map (100% Pure Black, Interactive Cursor Wave Animation, Scroll Wheel Zoom) */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-brand-secondary">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs font-mono">
+              <span className="text-brand-secondary text-[11px] sm:text-xs">
                 MATRIZ DE TELEMETRIA GLOBAL EM TEMPO REAL
               </span>
-              <span className="text-brand-muted text-[11px]">
-                {selectedCountry ? `Filtrando por: [${selectedCountry}]` : "Passe o cursor sobre os pontos ou clique para filtrar"}
+              <span className="text-brand-muted text-[10px] sm:text-[11px]">
+                {selectedCountry ? `Filtrando por: [${selectedCountry}]` : "Toque nos nós para filtrar os dados em tempo real"}
               </span>
             </div>
             <DigitalMatrixWorldMap
@@ -100,6 +100,7 @@ export const InteractiveDemo: React.FC = () => {
               geoData={geoData}
               selectedCountry={selectedCountry}
               onSelectCountry={setSelectedCountry}
+              className="h-[340px] sm:h-[440px] md:h-[500px] w-full rounded-2xl border border-brand-border/60"
             />
           </div>
 

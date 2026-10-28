@@ -87,12 +87,12 @@ export default function SignupPage() {
         {/* Top Header Logo & Theme Toggle */}
         <div className="relative z-10 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group">
-            <Logo size={36} />
+            <Logo size={40} className="group-hover:scale-105 transition-transform shrink-0" />
             <div className="flex flex-col">
-              <span className="font-mono text-sm font-bold text-brand-white tracking-widest leading-none">
+              <span className="font-poppins text-lg font-bold tracking-tight text-brand-white leading-none">
                 {siteConfig.name}
               </span>
-              <span className="text-[10px] text-brand-muted tracking-wider font-mono uppercase mt-0.5">
+              <span className="text-[10px] text-brand-muted tracking-wider font-sans uppercase mt-1">
                 Traffic Intelligence & Stealth Cloaking
               </span>
             </div>
@@ -173,14 +173,14 @@ export default function SignupPage() {
           <div className="bg-gradient-to-b from-brand-surface/95 via-brand-dark/95 to-brand-black/95 border border-brand-border rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl ring-1 ring-brand-border/40">
             {/* Top Logo & System Brand */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="relative mb-3">
+              <div className="relative mb-4">
                 <div className="absolute inset-0 bg-neutral-200/50 dark:bg-white/10 rounded-2xl blur-lg animate-pulse" />
-                <div className="relative w-14 h-14 rounded-2xl bg-brand-surface border border-brand-border p-2 flex items-center justify-center shadow-lg">
-                  <Logo size={42} />
+                <div className="relative w-16 h-16 rounded-2xl bg-brand-surface border border-brand-border p-2.5 flex items-center justify-center shadow-lg">
+                  <Logo size={48} />
                 </div>
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white font-poppins">
                 Crie sua conta
               </h1>
               <p className="text-xs text-brand-secondary mt-1 max-w-xs">

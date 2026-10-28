@@ -7,14 +7,14 @@ import { Check, ArrowRight } from "lucide-react";
 
 export const Pricing: React.FC = () => {
   return (
-    <section id="pricing" className="py-24 px-6 bg-brand-black border-t border-brand-border">
+    <section id="pricing" className="py-20 sm:py-24 px-4 sm:px-6 bg-brand-black border-t border-brand-border">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="text-xs font-mono tracking-widest uppercase text-brand-secondary">
             PLANOS & INFRAESTRUTURA
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-brand-white tracking-tight mt-3 mb-4">
+          <h2 className="text-2xl sm:text-4xl font-bold text-brand-white tracking-tight mt-3 mb-4">
             Previsibilidade para cada escala de operação.
           </h2>
           <p className="text-sm sm:text-base text-brand-secondary">
@@ -24,12 +24,12 @@ export const Pricing: React.FC = () => {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
           {siteConfig.pricing.map((plan) => {
             return (
               <div
                 key={plan.id}
-                className={`relative rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 ${
+                className={`relative rounded-2xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 ${
                   plan.highlighted
                     ? "bg-brand-surface border-2 border-neutral-900 dark:border-white shadow-glow-sm"
                     : "bg-brand-surface border border-brand-border hover:border-brand-borderHighlight"

@@ -13,9 +13,9 @@ export const Footer: React.FC = () => {
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
         {/* Brand Column */}
         <div className="md:col-span-2 space-y-4">
-          <Link href="/" className="flex items-center space-x-3">
-            <Logo size={28} />
-            <span className="font-mono text-base font-bold text-brand-white tracking-widest">
+          <Link href="/" className="flex items-center space-x-3 group">
+            <Logo size={36} className="group-hover:scale-105 transition-transform" />
+            <span className="font-poppins text-lg sm:text-xl font-bold tracking-tight text-brand-white">
               {siteConfig.name}
             </span>
           </Link>

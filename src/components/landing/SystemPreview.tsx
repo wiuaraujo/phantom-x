@@ -97,7 +97,7 @@ export const SystemPreview: React.FC = () => {
             </div>
 
             {/* Address Bar */}
-            <div className="text-[11px] font-mono text-neutral-300 dark:text-brand-secondary flex items-center space-x-1.5 bg-black/40 dark:bg-brand-surface/80 px-3.5 py-1 rounded-full border border-white/10 dark:border-brand-border">
+            <div className="hidden sm:flex text-[11px] font-mono text-neutral-300 dark:text-brand-secondary items-center space-x-1.5 bg-black/40 dark:bg-brand-surface/80 px-3.5 py-1 rounded-full border border-white/10 dark:border-brand-border">
               <span className="text-neutral-400 dark:text-brand-muted">https://</span>
               <span className="text-white font-medium">console.phantomx.pro/dashboard</span>
             </div>
@@ -122,8 +122,8 @@ export const SystemPreview: React.FC = () => {
               <div>
                 {/* Brand Header */}
                 <div className="h-14 flex items-center px-4 border-b border-brand-border space-x-3">
-                  <Logo size={26} />
-                  <span className="font-sans text-sm font-bold text-brand-white tracking-wider">
+                  <Logo size={32} />
+                  <span className="font-poppins text-base font-bold text-brand-white tracking-tight">
                     Phantom-X
                   </span>
                   <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-mono bg-brand-surface border border-brand-border text-brand-muted">
@@ -256,12 +256,13 @@ export const SystemPreview: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex-1 w-full min-h-[340px] flex items-center justify-center">
+                    <div className="flex-1 w-full min-h-[320px] flex items-center justify-center">
                       <DigitalMatrixWorldMap
                         events={events}
                         geoData={geoData}
                         selectedCountry={selectedCountry}
                         onSelectCountry={setSelectedCountry}
+                        className="h-[320px] sm:h-[400px] w-full rounded-2xl border border-brand-border/60"
                       />
                     </div>
                   </div>

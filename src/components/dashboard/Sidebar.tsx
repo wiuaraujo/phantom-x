@@ -54,9 +54,9 @@ export const Sidebar: React.FC = () => {
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-3 md:px-5 border-b border-brand-border">
           <Link href="/dashboard" className="flex items-center space-x-3 overflow-hidden group">
-            <Logo size={26} className="group-hover:scale-105 transition-transform shrink-0" />
+            <Logo size={34} className="group-hover:scale-105 transition-transform shrink-0" />
             {!collapsed && (
-              <span className="font-sans text-sm font-bold text-brand-white tracking-wider truncate">
+              <span className="font-poppins text-base font-bold tracking-tight text-brand-white truncate">
                 {siteConfig.name}
               </span>
             )}

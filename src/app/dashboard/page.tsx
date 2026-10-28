@@ -83,7 +83,7 @@ export default function DashboardOverview() {
           "o mapa tem que ser estendido de forma imersiva como banner principal"
           ======================================================================
         */}
-        <div className="relative w-full h-[480px] sm:h-[540px] lg:h-[620px] rounded-2xl bg-brand-surface border border-brand-border overflow-hidden shadow-sm flex flex-col">
+        <div className="relative w-full h-[360px] sm:h-[480px] lg:h-[620px] rounded-2xl bg-brand-surface border border-brand-border overflow-hidden shadow-sm flex flex-col">
           {/* Panoramic Map Header Floating Overlay */}
           <div className="absolute top-0 inset-x-0 z-20 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none">
             {/* Title & Live Badge */}
