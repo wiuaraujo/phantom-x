@@ -16,12 +16,9 @@ export const Hero: React.FC = () => {
       <div className="relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center">
         {/* 
           3D Rotating Dotted Globe:
-          Anchored directly relative to this headline container so on mobile, tablet and desktop
-          it is ALWAYS framed directly behind the headline text (h1 + subtitle),
-          never sliding down behind the pipeline or routing diagram.
-          The top curve comfortably clears the navbar.
+          Anchored directly below the navbar, centered behind the headline.
         */}
-        <div className="absolute top-24 sm:top-36 md:top-40 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] max-w-[95vw] xs:w-[380px] xs:h-[380px] sm:w-[540px] sm:h-[540px] md:w-[680px] md:h-[680px] pointer-events-auto z-0 opacity-90 sm:opacity-95 flex items-center justify-center">
+        <div className="absolute top-48 sm:top-60 md:top-64 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] max-w-[95vw] xs:w-[380px] xs:h-[380px] sm:w-[500px] sm:h-[500px] md:w-[600px] md:h-[600px] pointer-events-auto z-0 opacity-90 sm:opacity-95 flex items-center justify-center">
           {/* Subtle Ambient Radial Backlight */}
           <div className="absolute inset-0 rounded-full dark:bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.04)_0%,transparent_70%)] blur-2xl pointer-events-none" />
           <TechGlobe className="w-full h-full" />

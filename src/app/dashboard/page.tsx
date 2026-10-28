@@ -7,8 +7,10 @@ import { MetricCards } from "@/components/dashboard/MetricCards";
 import { DigitalMatrixWorldMap } from "@/components/dashboard/DigitalMatrixWorldMap";
 import { TrafficCharts } from "@/components/dashboard/TrafficCharts";
 import { store } from "@/lib/store";
+import { auth } from "@/lib/auth";
 import { TrafficEvent, GeoAggregate, MetricOverview } from "@/types";
 import { getCountryFlag, LocationBadge } from "@/lib/geoFlags";
+import { getDashboardGreeting } from "@/lib/userGreeting";
 import {
   Activity,
   RefreshCw,
@@ -21,12 +23,17 @@ import {
   ArrowRight,
   Shield,
   Zap,
+  Sliders,
+  Clock,
 } from "lucide-react";
 
 export default function DashboardOverview() {
   const [selectedDomain, setSelectedDomain] = useState("Todos os Domínios");
   const [selectedPeriod, setSelectedPeriod] = useState("24h");
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+
+  const [session, setSession] = useState(() => auth.getSession());
+  const [greeting, setGreeting] = useState(() => getDashboardGreeting(session?.user));
 
   const [metrics, setMetrics] = useState<MetricOverview>(store.getOverviewMetrics());
   const [geoData, setGeoData] = useState<GeoAggregate[]>(store.getGeoDistribution());
@@ -35,6 +42,10 @@ export default function DashboardOverview() {
   const [availableDomains, setAvailableDomains] = useState<string[]>(["Todos os Domínios"]);
 
   const loadData = () => {
+    const currentSession = auth.getSession();
+    setSession(currentSession);
+    setGreeting(getDashboardGreeting(currentSession?.user));
+
     setMetrics(store.getOverviewMetrics());
     setGeoData(store.getGeoDistribution());
     setTimeSeries(store.getTimeSeries(24));
@@ -77,6 +88,39 @@ export default function DashboardOverview() {
       />
 
       <div className="p-3 sm:p-6 lg:p-8 space-y-5 sm:space-y-7 max-w-[1600px] w-full mx-auto">
+        {/* 
+          ======================================================================
+          0. PERSONALIZED OPERATIONAL GREETING BANNER
+          "exemplo: Quinta-feira 14:00, Olá, Will algo assim... baseando-se no apelido
+          que o usuário configurou e data e horário referente ao fuso-horário"
+          ======================================================================
+        */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl bg-brand-surface border border-brand-border shadow-sm">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-xl bg-white text-black font-mono font-bold text-base flex items-center justify-center shrink-0 shadow-sm">
+              {greeting.displayName[0] ? greeting.displayName[0].toUpperCase() : "W"}
+            </div>
+            <div>
+              <div className="text-sm sm:text-base font-bold text-brand-white font-sans flex items-center space-x-2">
+                <span>{greeting.fullGreeting}</span>
+              </div>
+              <p className="text-xs text-brand-secondary mt-0.5">
+                Centro de comando sincronizado com o fuso-horário{" "}
+                <span className="font-mono text-brand-white font-medium">{greeting.timezone}</span>.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 shrink-0 self-start sm:self-auto text-xs font-mono">
+            <Link
+              href="/dashboard/settings"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-hover text-brand-secondary hover:text-white border border-brand-border transition"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>Configurações de Conta</span>
+            </Link>
+          </div>
+        </div>
         {/* 
           ======================================================================
           1. IMMERSIVE MAIN BANNER: DIGITAL MATRIX WORLD MAP

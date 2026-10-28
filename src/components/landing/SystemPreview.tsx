@@ -278,7 +278,7 @@ export const SystemPreview: React.FC = () => {
       <div className="max-w-4xl mx-auto text-center mb-12 flex flex-col items-center">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-surface border border-brand-border text-brand-white text-xs font-mono mb-3">
           <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-          <span>CONSOLE OPERACIONAL CLOAKILIOSHIELD V2.4</span>
+          <span>CONSOLE OPERACIONAL PHANTOM-X V2.4</span>
         </div>
         <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-brand-white mb-3 font-sans">
           Interface Real de Controle em Borda
@@ -343,7 +343,7 @@ export const SystemPreview: React.FC = () => {
                     <span className="font-poppins text-sm font-bold text-brand-white tracking-tight">
                       Phantom-X
                     </span>
-                    <span className="text-[10px] text-brand-muted font-mono">CloakilioShield v2.4</span>
+                    <span className="text-[10px] text-brand-muted font-mono">Motor de Borda v2.4</span>
                   </div>
                   <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-mono bg-brand-surface border border-brand-border text-brand-muted">
                     EDGE
@@ -434,7 +434,7 @@ export const SystemPreview: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <h1 className="text-xs sm:text-sm font-semibold text-brand-white tracking-wide">
                       {activeTab === "overview" && "Visão Geral da Operação"}
-                      {activeTab === "layers" && "Motor CloakilioShield (6 Camadas)"}
+                      {activeTab === "layers" && "Motor de Borda Phantom-X (6 Camadas)"}
                       {activeTab === "worker" && "Cloudflare Worker Edge Generator"}
                       {activeTab === "live" && "Auditoria de Tráfego em Tempo Real"}
                     </h1>
@@ -556,12 +556,12 @@ export const SystemPreview: React.FC = () => {
                           <MetricCards metrics={metrics} layout="compact" />
                         </div>
 
-                        {/* Cloakilio Operational Badge */}
+                        {/* Phantom-X Operational Badge */}
                         <div className="bg-brand-surface border border-brand-border rounded-xl p-3.5 space-y-2 text-xs">
                           <div className="flex items-center justify-between">
                             <span className="font-semibold text-brand-white text-xs flex items-center space-x-1.5">
                               <ShieldCheck className="w-3.5 h-3.5 text-brand-white" />
-                              <span>Blindagem CloakilioShield</span>
+                              <span>Blindagem Phantom-X</span>
                             </span>
                             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-hover text-brand-white border border-brand-border">
                               {cloakerMode}
@@ -720,7 +720,7 @@ export const SystemPreview: React.FC = () => {
                 )}
 
                 {/* ========================================================= */}
-                {/* TAB 2: MOTOR CLOAKILIOSHIELD 6 CAMADAS                   */}
+                {/* TAB 2: MOTOR DE BORDA PHANTOM-X (6 CAMADAS)              */}
                 {/* ========================================================= */}
                 {activeTab === "layers" && (
                   <div className="space-y-6">

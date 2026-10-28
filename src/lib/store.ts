@@ -52,15 +52,52 @@ const REFERRERS = [
   "Direto / Marcador",
 ];
 
-// Configuration CloakilioShield
-const CLOAKILIO_STORAGE_KEY = "phantom_cloakilio_config";
-let cloakilioConfigStore: CloakilioConfig = { ...DEFAULT_CLOAKILIO_CONFIG };
+// Configuration Phantom-X Motor de Borda
+const PHANTOM_CLOAKER_STORAGE_KEY = "phantom_cloaker_config";
+const CLOAKILIO_STORAGE_KEY = PHANTOM_CLOAKER_STORAGE_KEY;
+let phantomCloakerConfigStore: CloakilioConfig = { ...DEFAULT_CLOAKILIO_CONFIG };
 
 // USER ACCOUNT STORES START AT 100% ZERO FOR NEW ACCOUNTS
 let domainsStore: Domain[] = [];
 let campaignsStore: Campaign[] = [];
 let routingRulesStore: RoutingRule[] = [];
 let eventsStore: TrafficEvent[] = [];
+
+// Helper para obter o ID do usuário atualmente logado
+function getActiveUserId(): string {
+  if (typeof window === "undefined") return "master";
+  try {
+    const raw = localStorage.getItem("phantom_session");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.user?.id) return parsed.user.id;
+    }
+  } catch {}
+  return "master";
+}
+
+function getUserScopedKey(suffix: string): string {
+  return `phantom_user_${getActiveUserId()}_${suffix}`;
+}
+
+function loadUserArray<T>(suffix: string, fallback: T[] = []): T[] {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = localStorage.getItem(getUserScopedKey(suffix));
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return fallback;
+}
+
+function saveUserArray<T>(suffix: string, data: T[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(getUserScopedKey(suffix), JSON.stringify(data));
+  } catch {}
+}
 
 // Demo cache for landing page showcase
 let demoEventsCache: TrafficEvent[] = [];
@@ -73,7 +110,7 @@ function generateDemoEventsPool(count: number = 60): TrafficEvent[] {
     const timeOffset = Math.floor(i * (120000 / count));
     const loc = GLOBAL_LOCATIONS[Math.floor(Math.random() * GLOBAL_LOCATIONS.length)];
     
-    // Simula proporção realista do Cloakilio (85% humanos limpos, 15% bots / moderadores)
+    // Simula proporção realista do Phantom-X (85% humanos limpos, 15% bots / moderadores)
     const isBot = Math.random() < 0.15;
     const isSuspicious = !isBot && Math.random() < 0.10;
 
@@ -170,31 +207,42 @@ export const store = {
     campaignsStore = [];
     routingRulesStore = [];
     eventsStore = [];
+    saveUserArray("domains", []);
+    saveUserArray("campaigns", []);
+    saveUserArray("events", []);
   },
 
-  getCloakilioConfig(): CloakilioConfig {
+  getPhantomCloakerConfig(): CloakilioConfig {
     if (typeof window !== "undefined") {
       try {
-        const stored = localStorage.getItem(CLOAKILIO_STORAGE_KEY);
+        const stored = localStorage.getItem(PHANTOM_CLOAKER_STORAGE_KEY) || localStorage.getItem("phantom_cloakilio_config");
         if (stored) {
-          cloakilioConfigStore = { ...DEFAULT_CLOAKILIO_CONFIG, ...JSON.parse(stored) };
+          phantomCloakerConfigStore = { ...DEFAULT_CLOAKILIO_CONFIG, ...JSON.parse(stored) };
         }
       } catch {}
     }
-    return { ...cloakilioConfigStore };
+    return { ...phantomCloakerConfigStore };
   },
 
-  updateCloakilioConfig(partial: Partial<CloakilioConfig>): CloakilioConfig {
-    cloakilioConfigStore = {
-      ...cloakilioConfigStore,
+  getCloakilioConfig(): CloakilioConfig {
+    return this.getPhantomCloakerConfig();
+  },
+
+  updatePhantomCloakerConfig(partial: Partial<CloakilioConfig>): CloakilioConfig {
+    phantomCloakerConfigStore = {
+      ...phantomCloakerConfigStore,
       ...partial,
     };
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem(CLOAKILIO_STORAGE_KEY, JSON.stringify(cloakilioConfigStore));
+        localStorage.setItem(PHANTOM_CLOAKER_STORAGE_KEY, JSON.stringify(phantomCloakerConfigStore));
       } catch {}
     }
-    return { ...cloakilioConfigStore };
+    return { ...phantomCloakerConfigStore };
+  },
+
+  updateCloakilioConfig(partial: Partial<CloakilioConfig>): CloakilioConfig {
+    return this.updatePhantomCloakerConfig(partial);
   },
 
   seedAccountDemo() {
@@ -239,7 +287,8 @@ export const store = {
   },
 
   getOverviewMetrics(): MetricOverview {
-    if (eventsStore.length === 0) {
+    const userEvents = this.getEvents({ limit: 10000 });
+    if (userEvents.length === 0) {
       return {
         activeVisitors: 0,
         totalEvents: 0,
@@ -255,13 +304,13 @@ export const store = {
       };
     }
 
-    const totalEvents = eventsStore.length;
-    const threats = eventsStore.filter((e) => e.isThreat).length;
-    const uniqueCountries = new Set(eventsStore.map((e) => e.countryCode)).size;
-    const uniqueSessions = new Set(eventsStore.map((e) => e.ipMasked)).size;
+    const totalEvents = userEvents.length;
+    const threats = userEvents.filter((e) => e.isThreat).length;
+    const uniqueCountries = new Set(userEvents.map((e) => e.countryCode)).size;
+    const uniqueSessions = new Set(userEvents.map((e) => e.ipMasked)).size;
 
     const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
-    const recentClean = eventsStore.filter(
+    const recentClean = userEvents.filter(
       (e) => new Date(e.timestamp).getTime() > fifteenMinAgo && !e.isThreat
     );
     const activeVisitors = Math.max(
@@ -292,7 +341,8 @@ export const store = {
     country?: string;
     search?: string;
   }): TrafficEvent[] {
-    let result = [...eventsStore];
+    const allEvents = loadUserArray<TrafficEvent>("events", eventsStore);
+    let result = [...allEvents];
 
     if (filter?.domain && filter.domain !== "all" && filter.domain !== "Todos os Domínios") {
       result = result.filter((e) => e.domain === filter.domain);
@@ -522,14 +572,19 @@ export const store = {
       threatReasons: assessment.threatReasons,
     };
 
-    eventsStore.unshift(event);
-    if (eventsStore.length > 500) {
-      eventsStore.pop();
+    const allEvents = loadUserArray<TrafficEvent>("events", eventsStore);
+    allEvents.unshift(event);
+    if (allEvents.length > 500) {
+      allEvents.pop();
     }
+    eventsStore = allEvents;
+    saveUserArray("events", allEvents);
 
-    const dom = domainsStore.find((d) => d.name === domainName);
+    const currentDomains = loadUserArray<Domain>("domains", domainsStore);
+    const dom = currentDomains.find((d) => d.name === domainName);
     if (dom) {
       dom.eventsCount = (dom.eventsCount || 0) + 1;
+      saveUserArray("domains", currentDomains);
     }
     if (camp) {
       camp.totalEvents += 1;
@@ -541,7 +596,7 @@ export const store = {
   },
 
   getDomains(): Domain[] {
-    return [...domainsStore];
+    return loadUserArray<Domain>("domains", domainsStore);
   },
 
   addDomain(name: string): Domain {
@@ -570,38 +625,48 @@ export const store = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    domainsStore.push(newDomain);
+    const current = loadUserArray<Domain>("domains", domainsStore);
+    current.push(newDomain);
+    domainsStore = current;
+    saveUserArray("domains", current);
     return newDomain;
   },
 
   verifyDomainDNS(domainId: string): Domain | null {
-    const domain = domainsStore.find((d) => d.id === domainId);
+    const current = loadUserArray<Domain>("domains", domainsStore);
+    const domain = current.find((d) => d.id === domainId);
     if (!domain) return null;
 
     domain.dnsRecords.forEach((r) => (r.verified = true));
     domain.status = "active";
     domain.sslStatus = "valid";
     domain.updatedAt = new Date().toISOString();
+    domainsStore = current;
+    saveUserArray("domains", current);
     return { ...domain };
   },
 
   deleteDomain(domainId: string): boolean {
-    const initialLen = domainsStore.length;
-    domainsStore = domainsStore.filter((d) => d.id !== domainId);
-    return domainsStore.length < initialLen;
+    const current = loadUserArray<Domain>("domains", domainsStore);
+    const initialLen = current.length;
+    const filtered = current.filter((d) => d.id !== domainId);
+    domainsStore = filtered;
+    saveUserArray("domains", filtered);
+    return filtered.length < initialLen;
   },
 
   getCampaigns(): Campaign[] {
-    return [...campaignsStore];
+    return loadUserArray<Campaign>("campaigns", campaignsStore);
   },
 
   createCampaign(data: Partial<Campaign>): Campaign {
-    const domain = domainsStore.find((d) => d.id === data.domainId) || domainsStore[0];
+    const currentDomains = this.getDomains();
+    const domain = currentDomains.find((d) => d.id === data.domainId) || currentDomains[0];
     const newCamp: Campaign = {
       id: `camp_${Date.now().toString(36)}`,
-      name: data.name || "Nova Campanha Cloaker",
+      name: data.name || "Nova Campanha Phantom-X",
       domainId: domain ? domain.id : "default",
-      domainName: domain ? domain.name : "phantomx.pro",
+      domainName: domain ? domain.name : (currentDomains[0]?.name || "app.phantomx.pro"),
       status: "active",
       mode: data.mode || "AUTOMATICO",
       targetUrl: data.targetUrl || data.ofertaUrl || "https://seusite.com/oferta",
@@ -624,28 +689,39 @@ export const store = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    campaignsStore.push(newCamp);
+    const current = loadUserArray<Campaign>("campaigns", campaignsStore);
+    current.push(newCamp);
+    campaignsStore = current;
+    saveUserArray("campaigns", current);
+
     if (domain) {
       domain.activeCampaigns = (domain.activeCampaigns || 0) + 1;
+      saveUserArray("domains", currentDomains);
     }
     return newCamp;
   },
 
   updateCampaign(campaignId: string, data: Partial<Campaign>): Campaign | null {
-    const idx = campaignsStore.findIndex((c) => c.id === campaignId);
+    const current = loadUserArray<Campaign>("campaigns", campaignsStore);
+    const idx = current.findIndex((c) => c.id === campaignId);
     if (idx === -1) return null;
-    campaignsStore[idx] = {
-      ...campaignsStore[idx],
+    current[idx] = {
+      ...current[idx],
       ...data,
       updatedAt: new Date().toISOString(),
     };
-    return campaignsStore[idx];
+    campaignsStore = current;
+    saveUserArray("campaigns", current);
+    return current[idx];
   },
 
   deleteCampaign(campaignId: string): boolean {
-    const initialLen = campaignsStore.length;
-    campaignsStore = campaignsStore.filter((c) => c.id !== campaignId);
-    return campaignsStore.length < initialLen;
+    const current = loadUserArray<Campaign>("campaigns", campaignsStore);
+    const initialLen = current.length;
+    const filtered = current.filter((c) => c.id !== campaignId);
+    campaignsStore = filtered;
+    saveUserArray("campaigns", filtered);
+    return filtered.length < initialLen;
   },
 
   getRoutingRules(): RoutingRule[] {
@@ -678,13 +754,14 @@ export const store = {
   },
 
   getGeoDistribution(): GeoAggregate[] {
-    if (eventsStore.length === 0) {
+    const userEvents = this.getEvents({ limit: 10000 });
+    if (userEvents.length === 0) {
       return [];
     }
 
     const countryMap = new Map<string, { country: string; code: string; count: number; lat: number; lon: number }>();
 
-    eventsStore.forEach((evt) => {
+    userEvents.forEach((evt) => {
       const existing = countryMap.get(evt.countryCode);
       if (existing) {
         existing.count += 1;
@@ -699,7 +776,7 @@ export const store = {
       }
     });
 
-    const total = eventsStore.length;
+    const total = userEvents.length;
     return Array.from(countryMap.values())
       .map((item) => ({
         country: item.country,
@@ -713,20 +790,21 @@ export const store = {
   },
 
   getTimeSeries(hours: number = 24): { hour: string; events: number; threats: number }[] {
+    const userEvents = this.getEvents({ limit: 10000 });
     const result = [];
     const now = new Date();
     for (let i = hours - 1; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 3600000);
       const hourStr = `${d.getHours().toString().padStart(2, "0")}:00`;
 
-      if (eventsStore.length === 0) {
+      if (userEvents.length === 0) {
         result.push({ hour: hourStr, events: 0, threats: 0 });
         continue;
       }
 
       const windowStart = d.getTime() - 1800000;
       const windowEnd = d.getTime() + 1800000;
-      const hourEvts = eventsStore.filter((e) => {
+      const hourEvts = userEvents.filter((e) => {
         const t = new Date(e.timestamp).getTime();
         return t >= windowStart && t <= windowEnd;
       });

@@ -35,7 +35,7 @@ export interface CloakerAssessment {
 }
 
 // ============================================================================
-// 🛡️ LISTAS DE SEGURANÇA E ASNs DO MOTOR CLOAKILIO
+// 🛡️ LISTAS DE SEGURANÇA E ASNs DO MOTOR PHANTOM-X
 // ============================================================================
 
 export const BLOCKED_ASNS_MAP: Record<number, string> = {
@@ -128,7 +128,7 @@ export const RESIDENTIAL_ISPS: Record<string, { asn: number; org: string }[]> = 
 // Cache em memória para consultas de IP (Threat Intelligence)
 const ipThreatCache = new Map<string, { isBad: boolean; time: number; risk: number }>();
 
-export const DEFAULT_CLOAKILIO_CONFIG: CloakilioConfig = {
+export const DEFAULT_PHANTOM_CONFIG: CloakilioConfig = {
   modo: "AUTOMATICO",
   whitepageUrl: "https://seusite.com/white",
   ofertaUrl: "https://seusite.com/oferta",
@@ -147,6 +147,8 @@ export const DEFAULT_CLOAKILIO_CONFIG: CloakilioConfig = {
   clientAction: "redirect_whitepage",
 };
 
+export const DEFAULT_CLOAKILIO_CONFIG = DEFAULT_PHANTOM_CONFIG;
+
 export class CloakerEngine {
   /**
    * Gera Click ID único, criptograficamente seguro e opaco
@@ -158,7 +160,7 @@ export class CloakerEngine {
   }
 
   /**
-   * Avaliação multi-camada rigorosa baseada na arquitetura do CloakilioShield
+   * Avaliação multi-camada rigorosa baseada na arquitetura do Motor Phantom-X
    */
   public static evaluateRequest(params: {
     userAgent?: string;
@@ -470,7 +472,7 @@ export class CloakerEngine {
 
     return `/**
  * ============================================================================
- * 🛡️ PHANTOM-X CLOAKILIOSHIELD - CLOUDFLARE WORKER ENGINE
+ * 🛡️ MOTOR DE BORDA PHANTOM-X - CLOUDFLARE WORKER ENGINE
  * ============================================================================
  * Gerado automaticamente via Phantom-X Command Center
  * Entrega transparente na borda via Reverse Proxy puro (HTTP 200 OK sem redirects)

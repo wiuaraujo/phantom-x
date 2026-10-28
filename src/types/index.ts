@@ -17,7 +17,7 @@ export type CloakerDetectedLayer =
   | "threat_intelligence"
   | "clean_traffic";
 
-export interface CloakilioConfig {
+export interface PhantomCloakerConfig {
   modo: CloakerMode;
   whitepageUrl: string;
   ofertaUrl: string;
@@ -37,11 +37,16 @@ export interface CloakilioConfig {
   clientAction: "redirect_whitepage" | "log_only";
 }
 
+// Compatibilidade de tipo
+export type CloakilioConfig = PhantomCloakerConfig;
+
 export interface User {
   id: string;
   name: string;
+  nickname?: string;
   email: string;
   role: "admin" | "member" | "viewer";
+  timezone?: string;
   organizationId: string;
   organizationName: string;
   createdAt: string;

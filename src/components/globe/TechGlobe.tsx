@@ -565,18 +565,6 @@ export const TechGlobe: React.FC<{ className?: string }> = ({ className = "" }) 
           </div>
         </div>
       )}
-
-      {/* Quick Reset to Brazil Floating Button */}
-      <div className="absolute top-2 right-2 z-20 flex items-center space-x-1">
-        <button
-          type="button"
-          onClick={resetToBrazil}
-          className="p-1.5 rounded-lg bg-brand-surface/80 hover:bg-brand-hover border border-brand-border text-brand-secondary hover:text-brand-white transition shadow-sm"
-          title="Centralizar no Brasil e América do Sul"
-        >
-          <span className="text-xs">🇧🇷</span>
-        </button>
-      </div>
     </div>
   );
 };

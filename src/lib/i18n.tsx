@@ -47,7 +47,7 @@ const translations: Record<Language, Translations> = {
       getStarted: "Começar grátis",
     },
     hero: {
-      eyebrow: "ARQUITETURA DE BORDA • CLOAKILIOSHIELD V2.4",
+      eyebrow: "ARQUITETURA DE BORDA • PHANTOM-X V2.4",
       titleLine1: "Infraestrutura de Tráfego Invisível.",
       titleLine2: "Em Escala Global.",
       subtitle:
@@ -79,7 +79,7 @@ const translations: Record<Language, Translations> = {
       getStarted: "Get Started",
     },
     hero: {
-      eyebrow: "EDGE ARCHITECTURE • CLOAKILIOSHIELD V2.4",
+      eyebrow: "EDGE ARCHITECTURE • PHANTOM-X V2.4",
       titleLine1: "Invisible Traffic Infrastructure.",
       titleLine2: "At Global Scale.",
       subtitle:
@@ -111,7 +111,7 @@ const translations: Record<Language, Translations> = {
       getStarted: "Comenzar gratis",
     },
     hero: {
-      eyebrow: "ARQUITECTURA DE BORDE • CLOAKILIOSHIELD V2.4",
+      eyebrow: "ARQUITECTURA DE BORDE • PHANTOM-X V2.4",
       titleLine1: "Infraestructura de Tráfico Invisible.",
       titleLine2: "A Escala Global.",
       subtitle:

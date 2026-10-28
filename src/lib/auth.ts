@@ -3,12 +3,13 @@ import { User } from "@/types";
 export interface RegisteredUser {
   id: string;
   name: string;
+  nickname?: string; // Apelido para saudações e dashboard (ex: Will)
   username: string; // normalizado em minúsculas
   email: string; // normalizado em minúsculas
   passwordHash: string;
   salt: string;
   role: "admin" | "operator";
-  timezone?: string;
+  timezone?: string; // Fuso-horário configurado (ex: America/Sao_Paulo)
   organizationId: string;
   organizationName: string;
   failedAttempts: number;
@@ -43,6 +44,7 @@ const SEED_USERS: RegisteredUser[] = [
   {
     id: "usr_px_admin_master",
     name: "Engenheiro Operações (Master)",
+    nickname: "Will",
     username: "admin",
     email: "admin@phantomx.pro",
     passwordHash: MASTER_ADMIN_HASH,
@@ -239,8 +241,10 @@ export const auth = {
       user: {
         id: user.id,
         name: user.name,
+        nickname: user.nickname || user.name.split(" ")[0],
         email: user.email,
         role: user.role === "admin" ? "admin" : "member",
+        timezone: user.timezone || "America/Sao_Paulo",
         organizationId: user.organizationId,
         organizationName: user.organizationName,
         createdAt: user.createdAt,
@@ -314,6 +318,7 @@ export const auth = {
     const newUser: RegisteredUser = {
       id: userId,
       name: cleanName,
+      nickname: cleanName.split(" ")[0],
       username,
       email: cleanEmail,
       passwordHash,
@@ -331,6 +336,15 @@ export const auth = {
     users.push(newUser);
     this.saveUsers(users);
 
+    // Contas novas iniciam 100% zeradas (0 domínios, 0 campanhas, 0 eventos)
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(`phantom_user_${userId}_domains`, JSON.stringify([]));
+        localStorage.setItem(`phantom_user_${userId}_campaigns`, JSON.stringify([]));
+        localStorage.setItem(`phantom_user_${userId}_events`, JSON.stringify([]));
+      } catch {}
+    }
+
     // Cria sessão autenticada para o novo usuário registrado
     const expiresAt = new Date(Date.now() + 7 * 86400000).toISOString();
     const token = generateSecureToken();
@@ -339,8 +353,10 @@ export const auth = {
       user: {
         id: newUser.id,
         name: newUser.name,
+        nickname: newUser.nickname,
         email: newUser.email,
         role: "member",
+        timezone: newUser.timezone,
         organizationId: newUser.organizationId,
         organizationName: newUser.organizationName,
         createdAt: newUser.createdAt,
@@ -394,6 +410,49 @@ export const auth = {
       this.logout();
       return null;
     }
+  },
+
+  /**
+   * Atualiza o perfil e configurações da conta do usuário autenticado
+   */
+  updateCurrentUserProfile(data: { name?: string; nickname?: string; timezone?: string }): {
+    success: boolean;
+    user?: User;
+    error?: string;
+  } {
+    if (typeof window === "undefined") return { success: false, error: "Ambiente inválido" };
+    const session = this.getSession();
+    if (!session) return { success: false, error: "Usuário não autenticado" };
+
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === session.user.id);
+    if (idx === -1) return { success: false, error: "Usuário não encontrado" };
+
+    const user = users[idx];
+    if (data.name && data.name.trim().length >= 2) {
+      user.name = data.name.trim();
+    }
+    if (data.nickname !== undefined) {
+      user.nickname = data.nickname.trim();
+    }
+    if (data.timezone) {
+      user.timezone = data.timezone;
+    }
+
+    users[idx] = user;
+    this.saveUsers(users);
+
+    const updatedUser: User = {
+      ...session.user,
+      name: user.name,
+      nickname: user.nickname,
+      timezone: user.timezone,
+    };
+
+    session.user = updatedUser;
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+
+    return { success: true, user: updatedUser };
   },
 
   /**

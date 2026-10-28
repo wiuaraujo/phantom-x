@@ -58,7 +58,7 @@ export const siteConfig = {
         retentionDays: 14,
       },
       features: [
-        "Motor CloakilioShield com latência de borda < 14ms",
+        "Motor de Borda Phantom-X com latência < 14ms",
         "Entrega via Proxy Reverso (HTTP 200 OK sem redirects)",
         "Filtro de ASN Datacenter (Meta, AWS, Google, Spy Tools)",
         "Validação de tokens de tráfego pago (fbclid e UTMs)",

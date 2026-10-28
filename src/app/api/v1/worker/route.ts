@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const download = searchParams.get("download") === "1";
 
-  const config = store.getCloakilioConfig();
+  const config = store.getPhantomCloakerConfig();
   const scriptContent = CloakerEngine.generateCloudflareWorkerCode(config);
 
   const headers = new Headers();
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const updated = store.updateCloakilioConfig(body);
+    const updated = store.updatePhantomCloakerConfig(body);
     const scriptContent = CloakerEngine.generateCloudflareWorkerCode(updated);
     return NextResponse.json({
       success: true,

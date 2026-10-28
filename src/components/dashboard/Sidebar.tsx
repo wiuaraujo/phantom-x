@@ -25,6 +25,8 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const session = auth.getSession();
+  const displayName = session?.user?.nickname || session?.user?.name?.split(" ")[0] || "Operador";
 
   const navItems = [
     { label: "Visão Geral", href: "/dashboard", icon: LayoutDashboard },
@@ -112,6 +114,26 @@ export const Sidebar: React.FC = () => {
               <span>edge-phantom-01</span>
             </div>
           </div>
+        )}
+
+        {!collapsed && (
+          <Link
+            href="/dashboard/settings"
+            className="p-2.5 rounded-xl bg-brand-surface border border-brand-border flex items-center space-x-2.5 hover:bg-brand-hover transition block"
+            title="Acessar Perfil e Configurações"
+          >
+            <div className="w-8 h-8 rounded-full bg-white text-black font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
+              {displayName[0] ? displayName[0].toUpperCase() : "W"}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-brand-white truncate">
+                {displayName}
+              </div>
+              <div className="text-[10px] text-brand-muted font-mono truncate">
+                {session?.user?.timezone || "America/Sao_Paulo"}
+              </div>
+            </div>
+          </Link>
         )}
 
         <Link

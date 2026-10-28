@@ -63,7 +63,7 @@ export default function EventsExplorerPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `phantom_cloakilio_events_${Date.now()}.csv`);
+    link.setAttribute("download", `phantom_events_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -73,7 +73,7 @@ export default function EventsExplorerPage() {
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
         title="Explorador de Eventos & Telemetria"
-        subtitle="Registro granular de cada requisição processada com auditoria das 6 camadas do CloakilioShield"
+        subtitle="Registro granular de cada requisição processada com auditoria das 6 camadas do Motor Phantom-X"
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">

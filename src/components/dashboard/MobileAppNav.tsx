@@ -183,19 +183,27 @@ export const MobileAppNav: React.FC = () => {
               </div>
 
               {/* User Account Snippet */}
-              <div className="mt-4 p-3 rounded-xl bg-brand-black/60 border border-brand-border flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-full bg-white text-black font-mono font-bold text-sm flex items-center justify-center shrink-0">
-                  {session?.user.name ? session.user.name[0].toUpperCase() : "A"}
+              <Link
+                href="/dashboard/settings"
+                onClick={closeDrawer}
+                className="mt-4 p-3 rounded-xl bg-brand-black/60 border border-brand-border flex items-center space-x-3 hover:bg-brand-hover transition block"
+              >
+                <div className="w-9 h-9 rounded-full bg-white text-black font-mono font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">
+                  {session?.user.nickname
+                    ? session.user.nickname[0].toUpperCase()
+                    : session?.user.name
+                    ? session.user.name[0].toUpperCase()
+                    : "W"}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-semibold text-brand-white truncate">
-                    {session?.user.name || "Operador Phantom-X"}
+                    {session?.user.nickname ? `${session.user.nickname} (${session.user.name})` : session?.user.name || "Will (Operador)"}
                   </div>
                   <div className="text-[11px] text-brand-muted font-mono truncate">
-                    {session?.user.email || "admin@phantomx.pro"}
+                    {session?.user.timezone || "America/Sao_Paulo"}
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Navigation Links */}
               <nav className="mt-5 space-y-1">

@@ -7,7 +7,9 @@ import { siteConfig } from "@/config/site";
 import { useTheme } from "@/lib/theme";
 import { store } from "@/lib/store";
 import { CloakerEngine } from "@/lib/cloakerEngine";
-import { CloakilioConfig, CloakerMode } from "@/types";
+import { PhantomCloakerConfig, CloakerMode } from "@/types";
+import { TIMEZONE_REGIONS } from "@/lib/timezones";
+import { getDashboardGreeting } from "@/lib/userGreeting";
 import {
   Key,
   Copy,
@@ -31,6 +33,10 @@ import {
   Fingerprint,
   EyeOff,
   Flame,
+  User,
+  Clock,
+  Sparkle,
+  Smile,
 } from "lucide-react";
 
 const COMMON_GEOS = [
@@ -50,6 +56,16 @@ export default function SettingsPage() {
   const session = auth.getSession();
   const { theme, setTheme } = useTheme();
 
+  // User Profile configuration state
+  const [profileName, setProfileName] = useState(session?.user?.name || "");
+  const [profileNickname, setProfileNickname] = useState(
+    session?.user?.nickname || (session?.user?.name ? session.user.name.split(" ")[0] : "Will")
+  );
+  const [profileTimezone, setProfileTimezone] = useState(
+    session?.user?.timezone || "America/Sao_Paulo"
+  );
+  const [profileSavedSuccess, setProfileSavedSuccess] = useState(false);
+
   // API Key & Telemetry state
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedSnippet, setCopiedSnippet] = useState(false);
@@ -58,11 +74,36 @@ export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("ph_live_98a7f4e0c3b211ef893a0242ac120002");
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // CloakilioShield configuration state
-  const [config, setConfig] = useState<CloakilioConfig>(() => store.getCloakilioConfig());
+  // Phantom-X Cloaker configuration state
+  const [config, setConfig] = useState<PhantomCloakerConfig>(() => store.getPhantomCloakerConfig());
   const [customCountryInput, setCustomCountryInput] = useState("");
   const [generatedWorkerScript, setGeneratedWorkerScript] = useState("");
   const [generatedClientSnippet, setGeneratedClientSnippet] = useState("");
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = auth.updateCurrentUserProfile({
+      name: profileName,
+      nickname: profileNickname,
+      timezone: profileTimezone,
+    });
+    if (res.success) {
+      setProfileSavedSuccess(true);
+      setTimeout(() => setProfileSavedSuccess(false), 3000);
+    }
+  };
+
+  const previewGreeting = getDashboardGreeting({
+    id: session?.user?.id || "preview",
+    name: profileName || "Willian",
+    nickname: profileNickname || "Will",
+    timezone: profileTimezone,
+    email: session?.user?.email || "admin@phantomx.pro",
+    role: "admin",
+    organizationId: "org",
+    organizationName: "Phantom-X Command",
+    createdAt: new Date().toISOString(),
+  });
 
   // Sync worker script and client snippet when config changes
   useEffect(() => {
@@ -98,7 +139,7 @@ export default function SettingsPage() {
   };
 
   const handleSaveCloakerConfig = () => {
-    store.updateCloakilioConfig(config);
+    store.updatePhantomCloakerConfig(config);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
   };
@@ -164,7 +205,7 @@ export default function SettingsPage() {
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
         title="Arquitetura de Borda & Configurações"
-        subtitle="Gerenciador do Motor CloakilioShield, geração de Cloudflare Worker e telemetria client-side"
+        subtitle="Gerenciador do Motor de Borda Phantom-X, perfil do operador e telemetria client-side"
       />
 
       <div className="p-3 sm:p-6 space-y-5 sm:space-y-8 max-w-5xl w-full mx-auto font-mono text-xs">
@@ -174,20 +215,134 @@ export default function SettingsPage() {
             <div className="flex items-center space-x-2.5">
               <Check className="w-5 h-5 text-white" />
               <span className="font-semibold text-xs font-sans">
-                Parâmetros do CloakilioShield e scripts atualizados e persistidos com sucesso!
+                Parâmetros do Motor Phantom-X e scripts atualizados e persistidos com sucesso!
               </span>
             </div>
             <span className="text-[11px] text-neutral-400">Worker &amp; Snippets regenerados</span>
           </div>
         )}
 
-        {/* 1. CLOAKILIOSHIELD ENGINE SETTINGS */}
+        {/* ================================================================= */}
+        {/* 0. PERFIL DO OPERADOR & FUSO-HORÁRIO (CONFIGURAÇÕES DE CONTA)    */}
+        {/* ================================================================= */}
+        <div className="bg-brand-surface border border-brand-border rounded-xl p-5 sm:p-6 shadow-glow-sm space-y-5">
+          <div className="border-b border-brand-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center space-x-2">
+                <User className="w-5 h-5 text-brand-white" />
+                <h3 className="text-sm font-bold text-brand-white">Perfil e Configurações de Usuário</h3>
+              </div>
+              <p className="text-brand-secondary text-[11px] mt-0.5">
+                Configure seu nome, apelido informal de operador e fuso-horário para saudações e logs
+              </p>
+            </div>
+
+            {profileSavedSuccess && (
+              <span className="text-xs text-white font-semibold flex items-center space-x-1.5 bg-neutral-900 px-3 py-1 rounded-lg border border-neutral-700 animate-in fade-in">
+                <Check className="w-3.5 h-3.5 text-white" />
+                <span>Perfil salvo com sucesso!</span>
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSaveProfile} className="space-y-4 font-sans text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Full Name */}
+              <div>
+                <label className="block text-brand-muted text-[11px] font-mono mb-1.5">
+                  NOME COMPLETO DO OPERADOR
+                </label>
+                <input
+                  type="text"
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  placeholder="Ex: Will Araujo"
+                  required
+                  className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono"
+                />
+              </div>
+
+              {/* Nickname / Apelido */}
+              <div>
+                <label className="block text-brand-muted text-[11px] font-mono mb-1.5 flex items-center justify-between">
+                  <span>APELIDO NO DASHBOARD (SAUDAÇÃO)</span>
+                  <span className="text-[10px] text-brand-secondary">Exibido na Saudação</span>
+                </label>
+                <input
+                  type="text"
+                  value={profileNickname}
+                  onChange={(e) => setProfileNickname(e.target.value)}
+                  placeholder="Ex: Will"
+                  required
+                  className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-white transition font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Timezone Selector */}
+              <div>
+                <label className="block text-brand-muted text-[11px] font-mono mb-1.5">
+                  FUSO-HORÁRIO OPERACIONAL (RELÓGIO &amp; LOGS)
+                </label>
+                <select
+                  value={profileTimezone}
+                  onChange={(e) => setProfileTimezone(e.target.value)}
+                  className="w-full px-3 py-2 bg-brand-black border border-brand-border rounded-lg text-white focus:outline-none focus:border-white transition font-mono"
+                >
+                  {TIMEZONE_REGIONS.map((reg) => (
+                    <optgroup key={reg.region} label={`${reg.flag} ${reg.region}`}>
+                      {reg.timezones.map((tz) => (
+                        <option key={tz.value} value={tz.value}>
+                          {tz.flag} {tz.label} ({tz.offset})
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+
+              {/* Email (Readonly) */}
+              <div>
+                <label className="block text-brand-muted text-[11px] font-mono mb-1.5 flex items-center justify-between">
+                  <span>E-MAIL DA CONTA</span>
+                  <span className="text-[10px] text-white">Autenticado</span>
+                </label>
+                <input
+                  type="email"
+                  value={session?.user?.email || "admin@phantomx.pro"}
+                  disabled
+                  className="w-full px-3 py-2 bg-brand-black/50 border border-brand-borderSubtle rounded-lg text-brand-secondary font-mono cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            {/* Live Greeting Preview Banner */}
+            <div className="p-3 rounded-xl bg-brand-black/60 border border-brand-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+              <div className="flex items-center space-x-2 text-brand-secondary">
+                <Clock className="w-4 h-4 text-brand-white shrink-0" />
+                <span>
+                  Prévia no Dashboard: <strong className="text-brand-white">{previewGreeting.fullGreeting}</strong>
+                </span>
+              </div>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition flex items-center justify-center space-x-2 shrink-0 font-sans"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>Salvar Perfil</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* 1. PHANTOM-X ENGINE SETTINGS */}
         <div className="bg-brand-surface border border-brand-border rounded-xl p-5 sm:p-6 shadow-glow-sm space-y-6">
           <div className="border-b border-brand-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center space-x-2">
                 <ShieldCheck className="w-5 h-5 text-brand-white" />
-                <h3 className="text-sm font-bold text-brand-white">Motor de Borda CloakilioShield</h3>
+                <h3 className="text-sm font-bold text-brand-white">Motor de Borda Phantom-X</h3>
               </div>
               <p className="text-brand-secondary text-[11px] mt-0.5">
                 Arquitetura de 6 camadas com entrega via Proxy Reverso transparente (HTTP 200 OK)

@@ -81,7 +81,7 @@ export default function LiveMonitoringPage() {
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
         title="Monitoramento de Tráfego Ao Vivo"
-        subtitle="Fluxo contínuo de inspeção multi-camada do CloakilioShield com entrega transparent HTTP 200 OK"
+        subtitle="Fluxo contínuo de inspeção multi-camada do Phantom-X com entrega transparente HTTP 200 OK"
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
@@ -158,7 +158,7 @@ export default function LiveMonitoringPage() {
                 }`}
               />
               <span className="text-xs font-mono text-brand-white font-semibold uppercase">
-                {isPaused ? "STREAM EM PAUSA" : "CLOAKILIOSHIELD: STREAM ATIVO EM TEMPO REAL"}
+                {isPaused ? "STREAM EM PAUSA" : "MOTOR PHANTOM-X: STREAM ATIVO EM TEMPO REAL"}
               </span>
             </div>
             <span className="text-xs font-mono text-brand-muted">
@@ -262,7 +262,7 @@ export default function LiveMonitoringPage() {
           <div className="w-full max-w-lg bg-brand-surface border-l border-brand-border p-6 h-full overflow-y-auto space-y-6 font-mono">
             <div className="flex items-center justify-between border-b border-brand-border pb-4">
               <div>
-                <span className="text-[10px] text-brand-muted uppercase">AUDITORIA CLOAKILIOSHIELD</span>
+                <span className="text-[10px] text-brand-muted uppercase">AUDITORIA PHANTOM-X</span>
                 <h2 className="text-base font-bold text-brand-white">{selectedEvent.id}</h2>
               </div>
               <button

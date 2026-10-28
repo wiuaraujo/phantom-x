@@ -5,7 +5,7 @@ import { CloakerEngine } from "@/lib/cloakerEngine";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const config = store.getCloakilioConfig();
+  const config = store.getPhantomCloakerConfig();
   const scriptContent = CloakerEngine.generateClientFingerprintSnippet(config);
 
   // Extract pure JS code without <script> tags for standalone .js serving

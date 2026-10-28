@@ -29,7 +29,7 @@ export const RoutingDiagram: React.FC = () => {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 bg-brand-surface border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono text-white">
               <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <span className="font-semibold tracking-wider">PIPELINE DE BORDA CLOAKILIOSHIELD</span>
+              <span className="font-semibold tracking-wider">PIPELINE DE BORDA PHANTOM-X</span>
             </div>
             <span className="text-xs font-mono text-brand-muted hidden sm:inline">
               6 Camadas Determinísticas & Proxy Reverso 200 OK
@@ -138,7 +138,7 @@ export const RoutingDiagram: React.FC = () => {
               {/* Processor Title */}
               <div className="relative z-10 mt-4 text-center">
                 <span className="font-mono text-xs sm:text-sm font-bold text-brand-white tracking-widest uppercase">
-                  Motor de Decisão CloakilioShield
+                  Motor de Borda Phantom-X
                 </span>
                 <p className="text-[11px] text-brand-secondary mt-0.5 font-sans">
                   Pipeline de 6 Camadas na Borda • Decisão em &lt; 14ms
