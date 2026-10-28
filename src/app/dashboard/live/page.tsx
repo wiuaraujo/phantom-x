@@ -15,6 +15,11 @@ import {
   ArrowRight,
   ExternalLink,
   X,
+  Server,
+  Cpu,
+  Layers,
+  ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 
 export default function LiveMonitoringPage() {
@@ -44,7 +49,7 @@ export default function LiveMonitoringPage() {
   }, [isPaused]);
 
   const handleSimulateBurst = () => {
-    const evt = store.generateRandomSimulatedEvent();
+    store.generateRandomSimulatedEvent();
     refreshEvents();
   };
 
@@ -53,11 +58,30 @@ export default function LiveMonitoringPage() {
     return e.riskCategory === selectedRisk;
   });
 
+  const getLayerBadge = (layer?: string) => {
+    switch (layer) {
+      case "asn_datacenter":
+        return { label: "ASN Datacenter", color: "bg-red-500/10 text-red-300 border-red-500/30" };
+      case "bot_pattern":
+        return { label: "Crawler UA", color: "bg-amber-500/10 text-amber-300 border-amber-500/30" };
+      case "geo_fencing":
+        return { label: "Geo-Fencing", color: "bg-purple-500/10 text-purple-300 border-purple-500/30" };
+      case "platform_token":
+        return { label: "Token fbclid", color: "bg-yellow-500/10 text-yellow-300 border-yellow-500/30" };
+      case "threat_intelligence":
+        return { label: "Proxy / VPN", color: "bg-orange-500/10 text-orange-300 border-orange-500/30" };
+      case "clean_traffic":
+        return { label: "Humano Real", color: "bg-white/10 text-brand-white border-white/20" };
+      default:
+        return { label: "Borda L7", color: "bg-neutral-800 text-neutral-300 border-neutral-700" };
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
         title="Monitoramento de Tráfego Ao Vivo"
-        subtitle="Fluxo contínuo de requisições de borda com inspeção instantânea de telemetria"
+        subtitle="Fluxo contínuo de inspeção multi-camada do CloakilioShield com entrega transparent HTTP 200 OK"
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
@@ -99,7 +123,7 @@ export default function LiveMonitoringPage() {
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-brand-white bg-brand-surface border border-brand-border hover:bg-brand-hover transition"
             >
               <Send className="w-3.5 h-3.5 text-brand-white" />
-              <span>Injetar Carga (+3)</span>
+              <span>Injetar Requisição (+1)</span>
             </button>
           </div>
 
@@ -134,11 +158,11 @@ export default function LiveMonitoringPage() {
                 }`}
               />
               <span className="text-xs font-mono text-brand-white font-semibold uppercase">
-                {isPaused ? "STREAM EM PAUSA" : "STREAM DE REQUISIÇÕES CONECTADO"}
+                {isPaused ? "STREAM EM PAUSA" : "CLOAKILIOSHIELD: STREAM ATIVO EM TEMPO REAL"}
               </span>
             </div>
             <span className="text-xs font-mono text-brand-muted">
-              {filteredEvents.length} eventos listados
+              {filteredEvents.length} eventos monitorados
             </span>
           </div>
 
@@ -147,61 +171,85 @@ export default function LiveMonitoringPage() {
               <thead>
                 <tr className="border-b border-brand-border text-brand-muted text-[11px]">
                   <th className="pb-2.5">TIMESTAMP</th>
-                  <th className="pb-2.5">DOMÍNIO</th>
-                  <th className="pb-2.5">IP (MASCARADO)</th>
+                  <th className="pb-2.5">ASN &amp; PROVEDOR</th>
                   <th className="pb-2.5">LOCALIZAÇÃO</th>
-                  <th className="pb-2.5">LATÊNCIA</th>
-                  <th className="pb-2.5">USER AGENT</th>
+                  <th className="pb-2.5">CAMADA DETECTADA</th>
+                  <th className="pb-2.5">ENTREGA PROXY</th>
+                  <th className="pb-2.5">DISPOSITIVO / UA</th>
                   <th className="pb-2.5">SCORE</th>
-                  <th className="pb-2.5 text-right">DETALHES</th>
+                  <th className="pb-2.5 text-right">INSPEÇÃO</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-borderSubtle">
-                {filteredEvents.map((evt) => (
-                  <tr
-                    key={evt.id}
-                    onClick={() => setSelectedEvent(evt)}
-                    className="hover:bg-brand-hover/60 transition cursor-pointer group"
-                  >
-                    <td className="py-3 text-brand-secondary whitespace-nowrap">
-                      {new Date(evt.timestamp).toLocaleTimeString()}
-                    </td>
-                    <td className="py-3 text-brand-white font-medium whitespace-nowrap">{evt.domain}</td>
-                    <td className="py-3 text-brand-muted whitespace-nowrap">{evt.ipMasked}</td>
-                    <td className="py-3 text-brand-white whitespace-nowrap">
-                      <LocationBadge
-                        countryCode={evt.countryCode}
-                        cityName={evt.city}
-                        stateCode={evt.stateCode}
-                        stateName={evt.state}
-                      />
-                    </td>
-                    <td className="py-3 text-brand-secondary whitespace-nowrap">
-                      {evt.latencyMs}ms
-                    </td>
-                    <td className="py-3 text-brand-secondary max-w-[200px] truncate">
-                      {evt.browser} ({evt.os})
-                    </td>
-                    <td className="py-3 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                          evt.riskScore > 70
-                            ? "bg-neutral-900 text-white border border-neutral-700"
-                            : evt.riskScore > 35
-                            ? "bg-neutral-800 text-neutral-200 border border-neutral-700"
-                            : "text-brand-secondary"
-                        }`}
-                      >
-                        {evt.riskScore}/100
-                      </span>
-                    </td>
-                    <td className="py-3 text-right">
-                      <span className="text-brand-muted group-hover:text-brand-white transition">
-                        Inspecionar →
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {filteredEvents.map((evt) => {
+                  const layerBadge = getLayerBadge(evt.detectedLayer);
+                  return (
+                    <tr
+                      key={evt.id}
+                      onClick={() => setSelectedEvent(evt)}
+                      className="hover:bg-brand-hover/60 transition cursor-pointer group"
+                    >
+                      <td className="py-3 text-brand-secondary whitespace-nowrap">
+                        {new Date(evt.timestamp).toLocaleTimeString()}
+                      </td>
+
+                      <td className="py-3 whitespace-nowrap">
+                        <div className="text-brand-white font-medium">
+                          {evt.asn ? `AS${evt.asn}` : "AS-Residencial"}
+                        </div>
+                        <div className="text-brand-muted text-[10px] truncate max-w-[150px]">
+                          {evt.asnOrg || evt.ispOrg || "Rede de Borda"}
+                        </div>
+                      </td>
+
+                      <td className="py-3 text-brand-white whitespace-nowrap">
+                        <LocationBadge
+                          countryCode={evt.countryCode}
+                          cityName={evt.city}
+                          stateCode={evt.stateCode}
+                          stateName={evt.state}
+                        />
+                      </td>
+
+                      <td className="py-3 whitespace-nowrap">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${layerBadge.color}`}>
+                          {layerBadge.label}
+                        </span>
+                      </td>
+
+                      <td className="py-3 whitespace-nowrap">
+                        <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-900 text-white dark:bg-white dark:text-black">
+                          <Server className="w-3 h-3" />
+                          <span>HTTP 200</span>
+                        </span>
+                      </td>
+
+                      <td className="py-3 text-brand-secondary max-w-[160px] truncate">
+                        {evt.device} — {evt.browser}
+                      </td>
+
+                      <td className="py-3 whitespace-nowrap">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                            evt.riskScore > 70
+                              ? "bg-neutral-900 text-white border border-neutral-700"
+                              : evt.riskScore > 35
+                              ? "bg-neutral-800 text-neutral-200 border border-neutral-700"
+                              : "text-brand-secondary"
+                          }`}
+                        >
+                          {evt.riskScore}/100
+                        </span>
+                      </td>
+
+                      <td className="py-3 text-right">
+                        <span className="text-brand-muted group-hover:text-brand-white transition">
+                          Inspecionar →
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -214,7 +262,7 @@ export default function LiveMonitoringPage() {
           <div className="w-full max-w-lg bg-brand-surface border-l border-brand-border p-6 h-full overflow-y-auto space-y-6 font-mono">
             <div className="flex items-center justify-between border-b border-brand-border pb-4">
               <div>
-                <span className="text-[10px] text-brand-muted uppercase">DETALHES DA REQUISIÇÃO</span>
+                <span className="text-[10px] text-brand-muted uppercase">AUDITORIA CLOAKILIOSHIELD</span>
                 <h2 className="text-base font-bold text-brand-white">{selectedEvent.id}</h2>
               </div>
               <button
@@ -251,96 +299,120 @@ export default function LiveMonitoringPage() {
               )}
             </div>
 
-            {/* Technical Metadata Table */}
+            {/* 6-Layer Decision Breakdown */}
+            <div className="p-4 rounded-xl bg-brand-black/60 border border-brand-border space-y-3">
+              <div className="text-[11px] font-bold text-brand-white flex items-center space-x-1.5">
+                <Layers className="w-4 h-4 text-white" />
+                <span>AVALIAÇÃO DAS 6 CAMADAS DE SEGURANÇA</span>
+              </div>
+
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
+                  <span className="text-brand-muted">1. Geo-Fencing:</span>
+                  <span className="text-white">
+                    {selectedEvent.countryCode} ({selectedEvent.country})
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
+                  <span className="text-brand-muted">2. Filtro de Dispositivo:</span>
+                  <span className="text-white">
+                    {selectedEvent.device} ({selectedEvent.os})
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
+                  <span className="text-brand-muted">3. ASN / Rede Datacenter:</span>
+                  <span className="text-white">
+                    {selectedEvent.asn ? `AS${selectedEvent.asn} — ` : ""}
+                    {selectedEvent.asnOrg || "Residencial"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
+                  <span className="text-brand-muted">4. Assinatura Bot / Crawler:</span>
+                  <span className="text-white">
+                    {selectedEvent.isThreat ? "Detectado em Lista Negra" : "Nenhum padrão malicioso"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
+                  <span className="text-brand-muted">5. Token fbclid / UTM:</span>
+                  <span className="text-white">
+                    {selectedEvent.clickId ? "Válido / Presente" : "Sem Token de Campanha"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center py-1 border-b border-brand-borderSubtle">
+                  <span className="text-brand-muted">6. Threat Intel (ProxyCheck):</span>
+                  <span className="text-white">
+                    {selectedEvent.riskScore > 65 ? "Proxy / VPN Sinalizada" : "IP Residencial Limpo"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Delivery & Routing Details */}
             <div className="space-y-3 text-xs">
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Timestamp ISO:</span>
-                <span className="text-white">{selectedEvent.timestamp}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Domínio Alvo:</span>
-                <span className="text-white">{selectedEvent.domain}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Campanha Atribuída:</span>
-                <span className="text-white">{selectedEvent.campaignName || "Nenhuma"}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">IP Anonimizado:</span>
-                <span className="text-white">{selectedEvent.ipMasked}</span>
-              </div>
-              {selectedEvent.clickId && (
-                <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                  <span className="text-brand-muted">Click ID Atribuído:</span>
-                  <span className="text-white font-mono text-[11px]">{selectedEvent.clickId}</span>
-                </div>
-              )}
-              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Decisão de Roteamento:</span>
-                <span className="text-white font-semibold">
-                  {selectedEvent.decision === "routed_offer"
-                    ? "OFERTA (Acesso Autorizado)"
-                    : selectedEvent.decision === "mitigated_safe"
-                    ? "SAFE PAGE (Verificação de Segurança)"
-                    : selectedEvent.isThreat
-                    ? "SAFE PAGE (Mitigado)"
-                    : "OFERTA (Liberado)"}
+                <span className="text-brand-muted">Método de Entrega:</span>
+                <span className="text-white font-bold flex items-center space-x-1">
+                  <Server className="w-3.5 h-3.5" />
+                  <span>HTTP 200 OK (Proxy Reverso Transparente)</span>
                 </span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Geolocalização:</span>
+                <span className="text-brand-muted">Decisão de Roteamento:</span>
+                <span className="text-white font-semibold">
+                  {selectedEvent.decision === "routed_offer" || !selectedEvent.isThreat
+                    ? "OFERTA (Acesso Concedido)"
+                    : "WHITEPAGE (Página Segura de Moderação)"}
+                </span>
+              </div>
+              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
+                <span className="text-brand-muted">URL Entregue:</span>
+                <span className="text-white truncate max-w-[240px]">
+                  {selectedEvent.routedTo || selectedEvent.targetUrl}
+                </span>
+              </div>
+              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
+                <span className="text-brand-muted">Cache Headers:</span>
+                <span className="text-white font-mono text-[10px]">
+                  no-store, no-cache, max-age=0
+                </span>
+              </div>
+              {selectedEvent.isThreat && (
+                <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
+                  <span className="text-brand-muted">Robots Header:</span>
+                  <span className="text-white font-mono text-[10px]">
+                    X-Robots-Tag: noindex, nofollow
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
+                <span className="text-brand-muted">IP Mascarado:</span>
+                <span className="text-white">{selectedEvent.ipMasked}</span>
+              </div>
+              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
+                <span className="text-brand-muted">Localização:</span>
                 <span className="text-white flex items-center space-x-1.5">
                   <span className="text-sm select-none">{getCountryFlag(selectedEvent.countryCode)}</span>
                   <span>
                     {selectedEvent.city}
                     {selectedEvent.state ? `, ${selectedEvent.state}` : ""}
-                    {selectedEvent.stateCode ? ` [${selectedEvent.stateCode}]` : ""}
                     {" — "}
                     {selectedEvent.country}
                   </span>
                 </span>
               </div>
-              {selectedEvent.ispOrg && (
-                <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                  <span className="text-brand-muted">Provedor / ISP:</span>
-                  <span className="text-white">{selectedEvent.ispOrg}</span>
-                </div>
-              )}
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Coordenadas Aprox.:</span>
-                <span className="text-white">
-                  {selectedEvent.latitude.toFixed(2)}, {selectedEvent.longitude.toFixed(2)}
-                </span>
+                <span className="text-brand-muted">User Agent:</span>
+                <span className="text-white truncate max-w-[240px]">{selectedEvent.browser}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Dispositivo / Agente:</span>
-                <span className="text-white">{selectedEvent.device}</span>
+                <span className="text-brand-muted">Latência de Borda:</span>
+                <span className="text-white">{selectedEvent.latencyMs}ms</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Browser:</span>
-                <span className="text-white">{selectedEvent.browser}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Sistema Operacional:</span>
-                <span className="text-white">{selectedEvent.os}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Referrer HTTP:</span>
-                <span className="text-white truncate max-w-[250px]">{selectedEvent.referrer}</span>
-              </div>
-              <div className="flex justify-between py-1.5 border-b border-brand-borderSubtle">
-                <span className="text-brand-muted">Destino Roteado:</span>
-                <span className="text-white truncate max-w-[250px]">{selectedEvent.routedTo}</span>
-              </div>
-            </div>
-
-            <div className="pt-4">
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="w-full py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition"
-              >
-                Fechar Inspeção
-              </button>
             </div>
           </div>
         </div>

@@ -5,6 +5,33 @@ export type SSLStatus = "valid" | "provisioning" | "expired";
 export type CampaignStatus = "active" | "paused";
 export type RuleStatus = "active" | "inactive";
 
+export type CloakerMode = "AUTOMATICO" | "SO_WHITEPAGE" | "SO_OFERTA";
+
+export type CloakerDetectedLayer =
+  | "geo_fencing"
+  | "device_filter"
+  | "asn_datacenter"
+  | "bot_pattern"
+  | "platform_token"
+  | "client_hints"
+  | "threat_intelligence"
+  | "clean_traffic";
+
+export interface CloakilioConfig {
+  modo: CloakerMode;
+  whitepageUrl: string;
+  ofertaUrl: string;
+  paisesPermitidos: string[];
+  parametroUtm: string;
+  exigirFbclid: boolean;
+  permitirMobile: boolean;
+  permitirDesktop: boolean;
+  riscoMaximo: number;
+  proxyCheckApiKey: string;
+  blockedAsns: number[];
+  botPatterns: string[];
+}
+
 export interface User {
   id: string;
   name: string;
@@ -54,8 +81,15 @@ export interface Campaign {
   domainId: string;
   domainName: string;
   status: CampaignStatus;
-  targetUrl: string;
-  fallbackUrl?: string;
+  mode?: CloakerMode;
+  targetUrl: string; // Oferta / Black page
+  fallbackUrl?: string; // Whitepage / Safe page
+  whitepageUrl?: string; // Sinônimo explícito
+  ofertaUrl?: string; // Sinônimo explícito
+  allowedCountries?: string[];
+  requireFbclid?: boolean;
+  allowMobile?: boolean;
+  allowDesktop?: boolean;
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
@@ -97,6 +131,11 @@ export interface TrafficEvent {
   classification?: "human-like" | "known-crawler" | "preview-bot" | "automation" | "suspicious" | "unknown";
   decision?: "routed_offer" | "mitigated_safe" | "blocked";
   ispOrg?: string;
+  asn?: number;
+  asnOrg?: string;
+  detectedLayer?: CloakerDetectedLayer;
+  reverseProxyDelivery?: boolean;
+  httpStatus?: number;
   latencyMs: number;
   isThreat: boolean;
   threatReasons?: string[];

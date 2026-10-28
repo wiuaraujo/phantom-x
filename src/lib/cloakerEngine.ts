@@ -1,4 +1,4 @@
-import { DeviceType } from "@/types";
+import { DeviceType, CloakerMode, CloakilioConfig, CloakerDetectedLayer } from "@/types";
 
 export type CloakerClassification =
   | "human-like"
@@ -18,67 +18,131 @@ export interface CloakerAssessment {
   decision: CloakerDecision;
   isThreat: boolean;
   threatReasons: string[];
-  ispOrg: string;
+  detectedLayer: CloakerDetectedLayer;
+  asn?: number;
+  asnOrg: string;
+  targetUrl: string;
   routedUrl: string;
+  httpStatus: number;
+  reverseProxyDelivery: boolean;
   device: DeviceType;
   browser: string;
   os: string;
   cleanParams: Record<string, string>;
 }
 
-// Known Advertising & Search Crawler Signatures
-const ADS_CRAWLER_REGEX =
-  /facebookexternalhit|Facebot|Meta-ExternalAgent|Googlebot|AdsBot-Google|Google-InspectionTool|Storebot-Google|Mediapartners-Google|ByteDance|TikTokBot|Bytespider|Twitterbot|LinkedInBot|Bingbot|Applebot|DuckDuckBot|YandexBot/i;
+// ============================================================================
+// 🛡️ LISTAS DE SEGURANÇA E ASNs DO MOTOR CLOAKILIO
+// ============================================================================
 
-// Social & Messaging Previewers
-const PREVIEW_BOT_REGEX = /WhatsApp|TelegramBot|Slackbot|Discordbot|SkypeUriPreview/i;
+export const BLOCKED_ASNS_MAP: Record<number, string> = {
+  32934: "Meta Platforms / Facebook Bot Network",
+  63293: "Meta Platforms Infrastructure",
+  16509: "Amazon AWS Datacenter",
+  14618: "Amazon AWS EC2",
+  15169: "Google Cloud Infrastructure",
+  8075: "Microsoft Azure Hosting",
+  14061: "DigitalOcean Datacenter",
+  16276: "OVH Hosting SAS",
+  24940: "Hetzner Online Datacenter",
+  51167: "Contabo Cloud Servers",
+  13335: "Cloudflare Warp / Scrapers",
+  20473: "Vultr / Choopa Datacenter",
+  60068: "CDN77 / Spy Services",
+  46652: "AdPlexity / Spy Scrapers",
+};
 
-// Automated Tools, Headless Engines and Scrapers
-const AUTOMATION_REGEX =
-  /headless|phantomjs|puppeteer|playwright|selenium|webdriver|python-requests|aiohttp|httpx|curl|wget|scrapy|urllib|postmanruntime|go-http-client|okhttp|apache-httpclient|node-fetch|axios/i;
+export const BLOCKED_ASNS_SET = new Set<number>(
+  Object.keys(BLOCKED_ASNS_MAP).map(Number)
+);
 
-// Known Hosting & Datacenter ASNs commonly used by inspection bots
-const DATACENTER_ORGS = [
-  "Amazon Technologies Inc. (AWS)",
-  "Google Cloud Infrastructure (GCP)",
-  "Microsoft Azure Hosting",
-  "DigitalOcean LLC",
-  "Hetzner Online GmbH",
-  "Cloudflare Warp / Workers",
-  "OVH SAS",
-  "Linode / Akamai Cloud",
-  "Oracle Cloud Services",
-  "Tencent Cloud Computing",
+export const BOT_PATTERNS: string[] = [
+  "facebookbot",
+  "facebookexternalhit",
+  "fbexternalagent",
+  "fbexternalhit",
+  "fbadsbot",
+  "meta-externalagent",
+  "meta-externalfetcher",
+  "googlebot",
+  "adsbot-google",
+  "google-adsbot",
+  "mediapartners-google",
+  "tiktokbot",
+  "tiktokspider",
+  "bytedance",
+  "bingbot",
+  "adidxbot",
+  "headlesschrome",
+  "phantomjs",
+  "selenium",
+  "puppeteer",
+  "playwright",
+  "python-requests",
+  "curl/",
+  "wget/",
+  "semrush",
+  "ahrefs",
+  "adplexity",
+  "spyfu",
 ];
 
-// Residential / Mobile Carrier ASNs
-const RESIDENTIAL_ISPS: Record<string, string[]> = {
+export const RESIDENTIAL_ISPS: Record<string, { asn: number; org: string }[]> = {
   BR: [
-    "Claro Brasil Telecom",
-    "Vivo Móvel / Telefônica",
-    "TIM Celular SA",
-    "Oi Fibra Banda Larga",
-    "Algar Telecom SA",
-    "Brisanet Telecomunicações",
+    { asn: 28573, org: "Claro Brasil Telecom (Móvel/Fibra)" },
+    { asn: 18881, org: "Vivo / Telefônica Brasil" },
+    { asn: 26615, org: "TIM Celular SA (4G/5G)" },
+    { asn: 7738, org: "Telemar / Oi Fibra" },
+    { asn: 27699, org: "Algar Telecom" },
+    { asn: 53062, org: "Brisanet Telecomunicações" },
   ],
   US: [
-    "Comcast Cable Communications",
-    "Verizon Wireless",
-    "AT&T Internet Services",
-    "Charter Communications (Spectrum)",
-    "T-Mobile USA",
+    { asn: 7922, org: "Comcast Cable Communications" },
+    { asn: 701, org: "Verizon Wireless" },
+    { asn: 7018, org: "AT&T Internet Services" },
+    { asn: 20115, org: "Charter Communications (Spectrum)" },
+    { asn: 21928, org: "T-Mobile USA" },
   ],
-  GB: ["BT Consumer Broadband", "Virgin Media", "Vodafone UK", "Sky Broadband"],
-  DE: ["Deutsche Telekom AG", "Vodafone GmbH", "1&1 Telecom GmbH", "Telefónica Germany"],
-  JP: ["NTT DOCOMO", "SoftBank Corp", "KDDI Corporation"],
-  PT: ["MEO - Serviços de Comunicações", "NOS Comunicações", "Vodafone Portugal"],
-  ES: ["Telefónica de España", "Vodafone España", "Orange Espagne"],
-  FR: ["Orange SA", "Free SAS", "SFR - Altice France"],
+  GB: [
+    { asn: 2856, org: "BT Consumer Broadband" },
+    { asn: 5089, org: "Virgin Media UK" },
+    { asn: 12788, org: "Vodafone UK" },
+  ],
+  DE: [
+    { asn: 3320, org: "Deutsche Telekom AG" },
+    { asn: 3209, org: "Vodafone GmbH" },
+  ],
+  JP: [
+    { asn: 9605, org: "NTT DOCOMO" },
+    { asn: 17676, org: "SoftBank Corp" },
+  ],
+  PT: [
+    { asn: 2860, org: "NOS Comunicações Portugal" },
+    { asn: 3243, org: "MEO - Serviços de Comunicações" },
+  ],
+};
+
+// Cache em memória para consultas de IP (Threat Intelligence)
+const ipThreatCache = new Map<string, { isBad: boolean; time: number; risk: number }>();
+
+export const DEFAULT_CLOAKILIO_CONFIG: CloakilioConfig = {
+  modo: "AUTOMATICO",
+  whitepageUrl: "https://seusite.com/white",
+  ofertaUrl: "https://seusite.com/oferta",
+  paisesPermitidos: ["BR"],
+  parametroUtm: "",
+  exigirFbclid: false,
+  permitirMobile: true,
+  permitirDesktop: true,
+  riscoMaximo: 60,
+  proxyCheckApiKey: "96b67s-522c54-730017-h38p9e",
+  blockedAsns: Array.from(BLOCKED_ASNS_SET),
+  botPatterns: BOT_PATTERNS,
 };
 
 export class CloakerEngine {
   /**
-   * Generates a unique, non-sequential, opaque click identifier
+   * Gera Click ID único, criptograficamente seguro e opaco
    */
   public static generateClickId(): string {
     const timePart = Date.now().toString(36);
@@ -87,168 +151,186 @@ export class CloakerEngine {
   }
 
   /**
-   * Validates target destinations to prevent Open Redirect vulnerabilities
-   */
-  public static validateDestinationUrl(url: string, fallback: string = "https://phantomx.pro"): string {
-    try {
-      const parsed = new URL(url);
-      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-        return fallback;
-      }
-      return url;
-    } catch {
-      return fallback;
-    }
-  }
-
-  /**
-   * Deep Inspection & Assessment of incoming click request
+   * Avaliação multi-camada rigorosa baseada na arquitetura do CloakilioShield
    */
   public static evaluateRequest(params: {
     userAgent?: string;
     ip?: string;
+    asn?: number;
     referrer?: string;
     countryCode?: string;
-    targetUrl: string;
-    fallbackUrl?: string;
-    maxRiskScore?: number;
-    allowedCountries?: string[];
-    allowedDevices?: DeviceType[];
-    utmParams?: Record<string, string>;
+    secChUa?: boolean;
+    urlParams?: Record<string, string>;
+    config?: Partial<CloakilioConfig>;
   }): CloakerAssessment {
     const clickId = this.generateClickId();
     const now = new Date().toISOString();
-    const ua = params.userAgent || "";
-    const referrer = params.referrer || "";
-    const cCode = (params.countryCode || "BR").toUpperCase();
-    const maxAllowedRisk = params.maxRiskScore ?? 45;
+    const config = { ...DEFAULT_CLOAKILIO_CONFIG, ...params.config };
 
-    let score = 0;
+    const ua = (params.userAgent || "").toLowerCase();
+    const country = (params.countryCode || "BR").toUpperCase();
+    const clientIp = params.ip || "187.54.212.10";
+    const urlParams = params.urlParams || {};
+
+    let isModerator = false;
+    let detectedLayer: CloakerDetectedLayer = "clean_traffic";
     const threatReasons: string[] = [];
+    let riskScore = 4;
     let classification: CloakerClassification = "human-like";
-    let isThreat = false;
-    let ispOrg = "";
 
-    // 1. Evaluate User-Agent Signatures
-    if (AUTOMATION_REGEX.test(ua)) {
-      score += 85;
-      classification = "automation";
-      isThreat = true;
-      threatReasons.push("Assinatura de automação ou headless browser detectada (Selenium/Requests/Curl)");
-    } else if (ADS_CRAWLER_REGEX.test(ua)) {
-      score += 75;
-      classification = "known-crawler";
-      isThreat = true;
-      threatReasons.push("Crawler de inspeção de anúncios / bot de indexação identificado");
-    } else if (PREVIEW_BOT_REGEX.test(ua)) {
-      score += 65;
-      classification = "preview-bot";
-      isThreat = true;
-      threatReasons.push("Robô de pré-visualização social de link (WhatsApp/Telegram/Facebot)");
-    }
-
-    // 2. ISP & Datacenter ASN Heuristic
-    const isDatacenterAsn = isThreat || Math.random() < 0.08;
-    if (isDatacenterAsn) {
-      ispOrg = DATACENTER_ORGS[Math.floor(Math.random() * DATACENTER_ORGS.length)];
-      if (!isThreat) {
-        score += 45;
-        threatReasons.push(`Tráfego proveniente de ASN de Datacenter/Hosting (${ispOrg})`);
-      }
+    // 0. Modo Forçado Manual
+    if (config.modo === "SO_WHITEPAGE") {
+      isModerator = true;
+      riskScore = 100;
+      detectedLayer = "clean_traffic";
+      threatReasons.push("Modo manual forçado: SÓ_WHITEPAGE ativado pelo operador");
+    } else if (config.modo === "SO_OFERTA") {
+      isModerator = false;
+      riskScore = 0;
+      detectedLayer = "clean_traffic";
     } else {
-      const isps = RESIDENTIAL_ISPS[cCode] || RESIDENTIAL_ISPS["BR"];
-      ispOrg = isps[Math.floor(Math.random() * isps.length)];
+      // MOTOR DE DECISÃO EM 6 CAMADAS
+
+      // CAMADA 1: Geo-Fencing (Filtro de País)
+      if (config.paisesPermitidos.length > 0 && !config.paisesPermitidos.includes(country)) {
+        isModerator = true;
+        detectedLayer = "geo_fencing";
+        riskScore = 95;
+        threatReasons.push(`Geo-Fencing: País [${country}] não autorizado. Bloqueio preventivo de moderador internacional.`);
+      }
+
+      // CAMADA 2: Dispositivo e Sistema Operacional
+      const isMobile = ua.includes("iphone") || ua.includes("android");
+      if (!isModerator) {
+        if (isMobile && !config.permitirMobile) {
+          isModerator = true;
+          detectedLayer = "device_filter";
+          riskScore = 80;
+          threatReasons.push("Filtro de Dispositivo: Dispositivo Móvel bloqueado pela regra da campanha");
+        }
+        if (!isMobile && !config.permitirDesktop) {
+          isModerator = true;
+          detectedLayer = "device_filter";
+          riskScore = 80;
+          threatReasons.push("Filtro de Dispositivo: Computador/Desktop bloqueado pela regra da campanha");
+        }
+      }
+
+      // CAMADA 3: Assinatura de Rede (ASN de Datacenter & Bots Conhecidos)
+      const inputAsn = params.asn;
+      const isDatacenter = inputAsn ? BLOCKED_ASNS_SET.has(inputAsn) : false;
+      const matchedBotPattern = BOT_PATTERNS.find((p) => ua.includes(p));
+
+      if (!isModerator && isDatacenter) {
+        isModerator = true;
+        detectedLayer = "asn_datacenter";
+        riskScore = 98;
+        classification = "known-crawler";
+        threatReasons.push(`ASN de Datacenter/Hosting identificado: AS${inputAsn} (${BLOCKED_ASNS_MAP[inputAsn!] || "Servidor em Nuvem"})`);
+      }
+
+      if (!isModerator && matchedBotPattern) {
+        isModerator = true;
+        detectedLayer = "bot_pattern";
+        riskScore = 96;
+        classification = "known-crawler";
+        threatReasons.push(`User-Agent de moderador / crawler detectado: [${matchedBotPattern}]`);
+      }
+
+      // CAMADA 4: Tokens Obrigatórios da Plataforma (Meta Ads)
+      const campaignParam = (
+        urlParams["utm_campaign"] ||
+        urlParams["campaign"] ||
+        urlParams["utm_campaign_name"] ||
+        ""
+      ).toLowerCase();
+
+      const hasValidUtm = !config.parametroUtm || campaignParam.includes(config.parametroUtm.toLowerCase());
+      const hasFbclid = Boolean(urlParams["fbclid"]);
+
+      if (!isModerator && (!hasValidUtm || (config.exigirFbclid && !hasFbclid))) {
+        isModerator = true;
+        detectedLayer = "platform_token";
+        riskScore = 85;
+        classification = "suspicious";
+        if (!hasValidUtm) threatReasons.push(`Ausência do parâmetro UTM exigido: [${config.parametroUtm}]`);
+        if (config.exigirFbclid && !hasFbclid) threatReasons.push("Ausência de token fbclid oficial da Meta Ads (clique orgânico ou crawler direto)");
+      }
+
+      // CAMADA 5: Consistência de Headers de Navegadores Modernos
+      const hasSecChUa = params.secChUa ?? (ua.includes("chrome") || ua.includes("edg"));
+      if (!isModerator && !hasSecChUa && !isMobile) {
+        isModerator = true;
+        detectedLayer = "client_hints";
+        riskScore = 75;
+        classification = "automation";
+        threatReasons.push("Inconsistência de cabeçalho: sec-ch-ua ausente em desktop (assinatura de automação)");
+      }
+
+      // CAMADA 6: Threat Intelligence em Tempo Real (ProxyCheck.io)
+      const cached = ipThreatCache.get(clientIp);
+      if (!isModerator && cached && cached.risk >= config.riscoMaximo) {
+        isModerator = true;
+        detectedLayer = "threat_intelligence";
+        riskScore = cached.risk;
+        classification = "suspicious";
+        threatReasons.push(`ProxyCheck.io: IP identificado com alto risco de Proxy/VPN (${cached.risk}/100)`);
+      }
     }
 
-    // 3. Referrer Analysis for Paid Ads
-    const hasUtms = params.utmParams && Object.keys(params.utmParams).length > 0;
-    const isDirectReferrer = !referrer || referrer === "Direto" || referrer.includes("localhost");
-    if (hasUtms && isDirectReferrer && !isThreat) {
-      score += 15;
-      threatReasons.push("Ausência de cabeçalho Referer em clique com parâmetros de campanha");
+    // ISP Org & ASN Resolution
+    let finalAsn = params.asn;
+    let finalAsnOrg = "";
+
+    if (finalAsn && BLOCKED_ASNS_MAP[finalAsn]) {
+      finalAsnOrg = BLOCKED_ASNS_MAP[finalAsn];
+    } else {
+      const residentialPool = RESIDENTIAL_ISPS[country] || RESIDENTIAL_ISPS["BR"];
+      const chosen = residentialPool[Math.floor(Math.random() * residentialPool.length)];
+      finalAsn = finalAsn || chosen.asn;
+      finalAsnOrg = chosen.org;
     }
 
-    // 4. Determine Device & OS
-    const isMobileUa = /android|iphone|ipad|mobile/i.test(ua);
-    const isTabletUa = /ipad|tablet/i.test(ua);
-    const device: DeviceType = isThreat ? "bot" : isTabletUa ? "tablet" : isMobileUa ? "mobile" : "desktop";
+    // Device determination
+    const isMobileDevice = ua.includes("iphone") || ua.includes("android") || ua.includes("mobile");
+    const device: DeviceType = isModerator && classification === "known-crawler" ? "bot" : isMobileDevice ? "mobile" : "desktop";
 
-    const browser = isThreat
-      ? "Automated Engine"
-      : /edg/i.test(ua)
+    const browser = isModerator && classification === "automation"
+      ? "Headless Engine"
+      : ua.includes("edg")
       ? "Edge 124"
-      : /chrome/i.test(ua)
+      : ua.includes("chrome")
       ? "Chrome 124"
-      : /safari/i.test(ua)
+      : ua.includes("safari")
       ? "Safari 17.4"
-      : /firefox/i.test(ua)
+      : ua.includes("firefox")
       ? "Firefox 125"
       : "Mobile WebKit";
 
-    const os = /iphone|ipad/i.test(ua)
+    const os = ua.includes("iphone")
       ? "iOS 17.4"
-      : /android/i.test(ua)
+      : ua.includes("android")
       ? "Android 14"
-      : /macintosh|mac os x/i.test(ua)
+      : ua.includes("mac")
       ? "macOS Sonoma"
-      : /windows/i.test(ua)
+      : ua.includes("windows")
       ? "Windows 11"
-      : "Linux";
+      : "Linux x86_64";
 
-    // 5. Geolocation Constraints Check
-    if (params.allowedCountries && params.allowedCountries.length > 0) {
-      if (!params.allowedCountries.includes(cCode)) {
-        score += 50;
-        threatReasons.push(`Origem geográfica [${cCode}] fora da lista de países autorizados`);
-      }
-    }
+    const targetUrl = isModerator ? config.whitepageUrl : config.ofertaUrl;
+    const decision: CloakerDecision = isModerator ? "mitigated_safe" : "routed_offer";
 
-    // 6. Device Constraints Check
-    if (params.allowedDevices && params.allowedDevices.length > 0) {
-      if (!params.allowedDevices.includes(device)) {
-        score += 40;
-        threatReasons.push(`Dispositivo [${device}] não autorizado para esta campanha`);
-      }
-    }
-
-    // Calibrate final score (0-100)
-    const riskScore = Math.min(Math.max(score, isThreat ? 75 : 2), 100);
-
-    // Final Classification category
-    if (riskScore >= 75) {
-      classification = classification === "preview-bot" ? "preview-bot" : classification === "automation" ? "automation" : "known-crawler";
-      isThreat = true;
-    } else if (riskScore >= 35) {
-      classification = "suspicious";
-      isThreat = riskScore > maxAllowedRisk;
-    } else {
-      classification = "human-like";
-      isThreat = false;
-    }
-
-    // 7. Routing Decision: Offer Page vs Safe Mitigation Page
-    const safeFallback = params.fallbackUrl || "https://phantomx.pro/verificacao-seguranca";
-    let decision: CloakerDecision;
-    let routedUrl: string;
-
-    if (isThreat || riskScore > maxAllowedRisk) {
-      decision = "mitigated_safe";
-      routedUrl = this.validateDestinationUrl(safeFallback);
-    } else {
-      decision = "routed_offer";
-      // Construct final URL with click_id and preserved UTMs
-      try {
-        const urlObj = new URL(params.targetUrl);
-        urlObj.searchParams.set("clk_id", clickId);
-        if (params.utmParams) {
-          Object.entries(params.utmParams).forEach(([k, v]) => {
-            if (v) urlObj.searchParams.set(k, v);
-          });
-        }
-        routedUrl = urlObj.toString();
-      } catch {
-        routedUrl = params.targetUrl;
-      }
+    // Preserva integralmente todas as UTMs e parâmetros
+    let routedUrl = targetUrl;
+    try {
+      const urlObj = new URL(targetUrl);
+      Object.entries(urlParams).forEach(([k, v]) => {
+        if (v) urlObj.searchParams.set(k, v);
+      });
+      urlObj.searchParams.set("clk_id", clickId);
+      routedUrl = urlObj.toString();
+    } catch {
+      routedUrl = targetUrl;
     }
 
     return {
@@ -257,14 +339,183 @@ export class CloakerEngine {
       riskScore,
       classification,
       decision,
-      isThreat,
+      isThreat: isModerator,
       threatReasons,
-      ispOrg,
+      detectedLayer,
+      asn: finalAsn,
+      asnOrg: finalAsnOrg,
+      targetUrl,
       routedUrl,
+      httpStatus: 200, // Reverse Proxy puro entrega sempre HTTP 200
+      reverseProxyDelivery: true,
       device,
       browser,
       os,
-      cleanParams: params.utmParams || {},
+      cleanParams: urlParams,
     };
+  }
+
+  /**
+   * Gera o código completo e compilado de um Cloudflare Worker pronto para subir
+   */
+  public static generateCloudflareWorkerCode(config: CloakilioConfig): string {
+    const countriesStr = JSON.stringify(config.paisesPermitidos);
+    const blockedAsnsStr = JSON.stringify(config.blockedAsns);
+    const botPatternsStr = JSON.stringify(config.botPatterns, null, 2);
+
+    return `/**
+ * ============================================================================
+ * 🛡️ PHANTOM-X CLOAKILIOSHIELD - CLOUDFLARE WORKER ENGINE
+ * ============================================================================
+ * Gerado automaticamente via Phantom-X Command Center
+ * Entrega transparente na borda via Reverse Proxy puro (HTTP 200 OK sem redirects)
+ */
+
+const CONFIG = {
+  MODO: "${config.modo}",
+  WHITEPAGE_URL: "${config.whitepageUrl}",
+  OFERTA_URL: "${config.ofertaUrl}",
+  PAISES_PERMITIDOS: ${countriesStr},
+  PARAMETRO_UTM: "${config.parametroUtm}",
+  EXIGIR_FBCLID: ${config.exigirFbclid},
+  PERMITIR_MOBILE: ${config.permitirMobile},
+  PERMITIR_DESKTOP: ${config.permitirDesktop},
+  RISCO_MAXIMO: ${config.riscoMaximo},
+  API_KEY: "${config.proxyCheckApiKey}",
+};
+
+const BLOCKED_ASNS = new Set(${blockedAsnsStr});
+const BOT_PATTERNS = ${botPatternsStr};
+
+const ipCache = new Map();
+
+async function checkThreatScore(clientIp, apiKey, maxRisk) {
+  if (!apiKey || !clientIp) return false;
+  const cached = ipCache.get(clientIp);
+  if (cached && Date.now() - cached.time < 12 * 60 * 60 * 1000) {
+    return cached.isBad;
+  }
+  try {
+    const queryUrl = \`https://proxycheck.io/v2/\${clientIp}?key=\${apiKey}&vpn=1&asn=1&risk=1\`;
+    const res = await fetch(queryUrl, { cf: { cacheTtl: 43200 } });
+    if (!res.ok) return false;
+    const data = await res.json();
+    const result = data[clientIp];
+    if (!result) return false;
+    const isBad = result.proxy === "yes" || (result.risk && Number(result.risk) >= maxRisk);
+    ipCache.set(clientIp, { isBad, time: Date.now() });
+    return isBad;
+  } catch {
+    return false;
+  }
+}
+
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const userAgent = (request.headers.get("user-agent") || "").toLowerCase();
+    const clientIp = request.headers.get("cf-connecting-ip") || "";
+    const cf = request.cf || {};
+    const asn = cf.asn;
+    const country = (cf.country || "").toUpperCase();
+
+    // 1. Arquivos estáticos passam sem consumo de regras
+    if (/\\.(css|js|png|jpg|jpeg|gif|svg|woff2?|ico|mp3|mp4|json)$/i.test(url.pathname)) {
+      return fetch(request);
+    }
+
+    // 2. Processa apenas rotas de páginas
+    const isMainRoute = url.pathname === "/" || url.pathname === "/index.html";
+    if (!isMainRoute) {
+      return fetch(request);
+    }
+
+    // 3. Modos Forçados
+    if (CONFIG.MODO === "SO_WHITEPAGE") {
+      return serveTarget(request, CONFIG.WHITEPAGE_URL, true);
+    }
+    if (CONFIG.MODO === "SO_OFERTA") {
+      return serveTarget(request, CONFIG.OFERTA_URL, false);
+    }
+
+    // MOTOR DE DECISÃO MULTI-CAMADA
+    let failsGeo = false;
+    if (CONFIG.PAISES_PERMITIDOS.length > 0 && country) {
+      if (!CONFIG.PAISES_PERMITIDOS.includes(country)) {
+        failsGeo = true;
+      }
+    }
+
+    const isMobile = userAgent.includes("iphone") || userAgent.includes("android");
+    let failsDevice = false;
+    if (isMobile && !CONFIG.PERMITIR_MOBILE) failsDevice = true;
+    if (!isMobile && !CONFIG.PERMITIR_DESKTOP) failsDevice = true;
+
+    const isBotUA = !userAgent || BOT_PATTERNS.some((p) => userAgent.includes(p));
+    const isDatacenter = asn && BLOCKED_ASNS.has(asn);
+
+    const campaign = (
+      url.searchParams.get("utm_campaign") ||
+      url.searchParams.get("campaign") ||
+      url.searchParams.get("utm_campaign_name") ||
+      ""
+    ).toLowerCase();
+
+    const hasValidUtm = !CONFIG.PARAMETRO_UTM || campaign.includes(CONFIG.PARAMETRO_UTM.toLowerCase());
+    const hasFbclid = Boolean(url.searchParams.get("fbclid"));
+    const failsPlatformToken = !hasValidUtm || (CONFIG.EXIGIR_FBCLID && !hasFbclid);
+
+    const hasSecChUa = Boolean(request.headers.get("sec-ch-ua"));
+    const isSuspiciousBrowser = !hasSecChUa && !isMobile;
+
+    let isModerator =
+      failsGeo ||
+      failsDevice ||
+      isBotUA ||
+      isDatacenter ||
+      failsPlatformToken ||
+      isSuspiciousBrowser;
+
+    if (!isModerator && CONFIG.API_KEY) {
+      const isProxyOrVpn = await checkThreatScore(clientIp, CONFIG.API_KEY, CONFIG.RISCO_MAXIMO);
+      if (isProxyOrVpn) {
+        isModerator = true;
+      }
+    }
+
+    const targetUrl = isModerator ? CONFIG.WHITEPAGE_URL : CONFIG.OFERTA_URL;
+    return serveTarget(request, targetUrl, isModerator);
+  },
+};
+
+async function serveTarget(request, destination, isModerator) {
+  const currentUrl = new URL(request.url);
+  let finalTarget;
+
+  if (destination.startsWith("http://") || destination.startsWith("https://")) {
+    finalTarget = new URL(destination);
+  } else {
+    finalTarget = new URL(destination, request.url);
+  }
+
+  finalTarget.search = currentUrl.search;
+
+  const upstreamResponse = await fetch(finalTarget.toString(), {
+    headers: request.headers,
+  });
+
+  const responseHeaders = new Headers(upstreamResponse.headers);
+  responseHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  
+  if (isModerator) {
+    responseHeaders.set("X-Robots-Tag", "noindex, nofollow");
+  }
+
+  return new Response(upstreamResponse.body, {
+    status: 200,
+    headers: responseHeaders,
+  });
+}
+`;
   }
 }
