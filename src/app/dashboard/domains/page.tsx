@@ -52,21 +52,21 @@ export default function DomainsPage() {
         subtitle="Conecte seus domínios customizados para roteamento e certificados TLS automáticos"
       />
 
-      <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
         {/* Action Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-brand-white tracking-wide">
+            <h2 className="text-sm sm:text-base font-semibold text-brand-white tracking-wide">
               Domínios Conectados ({domains.length})
             </h2>
-            <p className="text-xs text-brand-secondary">
+            <p className="text-[11px] sm:text-xs text-brand-secondary">
               Cada domínio aponta para a borda global com suporte a HTTP/3 e terminação TLS
             </p>
           </div>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center space-x-1.5"
+            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-1.5 shrink-0"
           >
             <Plus className="w-4 h-4 text-white dark:text-black" />
             <span>Adicionar Domínio</span>

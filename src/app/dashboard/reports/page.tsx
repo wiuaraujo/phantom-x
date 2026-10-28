@@ -16,9 +16,9 @@ export default function ReportsPage() {
         subtitle="Métricas consolidadas de desempenho, integridade de tráfego e latência"
       />
 
-      <div className="p-6 space-y-6 max-w-7xl w-full mx-auto font-mono text-xs">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto font-mono text-xs">
         {/* KPI Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           <div className="bg-brand-surface border border-brand-border rounded-xl p-5 shadow-glow-sm">
             <div className="text-brand-muted text-[11px] mb-1">DISPONIBILIDADE GLOBAL</div>
             <div className="text-2xl font-bold text-white">99.98%</div>

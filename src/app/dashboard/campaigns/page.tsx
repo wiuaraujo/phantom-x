@@ -77,21 +77,21 @@ export default function CampaignsPage() {
         subtitle="Organize links de rastreamento, parâmetros UTM e destinos de tráfego"
       />
 
-      <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
         {/* Top Action Bar */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-brand-white tracking-wide">
+            <h2 className="text-sm sm:text-base font-semibold text-brand-white tracking-wide">
               Campanhas Configuradas ({campaigns.length})
             </h2>
-            <p className="text-xs text-brand-secondary">
+            <p className="text-[11px] sm:text-xs text-brand-secondary">
               Cada campanha possui endpoint único de rastreamento e auditoria de tráfego
             </p>
           </div>
 
           <button
             onClick={() => setShowModal(true)}
-            className="px-4 py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center space-x-1.5"
+            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-1.5 shrink-0"
           >
             <Plus className="w-4 h-4 text-white dark:text-black" />
             <span>Nova Campanha</span>

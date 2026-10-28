@@ -108,30 +108,33 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-4">
       {cards.map((card, i) => {
         const Icon = card.icon;
         const isPositive = card.growth > 0;
         const isThreatCard = card.title === "Tráfego Filtrado";
+        const isLastCard = i === 4;
 
         return (
           <div
             key={i}
-            className="bg-brand-surface border border-brand-border rounded-xl p-4 transition-all hover:border-brand-borderHighlight hover:shadow-sm flex flex-col justify-between"
+            className={`bg-brand-surface border border-brand-border rounded-xl p-3 sm:p-4 transition-all hover:border-brand-borderHighlight hover:shadow-sm flex flex-col justify-between ${
+              isLastCard ? "col-span-2 sm:col-span-2 lg:col-span-1" : ""
+            }`}
           >
-            <div className="flex items-center justify-between text-brand-secondary mb-3">
-              <span className="text-xs font-medium tracking-wide">{card.title}</span>
-              <Icon className="w-4 h-4 text-brand-muted" />
+            <div className="flex items-center justify-between text-brand-secondary mb-2 sm:mb-3">
+              <span className="text-[11px] sm:text-xs font-medium tracking-wide truncate">{card.title}</span>
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-muted shrink-0 ml-1" />
             </div>
 
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-sans text-brand-white tracking-tight">
+              <span className="text-lg sm:text-2xl font-bold font-sans text-brand-white tracking-tight">
                 {card.value}
               </span>
 
               {card.growth !== 0 && (
                 <div
-                  className={`flex items-center text-[11px] font-sans ${
+                  className={`flex items-center text-[10px] sm:text-[11px] font-sans ${
                     isThreatCard
                       ? isPositive
                         ? "text-brand-secondary"
@@ -142,16 +145,16 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
                   }`}
                 >
                   {isPositive ? (
-                    <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" />
+                    <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5" />
                   ) : (
-                    <ArrowDownRight className="w-3.5 h-3.5 mr-0.5" />
+                    <ArrowDownRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5" />
                   )}
                   {Math.abs(card.growth)}%
                 </div>
               )}
             </div>
 
-            <div className="mt-2 text-[11px] text-brand-muted">
+            <div className="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-brand-muted truncate">
               {card.label}
             </div>
           </div>

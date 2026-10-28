@@ -21,7 +21,7 @@ export const Hero: React.FC = () => {
           never sliding down behind the pipeline or routing diagram.
           The top curve comfortably clears the navbar.
         */}
-        <div className="absolute top-24 sm:top-36 md:top-40 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] xs:w-[380px] xs:h-[380px] sm:w-[540px] sm:h-[540px] md:w-[680px] md:h-[680px] pointer-events-none z-0 opacity-70 sm:opacity-75 flex items-center justify-center">
+        <div className="absolute top-24 sm:top-36 md:top-40 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] max-w-[95vw] xs:w-[380px] xs:h-[380px] sm:w-[540px] sm:h-[540px] md:w-[680px] md:h-[680px] pointer-events-none z-0 opacity-70 sm:opacity-75 flex items-center justify-center">
           {/* Subtle Ambient Radial Backlight */}
           <div className="absolute inset-0 rounded-full dark:bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.04)_0%,transparent_70%)] blur-2xl pointer-events-none" />
           <TechGlobe className="w-full h-full" />

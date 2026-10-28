@@ -76,38 +76,39 @@ export default function DashboardOverview() {
         onSelectPeriod={setSelectedPeriod}
       />
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-7 max-w-[1600px] w-full mx-auto">
+      <div className="p-3 sm:p-6 lg:p-8 space-y-5 sm:space-y-7 max-w-[1600px] w-full mx-auto">
         {/* 
           ======================================================================
           1. IMMERSIVE MAIN BANNER: DIGITAL MATRIX WORLD MAP
           "o mapa tem que ser estendido de forma imersiva como banner principal"
           ======================================================================
         */}
-        <div className="relative w-full h-[360px] sm:h-[480px] lg:h-[620px] rounded-2xl bg-brand-surface border border-brand-border overflow-hidden shadow-sm flex flex-col">
-          {/* Panoramic Map Header Floating Overlay */}
-          <div className="absolute top-0 inset-x-0 z-20 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none">
+        <div className="relative w-full h-[380px] sm:h-[480px] lg:h-[620px] rounded-2xl bg-brand-surface border border-brand-border overflow-hidden shadow-sm flex flex-col">
+          {/* Panoramic Map Header Floating Overlay (Compact & responsive on mobile) */}
+          <div className="absolute top-0 inset-x-0 z-20 p-2.5 sm:p-5 flex items-center justify-between gap-2 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none">
             {/* Title & Live Badge */}
-            <div className="flex items-center space-x-3 pointer-events-auto">
-              <div className="flex items-center space-x-2 bg-brand-surface/90 backdrop-blur-md border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono">
-                <span className="w-2 h-2 rounded-full bg-neutral-900 dark:bg-white animate-pulse" />
-                <span className="text-brand-white font-semibold tracking-wider">MATRIZ DE TELEMETRIA GLOBAL</span>
+            <div className="flex items-center space-x-2 pointer-events-auto min-w-0">
+              <div className="flex items-center space-x-1.5 sm:space-x-2 bg-brand-surface/90 backdrop-blur-md border border-brand-border px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-mono shrink-0">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-brand-white font-semibold tracking-wider">MATRIZ GLOBAL</span>
               </div>
               <div className="hidden md:flex items-center space-x-2 text-[11px] text-brand-muted font-mono bg-brand-surface/60 px-2.5 py-1 rounded-md border border-brand-border/60">
                 <span>14 PoPs operacionais</span>
                 <span>•</span>
-                <span>&lt; 18ms latência de borda</span>
+                <span>&lt; 18ms latência</span>
               </div>
             </div>
 
             {/* Actions Bar */}
-            <div className="flex items-center space-x-2 pointer-events-auto">
+            <div className="flex items-center space-x-1.5 pointer-events-auto shrink-0">
               {selectedCountry && (
-                <div className="flex items-center space-x-1.5 bg-brand-surface border border-brand-border px-2.5 py-1 rounded-lg text-xs font-mono text-brand-white">
-                  <span className="text-sm select-none">{getCountryFlag(selectedCountry)}</span>
-                  <span>Filtrando: [{selectedCountry}]</span>
+                <div className="flex items-center space-x-1 bg-brand-surface border border-brand-border px-2 py-1 rounded-lg text-[11px] font-mono text-brand-white">
+                  <span className="text-xs select-none">{getCountryFlag(selectedCountry)}</span>
+                  <span className="hidden xs:inline">[{selectedCountry}]</span>
                   <button
                     onClick={() => setSelectedCountry(null)}
-                    className="text-brand-muted hover:text-brand-white ml-1"
+                    className="text-brand-muted hover:text-brand-white ml-0.5"
+                    title="Limpar filtro de país"
                   >
                     ✕
                   </button>
@@ -116,16 +117,16 @@ export default function DashboardOverview() {
 
               <button
                 onClick={handleSimulateBurst}
-                className="hover:bg-brand-hover text-white flex items-center space-x-1.5 text-xs bg-brand-surface px-3 py-1.5 rounded-lg border border-brand-border transition font-medium shadow-glow-sm"
+                className="hover:bg-brand-hover text-white flex items-center space-x-1 text-[11px] bg-brand-surface px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-brand-border transition font-medium shadow-glow-sm"
                 title="Injetar requisição de teste para ativar nós em tempo real"
               >
-                <Send className="w-3.5 h-3.5 text-white" />
-                <span>Simular Requisição</span>
+                <Send className="w-3 h-3 text-white" />
+                <span className="hidden xs:inline">Simular</span>
               </button>
 
               <button
                 onClick={loadData}
-                className="hover:bg-brand-hover hover:text-white p-2 rounded-lg bg-brand-surface border border-brand-border text-brand-secondary transition"
+                className="hover:bg-brand-hover hover:text-white p-1 sm:p-2 rounded-lg bg-brand-surface border border-brand-border text-brand-secondary transition"
                 title="Recarregar dados"
               >
                 <RefreshCw className="w-3.5 h-3.5" />

@@ -48,7 +48,7 @@ export default function SettingsPage() {
         subtitle="Gerenciamento de chaves de API, regras de integridade e snippet de rastreamento"
       />
 
-      <div className="p-6 space-y-8 max-w-5xl w-full mx-auto font-mono text-xs">
+      <div className="p-3 sm:p-6 space-y-5 sm:space-y-8 max-w-5xl w-full mx-auto font-mono text-xs">
         {/* Appearance & Interface Theme Card */}
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 shadow-glow-sm space-y-4">
           <div className="border-b border-brand-border pb-3">

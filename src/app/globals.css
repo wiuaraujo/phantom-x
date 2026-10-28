@@ -56,15 +56,30 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.2s ease, color 0.2s ease;
   touch-action: manipulation;
+  overscroll-behavior-x: none;
 }
 
-/* Previne zoom automático e saltos visuais no iOS Safari e Android */
+/* Previne zoom automático indesejado e saltos visuais no iOS Safari e Android */
 @media screen and (max-width: 768px) {
   input,
+  select,
+  textarea,
+  button {
+    touch-action: manipulation;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
   select,
   textarea {
     font-size: 16px !important;
   }
+}
+
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
 }
 
 html.dark body {

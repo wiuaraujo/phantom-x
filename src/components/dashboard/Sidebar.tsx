@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { siteConfig } from "@/config/site";
@@ -26,12 +26,6 @@ export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      setCollapsed(true);
-    }
-  }, []);
-
   const navItems = [
     { label: "Visão Geral", href: "/dashboard", icon: LayoutDashboard },
     { label: "Monitoramento Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
@@ -45,16 +39,16 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`relative flex flex-col justify-between border-r border-brand-border bg-brand-black transition-all duration-300 z-30 font-sans ${
-        collapsed ? "w-16 md:w-20" : "w-64"
+      className={`hidden lg:flex relative flex-col justify-between border-r border-brand-border bg-brand-black transition-all duration-300 z-30 font-sans ${
+        collapsed ? "w-20" : "w-64"
       } min-h-screen shrink-0`}
     >
       {/* Top Section */}
       <div>
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-3 md:px-5 border-b border-brand-border">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-brand-border">
           <Link href="/dashboard" className="flex items-center space-x-3 overflow-hidden group">
-            <Logo size={34} className="group-hover:scale-105 transition-transform shrink-0" />
+            <Logo size={36} className="group-hover:scale-105 transition-transform shrink-0" />
             {!collapsed && (
               <span className="font-poppins text-base font-bold tracking-tight text-brand-white truncate">
                 {siteConfig.name}
@@ -71,7 +65,7 @@ export const Sidebar: React.FC = () => {
         </div>
 
         {/* Navigation Items */}
-        <nav className="p-2 md:p-3 space-y-1">
+        <nav className="p-3 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -88,9 +82,13 @@ export const Sidebar: React.FC = () => {
                 title={collapsed ? item.label : undefined}
               >
                 <div className="relative shrink-0">
-                  <Icon className={`w-4 h-4 ${isActive ? "text-white dark:text-black" : "text-brand-secondary group-hover:text-brand-white"}`} />
+                  <Icon
+                    className={`w-4 h-4 ${
+                      isActive ? "text-white dark:text-black" : "text-brand-secondary group-hover:text-brand-white"
+                    }`}
+                  />
                   {item.pulse && (
-                    <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-white animate-ping" />
+                    <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                   )}
                 </div>
                 {!collapsed && <span className="ml-3 truncate">{item.label}</span>}
@@ -101,7 +99,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Bottom Section */}
-      <div className="p-2 md:p-3 border-t border-brand-border space-y-2">
+      <div className="p-3 border-t border-brand-border space-y-2">
         <div className="flex items-center">
           <ThemeToggle className="w-full flex justify-center py-2" showLabel={!collapsed} />
         </div>
@@ -110,7 +108,7 @@ export const Sidebar: React.FC = () => {
           <div className="px-3 py-2 rounded-xl bg-gradient-to-r from-neutral-900 to-brand-surface border border-brand-borderSubtle text-[11px] font-sans">
             <div className="text-brand-muted text-[10px] uppercase font-mono tracking-wider">Cluster</div>
             <div className="text-white font-medium flex items-center space-x-1.5 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>edge-phantom-01</span>
             </div>
           </div>

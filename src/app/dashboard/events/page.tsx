@@ -57,12 +57,12 @@ export default function EventsExplorerPage() {
         subtitle="Registro granular de cada requisição processada com retenção e conformidade LGPD"
       />
 
-      <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
         {/* Controls Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-brand-surface border border-brand-border rounded-xl p-4 shadow-glow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-brand-surface border border-brand-border rounded-xl p-3 sm:p-4 shadow-glow-sm">
           {/* Search Box */}
-          <div className="relative flex-1 min-w-[240px] max-w-md">
-            <Search className="w-4 h-4 text-brand-muted absolute left-3 top-3" />
+          <div className="relative w-full sm:max-w-md">
+            <Search className="w-4 h-4 text-brand-muted absolute left-3 top-2.5 sm:top-3" />
             <input
               type="text"
               value={search}
@@ -70,12 +70,12 @@ export default function EventsExplorerPage() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              placeholder="Buscar por cidade, país, domínio ou IP..."
+              placeholder="Buscar cidade, país, domínio ou IP..."
               className="w-full pl-9 pr-3 py-2 bg-brand-surface border border-brand-border rounded-lg text-xs font-mono text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition"
             />
           </div>
 
-          <div className="flex items-center space-x-3 font-mono text-xs">
+          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 font-mono text-xs w-full sm:w-auto">
             {/* Risk Filter */}
             <div className="flex items-center space-x-1.5">
               <span className="text-brand-muted text-[11px]">Risco:</span>

@@ -19,18 +19,18 @@ export default function GlobalMapPage() {
         subtitle="Visualização geoespacial da matriz digital das requisições e latência de borda"
       />
 
-      <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
         {/* Full-width Digital Matrix Map Canvas */}
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-mono">
             <div className="flex items-center space-x-2 text-brand-white">
               <Globe2 className="w-4 h-4 text-brand-white" />
-              <span className="font-semibold">NÓS DE TELEMETRIA POR PAÍS E CIDADE</span>
+              <span className="font-semibold text-xs truncate">NÓS DE TELEMETRIA POR PAÍS</span>
             </div>
-            <span className="text-brand-muted text-[11px]">
+            <span className="text-brand-muted text-[10px] sm:text-[11px] truncate ml-2">
               {selectedCountry
-                ? `Isolando tráfego de: [${selectedCountry}]`
-                : "Selecione um nó no mapa ou na tabela abaixo"}
+                ? `Isolando: [${selectedCountry}]`
+                : "Toque em um nó no mapa"}
             </span>
           </div>
 
@@ -39,7 +39,7 @@ export default function GlobalMapPage() {
             geoData={geoData}
             selectedCountry={selectedCountry}
             onSelectCountry={setSelectedCountry}
-            className="h-[360px] sm:h-[460px] md:h-[540px] w-full rounded-2xl border border-brand-border"
+            className="h-[380px] sm:h-[460px] md:h-[540px] w-full rounded-2xl border border-brand-border"
           />
         </div>
 

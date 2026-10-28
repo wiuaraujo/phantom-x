@@ -389,7 +389,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     if (onSelectCountry) onSelectCountry(null);
   };
 
-  // Suporte avançado para gestos de toque no mobile (toque único para filtrar, pinch para zoom sem dar zoom na página inteira)
+  // Suporte avançado para gestos de toque no mobile (toque único para filtrar, pinch para zoom sem interferir na página)
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (!interactive) return;
     if (e.touches.length === 1) {
@@ -400,6 +400,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         time: Date.now(),
         touches: 1,
       };
+      setIsDragging(true);
     } else if (e.touches.length === 2) {
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
@@ -412,13 +413,13 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         touches: 2,
         dist,
       };
+      setIsDragging(false);
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (!interactive) return;
     if (e.touches.length === 2 && touchStartRef.current.dist) {
-      e.preventDefault();
       const currentDist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
@@ -426,11 +427,19 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
       const ratio = currentDist / touchStartRef.current.dist;
       setZoom((z) => Math.min(Math.max(0.8, z * ratio), 3.5));
       touchStartRef.current.dist = currentDist;
+    } else if (e.touches.length === 1 && isDragging) {
+      const touch = e.touches[0];
+      setPan({
+        x: touch.clientX - touchStartRef.current.x,
+        y: touch.clientY - touchStartRef.current.y,
+      });
     }
   };
 
   const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    setIsDragging(false);
     if (!interactive) return;
+
     const dt = Date.now() - touchStartRef.current.time;
     if (dt < 350 && touchStartRef.current.touches === 1 && e.changedTouches.length > 0) {
       const canvas = canvasRef.current;
@@ -458,7 +467,7 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         const px = marginX + hub.col * cellW + baseDotSize / 2;
         const py = marginY + hub.row * cellH + baseDotSize / 2;
         const dist = Math.hypot(worldTouchX - px, worldTouchY - py);
-        if (dist < 28) {
+        if (dist < 32) {
           matched = hub;
           break;
         }
@@ -483,12 +492,12 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
   return (
     <div
       ref={containerRef}
-      style={{ touchAction: "pan-y", overscrollBehavior: "contain" }}
+      style={{ touchAction: "none", overscrollBehavior: "contain" }}
       className={`relative w-full h-full bg-brand-black overflow-hidden select-none font-sans ${className}`}
     >
       <canvas
         ref={canvasRef}
-        style={{ touchAction: "pan-y", overscrollBehavior: "contain" }}
+        style={{ touchAction: "none", overscrollBehavior: "contain" }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -505,20 +514,20 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
 
       {/* Controls Overlay */}
       {showControls && (
-        <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-4 flex items-center space-x-1 bg-brand-surface/90 backdrop-blur-md border border-brand-border p-1 rounded-lg shadow-glow-sm z-20">
+        <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-4 flex items-center space-x-1 bg-brand-surface/90 backdrop-blur-md border border-brand-border p-1 rounded-lg shadow-glow-sm z-20">
           <button
             onClick={() => setZoom((z) => Math.min(z + 0.3, 3.5))}
             title="Aproximar (+)"
-            className="p-1.5 sm:p-1 text-brand-secondary hover:text-white transition rounded"
+            className="p-1 text-brand-secondary hover:text-white transition rounded"
           >
-            <ZoomIn className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+            <ZoomIn className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setZoom((z) => Math.max(z - 0.3, 0.8))}
             title="Afastar (-)"
-            className="p-1.5 sm:p-1 text-brand-secondary hover:text-white transition rounded"
+            className="p-1 text-brand-secondary hover:text-white transition rounded"
           >
-            <ZoomOut className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+            <ZoomOut className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => {
@@ -527,17 +536,17 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
               if (onSelectCountry) onSelectCountry(null);
             }}
             title="Redefinir visualização"
-            className="p-1.5 sm:p-1 text-brand-secondary hover:text-white transition rounded"
+            className="p-1 text-brand-secondary hover:text-white transition rounded"
           >
-            <RotateCcw className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {/* Bottom Telemetry Legend Bar */}
-      <div className="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-4 flex items-center space-x-2 sm:space-x-3 bg-brand-surface/85 backdrop-blur-md border border-brand-border px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs text-brand-secondary font-sans z-20 max-w-[55%] sm:max-w-none truncate">
+      <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-4 flex items-center space-x-1.5 sm:space-x-3 bg-brand-surface/85 backdrop-blur-md border border-brand-border px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs text-brand-secondary font-sans z-20 max-w-[55%] sm:max-w-none truncate">
         <div className="flex items-center space-x-1.5 shrink-0">
-          <Activity className="w-3.5 h-3.5 text-white animate-pulse shrink-0" />
+          <Activity className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white animate-pulse shrink-0" />
           <span className="text-white font-medium text-[10px] sm:text-[11px] truncate">Telemetria Global</span>
         </div>
         <div className="hidden sm:flex items-center space-x-1.5 text-[10px] text-brand-muted">
@@ -545,43 +554,41 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
         </div>
       </div>
 
-      {/* Interactive Tooltip on Node Hover */}
+      {/* Interactive Tooltip on Node Hover / Touch (Smart Bounded to never clip or break layout) */}
       {hoveredNode && (
         <div
-          style={{ left: tooltipPos.x + 14, top: tooltipPos.y - 12 }}
-          className="pointer-events-none absolute z-30 bg-[#0d0e14]/95 backdrop-blur-md border border-white/10 px-3.5 py-2.5 rounded-xl shadow-[0_10px_35px_rgba(0,0,0,0.85)] text-xs font-sans ring-1 ring-white/5"
+          style={{
+            left: Math.max(10, Math.min(tooltipPos.x > 200 ? tooltipPos.x - 210 : tooltipPos.x + 12, (canvasRef.current?.clientWidth || 360) - 220)),
+            top: Math.max(10, Math.min(tooltipPos.y > 150 ? tooltipPos.y - 110 : tooltipPos.y + 12, (canvasRef.current?.clientHeight || 360) - 130)),
+          }}
+          className="pointer-events-none absolute z-30 bg-[#0d0e14]/95 backdrop-blur-md border border-white/10 px-3 py-2 rounded-xl shadow-[0_10px_35px_rgba(0,0,0,0.85)] text-xs font-sans ring-1 ring-white/5 w-52 max-w-[85vw]"
         >
-          <div className="font-semibold text-white flex items-center justify-between space-x-3">
-            <div className="flex items-center space-x-1.5">
-              <span className="text-base leading-none select-none">
+          <div className="font-semibold text-white flex items-center justify-between space-x-2">
+            <div className="flex items-center space-x-1.5 truncate">
+              <span className="text-sm leading-none select-none shrink-0">
                 {hoveredNode.flag || getCountryFlag(hoveredNode.code)}
               </span>
-              <span className="text-white font-medium">{hoveredNode.name}</span>
-              {hoveredNode.stateCode && (
-                <span className="text-[10px] bg-white/10 text-white font-mono px-1.5 py-0.5 rounded border border-white/10 font-bold">
-                  {hoveredNode.stateCode}
-                </span>
-              )}
+              <span className="text-white font-medium truncate text-xs">{hoveredNode.name}</span>
             </div>
-            <span className="text-brand-secondary font-mono text-[11px]">[{hoveredNode.code}]</span>
+            <span className="text-brand-secondary font-mono text-[10px] shrink-0">[{hoveredNode.code}]</span>
           </div>
           {hoveredNode.state && (
-            <div className="text-[11px] text-brand-muted mt-0.5 pl-6">
+            <div className="text-[10px] text-brand-muted mt-0.5 truncate">
               {hoveredNode.state}
             </div>
           )}
-          <div className="text-brand-secondary mt-2 flex justify-between space-x-4 text-[11px]">
-            <span>Volume registrado:</span>
-            <span className="text-white font-bold font-mono">{hoveredNode.eventsCount} reqs</span>
+          <div className="text-brand-secondary mt-1.5 flex justify-between space-x-2 text-[10px] font-mono">
+            <span>Volume:</span>
+            <span className="text-white font-bold">{hoveredNode.eventsCount} reqs</span>
           </div>
           {hoveredNode.percentage > 0 && (
-            <div className="text-brand-secondary flex justify-between space-x-4 text-[11px]">
+            <div className="text-brand-secondary flex justify-between space-x-2 text-[10px] font-mono">
               <span>Fatia da rede:</span>
-              <span className="text-white font-mono">{hoveredNode.percentage}%</span>
+              <span className="text-white">{hoveredNode.percentage}%</span>
             </div>
           )}
-          <div className="text-[10px] text-brand-muted mt-1.5 border-t border-white/5 pt-1 italic">
-            Clique para filtrar por este território
+          <div className="text-[9px] text-brand-muted mt-1 border-t border-white/5 pt-0.5 italic">
+            Toque para filtrar por esta região
           </div>
         </div>
       )}

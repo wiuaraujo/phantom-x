@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { MobileAppNav } from "@/components/dashboard/MobileAppNav";
+import { DashboardNavProvider } from "@/components/dashboard/DashboardNavContext";
 import { auth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
@@ -30,14 +32,19 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-brand-black text-brand-white flex">
-      {/* Fixed Sidebar */}
-      <Sidebar />
+    <DashboardNavProvider>
+      <div className="min-h-screen bg-brand-black text-brand-white flex font-sans">
+        {/* Desktop Sidebar (hidden on mobile, visible on lg+) */}
+        <Sidebar />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {children}
+        {/* Main Content Area (with pb-20 on mobile to leave space for bottom bar) */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto pb-20 lg:pb-0">
+          {children}
+        </div>
+
+        {/* Mobile Native App Bottom Navigation Bar & Drawer (< lg) */}
+        <MobileAppNav />
       </div>
-    </div>
+    </DashboardNavProvider>
   );
 }

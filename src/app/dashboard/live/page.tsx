@@ -60,7 +60,7 @@ export default function LiveMonitoringPage() {
         subtitle="Fluxo contínuo de requisições de borda com inspeção instantânea de telemetria"
       />
 
-      <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
         {/* Stream Controls Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-4 bg-brand-surface border border-brand-border rounded-xl p-4 shadow-glow-sm">
           <div className="flex items-center space-x-3">

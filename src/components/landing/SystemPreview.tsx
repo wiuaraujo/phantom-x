@@ -116,9 +116,9 @@ export const SystemPreview: React.FC = () => {
           </div>
 
           {/* 2. REAL PHANTOM-X DASHBOARD: SIDEBAR + MAIN WORKSPACE */}
-          <div className="flex flex-col md:flex-row min-h-[750px] bg-brand-black">
-            {/* Real Dashboard Sidebar */}
-            <aside className="w-full md:w-60 border-b md:border-b-0 md:border-r border-brand-border bg-brand-black/95 flex flex-col justify-between shrink-0">
+          <div className="flex flex-col md:flex-row min-h-[560px] md:min-h-[750px] bg-brand-black">
+            {/* Real Dashboard Sidebar (hidden on mobile, visible on md+) */}
+            <aside className="hidden md:flex w-60 border-r border-brand-border bg-brand-black/95 flex-col justify-between shrink-0">
               <div>
                 {/* Brand Header */}
                 <div className="h-14 flex items-center px-4 border-b border-brand-border space-x-3">

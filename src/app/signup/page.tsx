@@ -90,7 +90,6 @@ function SignupFormInner() {
         return;
       }
 
-      // Registro com sucesso e sessão já inicializada
       router.push("/dashboard");
     } catch {
       setError("Falha inesperada ao provisionar a conta. Tente novamente.");
@@ -99,15 +98,28 @@ function SignupFormInner() {
   };
 
   return (
-    <div className="w-full max-w-md my-auto space-y-6">
+    <div className="w-full max-w-md mx-auto space-y-5">
+      {/* Mobile-only compact Globe & Headline (< lg) */}
+      <div className="lg:hidden flex flex-col items-center text-center pt-2 pb-1">
+        <div className="relative flex items-center justify-center mb-3">
+          <RotatingGlobe size={150} />
+        </div>
+        <h2 className="text-lg font-bold text-brand-white font-poppins">
+          Provisionamento de Cluster Phantom-X
+        </h2>
+        <p className="text-[11px] text-brand-secondary mt-0.5">
+          Cadastre seu acesso de operador com fuso horário e telemetria
+        </p>
+      </div>
+
       {/* Box de Cadastro */}
-      <div className="bg-gradient-to-b from-brand-surface/95 via-brand-dark/95 to-brand-black/95 border border-brand-border rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl ring-1 ring-brand-border/40">
+      <div className="bg-gradient-to-b from-brand-surface/95 via-brand-dark/95 to-brand-black/95 border border-brand-border rounded-2xl p-5 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl ring-1 ring-brand-border/40">
         {/* Top Logo & System Brand */}
-        <div className="flex flex-col items-center text-center mb-6">
-          <div className="relative mb-4">
+        <div className="flex flex-col items-center text-center mb-5 sm:mb-6">
+          <div className="relative mb-3 sm:mb-4">
             <div className="absolute inset-0 bg-neutral-200/50 dark:bg-white/10 rounded-2xl blur-lg animate-pulse" />
-            <div className="relative w-16 h-16 rounded-2xl bg-brand-surface border border-brand-border p-2.5 flex items-center justify-center shadow-lg">
-              <Logo size={48} />
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-brand-surface border border-brand-border p-2 sm:p-2.5 flex items-center justify-center shadow-lg">
+              <Logo size={44} />
             </div>
           </div>
 
@@ -120,7 +132,7 @@ function SignupFormInner() {
         </div>
 
         {error && (
-          <div className="mb-5 p-3.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs text-white font-mono space-y-2">
+          <div className="mb-4 sm:mb-5 p-3.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs text-white font-mono space-y-2">
             <div className="flex items-start justify-between space-x-2">
               <div className="flex items-start space-x-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
@@ -147,7 +159,7 @@ function SignupFormInner() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           {/* Nome */}
           <div>
             <label className="block text-xs font-mono text-brand-secondary mb-1.5 font-medium">
@@ -245,7 +257,7 @@ function SignupFormInner() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-brand-muted hover:text-brand-white"
+                className="absolute right-3 top-3 text-brand-muted hover:text-brand-white p-0.5"
                 title={showPassword ? "Ocultar senha" : "Exibir senha"}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -273,7 +285,7 @@ function SignupFormInner() {
           </div>
 
           {/* Termos */}
-          <div className="pt-1">
+          <div className="pt-0.5">
             <label className="flex items-start space-x-2 text-xs text-brand-secondary cursor-pointer">
               <input
                 type="checkbox"
@@ -299,7 +311,7 @@ function SignupFormInner() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-4 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
+            className="w-full mt-3 sm:mt-4 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
           >
             {loading ? (
               <span className="font-mono text-xs animate-pulse">
@@ -315,7 +327,7 @@ function SignupFormInner() {
         </form>
 
         {/* Alternar para Login */}
-        <div className="mt-5 pt-4 border-t border-brand-border text-center text-xs text-brand-secondary font-mono">
+        <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-brand-border text-center text-xs text-brand-secondary font-mono">
           Já possui uma conta ativa?{" "}
           <Link href="/login" className="text-brand-white font-semibold underline hover:text-brand-secondary">
             Acessar console
@@ -323,7 +335,26 @@ function SignupFormInner() {
         </div>
       </div>
 
-      <div className="text-center text-[11px] font-mono text-brand-muted">
+      {/* Mobile Value Proposition Badges */}
+      <div className="lg:hidden grid grid-cols-3 gap-2 pt-1 text-center">
+        <div className="p-2 rounded-xl bg-brand-surface/60 border border-brand-border">
+          <Zap className="w-3.5 h-3.5 text-brand-white mx-auto mb-1" />
+          <div className="text-[10px] font-semibold text-brand-white">&lt; 18ms</div>
+          <div className="text-[9px] text-brand-muted">Borda Global</div>
+        </div>
+        <div className="p-2 rounded-xl bg-brand-surface/60 border border-brand-border">
+          <ShieldCheck className="w-3.5 h-3.5 text-brand-white mx-auto mb-1" />
+          <div className="text-[10px] font-semibold text-brand-white">Zero Footprint</div>
+          <div className="text-[9px] text-brand-muted">Assinatura Estéril</div>
+        </div>
+        <div className="p-2 rounded-xl bg-brand-surface/60 border border-brand-border">
+          <Activity className="w-3.5 h-3.5 text-brand-white mx-auto mb-1" />
+          <div className="text-[10px] font-semibold text-brand-white">Click ID</div>
+          <div className="text-[9px] text-brand-muted">Atribuição Real</div>
+        </div>
+      </div>
+
+      <div className="text-center text-[10px] sm:text-[11px] font-mono text-brand-muted">
         Protegido por infraestrutura Phantom-X Edge • Criptografia SHA-256 + Salt
       </div>
     </div>
@@ -335,10 +366,31 @@ export default function SignupPage() {
     <div className="min-h-screen w-full bg-brand-black text-brand-white flex flex-col lg:flex-row font-sans selection:bg-white selection:text-black">
       {/* 
         ========================================================================
-        LADO ESQUERDO: SHOWCASE DINÂMICO COM GLOBO 3D, AUTORIDADE E RETENÇÃO
+        MOBILE TOP BAR (< lg)
         ========================================================================
       */}
-      <div className="w-full lg:w-1/2 relative bg-gradient-to-br from-brand-surface via-brand-dark to-brand-black border-b lg:border-b-0 lg:border-r border-brand-border p-6 sm:p-10 lg:p-12 flex flex-col justify-between overflow-hidden">
+      <div className="lg:hidden flex items-center justify-between p-4 border-b border-brand-border bg-brand-surface/60 backdrop-blur-md sticky top-0 z-30">
+        <Link href="/" className="flex items-center space-x-2">
+          <Logo size={32} />
+          <span className="font-poppins font-bold text-sm text-brand-white tracking-tight">
+            {siteConfig.name}
+          </span>
+        </Link>
+        <div className="flex items-center space-x-2">
+          <ThemeToggle />
+          <span className="text-[10px] font-mono text-emerald-400 bg-brand-surface border border-brand-border px-2 py-0.5 rounded-full flex items-center space-x-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>PoPs Ativos</span>
+          </span>
+        </div>
+      </div>
+
+      {/* 
+        ========================================================================
+        DESKTOP SHOWCASE (Lado Esquerdo, visível apenas em telas >= lg)
+        ========================================================================
+      */}
+      <div className="hidden lg:flex w-1/2 relative bg-gradient-to-br from-brand-surface via-brand-dark to-brand-black border-r border-brand-border p-8 lg:p-12 flex-col justify-between overflow-hidden">
         {/* Subtle Ambient Glow Effect */}
         <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-white/[0.03] rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 right-10 w-60 h-60 bg-white/[0.02] rounded-full blur-2xl pointer-events-none" />
@@ -358,7 +410,7 @@ export default function SignupPage() {
           </Link>
           <div className="flex items-center space-x-2">
             <ThemeToggle />
-            <div className="hidden sm:flex items-center space-x-2 text-[11px] font-mono text-brand-muted bg-brand-surface px-2.5 py-1 rounded-full border border-brand-border">
+            <div className="flex items-center space-x-2 text-[11px] font-mono text-brand-muted bg-brand-surface px-2.5 py-1 rounded-full border border-brand-border">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>PoPs Operacionais Ativos</span>
             </div>
@@ -372,7 +424,7 @@ export default function SignupPage() {
           </div>
 
           <div className="max-w-md mx-auto space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white leading-tight">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white leading-tight font-poppins">
               Infraestrutura de Tráfego Invisível em Escala Global.
             </h2>
             <p className="text-xs sm:text-sm text-brand-secondary font-sans leading-relaxed">
@@ -381,7 +433,7 @@ export default function SignupPage() {
           </div>
 
           {/* Value Props / Instruções Claras */}
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg text-left">
+          <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-lg text-left">
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
               <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
                 <Zap className="w-3.5 h-3.5 text-brand-white" />
@@ -423,10 +475,10 @@ export default function SignupPage() {
 
       {/* 
         ========================================================================
-        LADO DIREITO: FORMULÁRIO DE CADASTRO COM LOGO, FUSO HORÁRIO E ELEGÂNCIA
+        FORMULÁRIO DE CADASTRO (100% Responsivo, Mobile App First no Mobile)
         ========================================================================
       */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 relative overflow-y-auto">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-12 relative overflow-y-auto">
         <Suspense fallback={
           <div className="w-full max-w-md my-auto flex flex-col items-center justify-center p-12 text-center">
             <div className="w-8 h-8 rounded-full border-2 border-white border-t-transparent animate-spin mb-4" />
