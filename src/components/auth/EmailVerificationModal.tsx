@@ -214,11 +214,11 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           </div>
         </div>
 
-        {/* Informative Guidance Card */}
-        <div className="mb-4 p-3 rounded-xl bg-blue-950/20 border border-blue-500/20 text-[11px] text-neutral-300 leading-relaxed font-sans flex items-start space-x-2.5">
-          <Lock className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+        {/* Informative Guidance Card (UI preta com degradê suave) */}
+        <div className="mb-4 p-3.5 rounded-xl bg-gradient-to-b from-white/[0.08] via-neutral-950 to-black border border-white/15 text-[11px] text-neutral-300 leading-relaxed font-sans flex items-start space-x-2.5 shadow-lg shadow-black/50 ring-1 ring-white/5">
+          <Lock className="w-4 h-4 text-white/80 shrink-0 mt-0.5" />
           <div>
-            Acesse o seu aplicativo ou navegador do <strong>Gmail</strong>. Copie o código de 6 números que chegou e cole nos campos abaixo para confirmar sua conta.
+            Acesse o seu aplicativo ou navegador do <strong className="text-white">Gmail</strong>. Copie o código de 6 números que chegou e cole nos campos abaixo para confirmar sua conta.
             <span className="block text-[10px] text-neutral-400 mt-1">
               (Caso não veja na caixa de entrada, verifique também a pasta de <em>Spam / Lixo Eletrônico</em>).
             </span>
