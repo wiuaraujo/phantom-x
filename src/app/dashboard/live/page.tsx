@@ -110,12 +110,15 @@ export default function LiveMonitoringPage() {
             </button>
 
             <button
-              onClick={() => setEvents([])}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-brand-secondary hover:text-brand-white bg-brand-surface border border-brand-border transition"
-              title="Limpar buffer de eventos"
+              onClick={() => {
+                store.revertSimulatedEvents();
+                refreshEvents();
+              }}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-brand-secondary hover:text-rose-400 bg-brand-surface border border-brand-border transition"
+              title="Limpar e reverter eventos de teste do dashboard"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Limpar</span>
+              <span>Limpar / Reverter Testes</span>
             </button>
 
             <button

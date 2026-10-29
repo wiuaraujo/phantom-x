@@ -157,6 +157,7 @@ export interface TrafficEvent {
   latencyMs: number;
   isThreat: boolean;
   threatReasons?: string[];
+  isSimulated?: boolean;
 }
 
 export interface RoutingRule {

@@ -570,6 +570,7 @@ export const store = {
       latencyMs: Math.floor(10 + Math.random() * 20),
       isThreat: assessment.isThreat,
       threatReasons: assessment.threatReasons,
+      isSimulated: true,
     };
 
     const allEvents = loadUserArray<TrafficEvent>("events", eventsStore);
@@ -593,6 +594,54 @@ export const store = {
     }
 
     return event;
+  },
+
+  /**
+   * Verifica se o usuário possui eventos simulados/de teste no dashboard
+   */
+  hasSimulatedData(): boolean {
+    const allEvents = loadUserArray<TrafficEvent>("events", eventsStore);
+    return allEvents.some((e) => e.isSimulated || e.id.startsWith("evt_sim_"));
+  },
+
+  /**
+   * Reverte e remove todos os eventos simulados de teste, restaurando o dashboard
+   * limpo sem afetar os dados reais do usuário.
+   */
+  revertSimulatedEvents(): { count: number } {
+    const allEvents = loadUserArray<TrafficEvent>("events", eventsStore);
+    const beforeCount = allEvents.length;
+    const remaining = allEvents.filter((e) => !e.isSimulated && !e.id.startsWith("evt_sim_"));
+    const removedCount = beforeCount - remaining.length;
+
+    eventsStore = remaining;
+    saveUserArray("events", remaining);
+
+    // Recalcula contadores de eventos por domínio
+    const currentDomains = loadUserArray<Domain>("domains", domainsStore);
+    const updatedDomains = currentDomains.map((d) => {
+      const realEvents = remaining.filter((e) => e.domain === d.name);
+      return {
+        ...d,
+        eventsCount: realEvents.length,
+      };
+    });
+    domainsStore = updatedDomains;
+    saveUserArray("domains", updatedDomains);
+
+    return { count: removedCount };
+  },
+
+  /**
+   * Limpa completamente todos os eventos de tráfego do usuário ativo
+   */
+  clearAllEvents(): void {
+    eventsStore = [];
+    saveUserArray("events", []);
+    const currentDomains = loadUserArray<Domain>("domains", domainsStore);
+    const updatedDomains = currentDomains.map((d) => ({ ...d, eventsCount: 0 }));
+    domainsStore = updatedDomains;
+    saveUserArray("domains", updatedDomains);
   },
 
   getDomains(): Domain[] {

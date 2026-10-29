@@ -5,7 +5,7 @@ import { Header } from "@/components/dashboard/Header";
 import { store } from "@/lib/store";
 import { TrafficEvent, RiskCategory } from "@/types";
 import { LocationBadge } from "@/lib/geoFlags";
-import { Download, Search, Filter, ShieldCheck, ChevronLeft, ChevronRight, Server } from "lucide-react";
+import { Download, Search, Filter, ShieldCheck, ChevronLeft, ChevronRight, Server, RotateCcw } from "lucide-react";
 
 export default function EventsExplorerPage() {
   const [events, setEvents] = useState<TrafficEvent[]>([]);
@@ -112,6 +112,20 @@ export default function EventsExplorerPage() {
                 <option value="bot">Bots (&gt;70)</option>
               </select>
             </div>
+
+            {store.hasSimulatedData() && (
+              <button
+                onClick={() => {
+                  store.revertSimulatedEvents();
+                  loadEvents();
+                }}
+                className="px-3 py-2 rounded-lg bg-amber-950/40 border border-amber-500/40 text-amber-300 hover:bg-amber-900/60 transition flex items-center space-x-1.5"
+                title="Limpar e reverter requisições simuladas do dashboard"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                <span>Reverter Testes</span>
+              </button>
+            )}
 
             {/* Export Button */}
             <button

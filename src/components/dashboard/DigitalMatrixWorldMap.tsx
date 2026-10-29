@@ -408,18 +408,18 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
             ctx.font = "11px sans-serif";
             ctx.fillText(flag, isLeft ? cardX + 6 : cardX + cardW - 20, cardY + 14);
 
-            // Monospace Cyber Details
+            // Monospace Cyber Details (100% em Português)
             ctx.font = "bold 8.5px 'JetBrains Mono', monospace";
             ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
-            ctx.fillText(`ORIGIN: IP ${hub.ip || "192.168.***"}`, cardX + (isLeft ? 24 : 8), cardY + 13);
+            ctx.fillText(`ORIGEM: IP ${hub.ip || "192.168.***"}`, cardX + (isLeft ? 24 : 8), cardY + 13);
 
             ctx.font = "8px 'JetBrains Mono', monospace";
             ctx.fillStyle = isLight ? "#52525b" : "#a1a1aa";
-            ctx.fillText(`DESTINATION: [${hub.name.toUpperCase()}]`, cardX + 8, cardY + 25);
+            ctx.fillText(`DESTINO: [${hub.name.toUpperCase()}]`, cardX + 8, cardY + 25);
             ctx.fillText(`STATUS: PROXY 200 OK`, cardX + 8, cardY + 35);
 
             ctx.fillStyle = isLight ? "#047857" : "#34d399";
-            ctx.fillText(`TRAFFIC: ENCRYPTED`, cardX + 8, cardY + 45);
+            ctx.fillText(`TRÁFEGO: CRIPTOGRAFADO`, cardX + 8, cardY + 45);
 
             ctx.restore();
           }
@@ -460,6 +460,44 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
             ctx.restore();
           }
         });
+
+        // 6. Corner HUD Overlays (100% em Português)
+        // Caixa do Auditor de Borda no canto inferior esquerdo
+        if (w >= 640) {
+          ctx.save();
+          const terminalW = 232;
+          const terminalH = 70;
+          const termX = 14;
+          const termY = h - terminalH - 14;
+
+          ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.94)" : "rgba(6, 7, 10, 0.90)";
+          ctx.strokeStyle = isLight ? "rgba(0, 0, 0, 0.18)" : "rgba(255, 255, 255, 0.22)";
+          ctx.lineWidth = 1;
+
+          if (ctx.roundRect) {
+            ctx.beginPath();
+            ctx.roundRect(termX, termY, terminalW, terminalH, 6);
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            ctx.fillRect(termX, termY, terminalW, terminalH);
+            ctx.strokeRect(termX, termY, terminalW, terminalH);
+          }
+
+          ctx.font = "bold 8.5px 'JetBrains Mono', monospace";
+          ctx.fillStyle = isLight ? "#0f0f12" : "#ffffff";
+          ctx.fillText("AUDITOR DE BORDA PHANTOM-X V2.4", termX + 8, termY + 14);
+
+          ctx.font = "8px 'JetBrains Mono', monospace";
+          ctx.fillStyle = isLight ? "#52525b" : "#a1a1aa";
+          ctx.fillText("ORIGEM: IP 177.136.24.*** [SP/BR]", termX + 8, termY + 27);
+          ctx.fillText("DESTINO: PROXY 200 OK (DIRETO)", termX + 8, termY + 39);
+          ctx.fillText("ASNS BLOQUEADOS: 14 REDES (META/AWS)", termX + 8, termY + 51);
+
+          ctx.fillStyle = isLight ? "#047857" : "#34d399";
+          ctx.fillText("STATUS: ZERO REDIRECIONAMENTOS • < 14ms", termX + 8, termY + 63);
+          ctx.restore();
+        }
       }
 
       ctx.restore();

@@ -25,6 +25,7 @@ import {
   Zap,
   Sliders,
   Clock,
+  RotateCcw,
 } from "lucide-react";
 
 export default function DashboardOverview() {
@@ -40,6 +41,8 @@ export default function DashboardOverview() {
   const [timeSeries, setTimeSeries] = useState(store.getTimeSeries(24));
   const [events, setEvents] = useState<TrafficEvent[]>([]);
   const [availableDomains, setAvailableDomains] = useState<string[]>(["Todos os Domínios"]);
+  const [hasSimulatedEvents, setHasSimulatedEvents] = useState(false);
+  const [revertNotice, setRevertNotice] = useState<string | null>(null);
 
   const loadData = () => {
     const currentSession = auth.getSession();
@@ -58,6 +61,7 @@ export default function DashboardOverview() {
     );
     const userDomains = store.getDomains().map((d) => d.name);
     setAvailableDomains(["Todos os Domínios", ...userDomains]);
+    setHasSimulatedEvents(store.hasSimulatedData());
   };
 
   useEffect(() => {
@@ -72,7 +76,16 @@ export default function DashboardOverview() {
     try {
       store.generateRandomSimulatedEvent();
       loadData();
+      setRevertNotice("Requisição de teste simulada com sucesso! Você pode testar sem conectar domínio e reverter a qualquer momento.");
+      setTimeout(() => setRevertNotice(null), 6000);
     } catch {}
+  };
+
+  const handleRevertSimulations = () => {
+    const res = store.revertSimulatedEvents();
+    loadData();
+    setRevertNotice(`Teste revertido com sucesso! ${res.count} evento(s) simulados foram removidos e o dashboard voltou ao estado limpo.`);
+    setTimeout(() => setRevertNotice(null), 6000);
   };
 
   return (
@@ -110,6 +123,23 @@ export default function DashboardOverview() {
             <span>Configurações do Perfil</span>
           </Link>
         </div>
+        {/* Revert / Test Feedback Notice */}
+        {revertNotice && (
+          <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs font-mono text-white animate-in fade-in slide-in-from-top-1">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>{revertNotice}</span>
+            </div>
+            <button
+              onClick={() => setRevertNotice(null)}
+              className="text-brand-muted hover:text-white ml-2 text-xs"
+              title="Fechar"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* 
           ======================================================================
           1. IMMERSIVE MAIN BANNER: DIGITAL MATRIX WORLD MAP 360° OVAL
@@ -138,12 +168,23 @@ export default function DashboardOverview() {
 
               <button
                 onClick={handleSimulateBurst}
-                className="hover:bg-brand-hover text-brand-white flex items-center space-x-1 text-[11px] bg-brand-surface px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-brand-border transition font-medium shadow-glow-sm"
-                title="Injetar requisição de teste para ativar nós em tempo real"
+                className="hover:bg-brand-hover text-brand-white flex items-center space-x-1.5 text-[11px] bg-brand-surface px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-brand-border transition font-medium shadow-glow-sm"
+                title="Testar tráfego sem conectar domínio (injetar requisição de teste)"
               >
                 <Send className="w-3 h-3 text-brand-white" />
-                <span className="hidden xs:inline">Simular</span>
+                <span className="hidden xs:inline">Testar / Simular</span>
               </button>
+
+              {hasSimulatedEvents && (
+                <button
+                  onClick={handleRevertSimulations}
+                  className="bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 hover:text-amber-200 border border-amber-500/40 flex items-center space-x-1.5 text-[11px] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg transition font-mono shadow-sm animate-in fade-in"
+                  title="Reverter testes e restaurar dashboard limpo"
+                >
+                  <RotateCcw className="w-3 h-3 text-amber-400" />
+                  <span>Reverter Teste</span>
+                </button>
+              )}
 
               <button
                 onClick={loadData}
