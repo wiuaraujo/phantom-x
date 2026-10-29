@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import {
   ShieldCheck,
-  Clock,
   RefreshCw,
   ArrowRight,
-  AlertTriangle,
   Mail,
   X,
-  Lock,
+  ExternalLink,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 
@@ -18,9 +18,9 @@ interface EmailVerificationModalProps {
   onClose: () => void;
   email: string;
   name?: string;
-  expiresAt: number;
-  onConfirm: (code: string) => Promise<void>;
-  onResend: () => Promise<string | void>;
+  expiresAt?: number;
+  onConfirm?: (code: string) => Promise<void> | void;
+  onResend?: () => Promise<string | void>;
   loading?: boolean;
 }
 
@@ -28,150 +28,30 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
   isOpen,
   onClose,
   email,
-  expiresAt,
-  onConfirm,
   onResend,
-  loading = false,
 }) => {
-  const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
-  const [secondsLeft, setSecondsLeft] = useState<number>(300);
-  const [error, setError] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
-
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  // Atualiza contador regressivo de 5 minutos
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const calculateRemaining = () => {
-      const remainingMs = Math.max(0, expiresAt - Date.now());
-      return Math.floor(remainingMs / 1000);
-    };
-
-    setSecondsLeft(calculateRemaining());
-
-    const interval = setInterval(() => {
-      const remaining = calculateRemaining();
-      setSecondsLeft(remaining);
-      if (remaining <= 0) {
-        clearInterval(interval);
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isOpen, expiresAt]);
-
-  // Foco no primeiro campo quando abre o modal
-  useEffect(() => {
-    if (isOpen) {
-      setError(null);
-      setDigits(["", "", "", "", "", ""]);
-      setTimeout(() => {
-        inputRefs.current[0]?.focus();
-      }, 150);
-    }
-  }, [isOpen]);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  // Formata o tempo restante (MM:SS)
-  const formatTime = (totalSec: number) => {
-    const mins = Math.floor(totalSec / 60);
-    const secs = totalSec % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const isExpired = secondsLeft <= 0;
-
-  // Gerenciador de digitação nas 6 caixas individuais
-  const handleDigitChange = (index: number, val: string) => {
-    setError(null);
-
-    // Se o usuário colou múltiplos caracteres no input
-    const cleaned = val.replace(/\D/g, "");
-    if (cleaned.length > 1) {
-      handlePasteCode(cleaned);
-      return;
-    }
-
-    const newDigits = [...digits];
-    newDigits[index] = cleaned;
-    setDigits(newDigits);
-
-    // Avança para o próximo campo automaticamente
-    if (cleaned && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  // Gerenciador de Backspace para retornar ao campo anterior
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !digits[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  // Gerenciador de colagem direta (Ctrl+V / Cmd+V)
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData("text");
-    handlePasteCode(pastedData);
-  };
-
-  const handlePasteCode = (codeStr: string) => {
-    const cleaned = codeStr.replace(/\D/g, "").slice(0, 6);
-    if (!cleaned) return;
-
-    const newDigits = ["", "", "", "", "", ""];
-    for (let i = 0; i < cleaned.length; i++) {
-      newDigits[i] = cleaned[i];
-    }
-    setDigits(newDigits);
-
-    // Foca no próximo campo vazio ou no último
-    const nextIndex = Math.min(cleaned.length, 5);
-    inputRefs.current[nextIndex]?.focus();
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    const fullCode = digits.join("").trim();
-    if (fullCode.length < 6) {
-      setError("Por favor, preencha todos os 6 números do código.");
-      return;
-    }
-
-    if (isExpired) {
-      setError("Este código expirou (limite de 5 minutos). Clique em 'Reenviar código' para receber um novo token no seu e-mail.");
-      return;
-    }
-
-    try {
-      await onConfirm(fullCode);
-    } catch (err: any) {
-      setError(
-        err?.message ||
-          "Código de verificação incorreto ou expirado. Verifique os números recebidos na sua caixa de entrada do Gmail."
-      );
-    }
+  const handleOpenGmail = () => {
+    // Abre a busca direta pelo remetente ou caixa de entrada no Gmail
+    window.open("https://mail.google.com/mail/u/0/#inbox", "_blank", "noopener,noreferrer");
   };
 
   const handleResendClick = async () => {
-    setError(null);
+    if (resending || !onResend) return;
     setResending(true);
-    setResendSuccess(false);
+    setError(null);
+
     try {
       await onResend();
-      setDigits(["", "", "", "", "", ""]);
       setResendSuccess(true);
-      setTimeout(() => setResendSuccess(false), 4000);
-      inputRefs.current[0]?.focus();
+      setTimeout(() => setResendSuccess(false), 5000);
     } catch (err: any) {
-      setError(err?.message || "Falha ao reenviar código. Aguarde alguns instantes.");
+      setError(err?.message || "Falha ao reenviar e-mail de confirmação. Aguarde alguns instantes.");
     } finally {
       setResending(false);
     }
@@ -197,35 +77,40 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
 
           <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-brand-secondary mb-2">
             <ShieldCheck className="w-3 h-3 text-emerald-400" />
-            <span>CONFIRMAÇÃO DE E-MAIL DO OPERADOR</span>
+            <span>CONFIRMAÇÃO DE CONTA</span>
           </div>
 
           <h2 className="text-lg sm:text-xl font-bold text-brand-white font-poppins">
-            Insira o Código de 6 Números
+            Confirme o seu E-mail
           </h2>
 
           <p className="text-xs text-brand-secondary mt-1 max-w-sm">
-            Enviamos o token de verificação exclusivo para o seu e-mail:
+            Enviamos a confirmação de acesso para o seu endereço de e-mail:
           </p>
 
-          <div className="mt-2 px-3 py-1 bg-brand-surface border border-brand-border rounded-lg text-xs font-mono text-brand-white font-semibold flex items-center space-x-2">
+          <div className="mt-2.5 px-3 py-1 bg-brand-surface border border-brand-border rounded-lg text-xs font-mono text-brand-white font-semibold flex items-center space-x-2 shadow-inner">
             <Mail className="w-3.5 h-3.5 text-brand-muted" />
-            <span>{email}</span>
+            <span className="truncate max-w-[280px]">{email}</span>
           </div>
         </div>
 
-        {/* Informative Guidance Card (UI preta com degradê suave) */}
-        <div className="mb-4 p-3.5 rounded-xl bg-gradient-to-b from-white/[0.08] via-neutral-950 to-black border border-white/15 text-[11px] text-neutral-300 leading-relaxed font-sans flex items-start space-x-2.5 shadow-lg shadow-black/50 ring-1 ring-white/5">
-          <Lock className="w-4 h-4 text-white/80 shrink-0 mt-0.5" />
-          <div>
-            Acesse o seu aplicativo ou navegador do <strong className="text-white">Gmail</strong>. Copie o código de 6 números que chegou e cole nos campos abaixo para confirmar sua conta.
-            <span className="block text-[10px] text-neutral-400 mt-1">
-              (Caso não veja na caixa de entrada, verifique também a pasta de <em>Spam / Lixo Eletrônico</em>).
+        {/* Card Informativo com UI Preta com Degradê Suave */}
+        <div className="mb-5 p-4 rounded-xl bg-gradient-to-b from-white/[0.08] via-neutral-950 to-black border border-white/15 text-[11px] text-neutral-300 leading-relaxed font-sans flex items-start space-x-3 shadow-lg shadow-black/50 ring-1 ring-white/5">
+          <Mail className="w-4 h-4 text-white/90 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="font-semibold text-white text-xs">
+              Acesse o seu aplicativo ou navegador do <strong>Gmail</strong>.
+            </p>
+            <p className="text-neutral-300 leading-normal">
+              Abra o e-mail de verificação que acabamos de enviar e confirme o seu acesso para ativar sua conta na plataforma.
+            </p>
+            <span className="block text-[10px] text-neutral-400 pt-1 font-mono">
+              (Caso não veja na caixa de entrada principal, verifique também a pasta de <em>Spam / Lixo Eletrônico</em>).
             </span>
           </div>
         </div>
 
-        {/* Alerta de Erro de Código Incorreto ou Expirado */}
+        {/* Alerta de Erro de Reenvio */}
         {error && (
           <div className="mb-4 p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-xs text-red-200 font-mono flex items-start space-x-2 animate-in fade-in">
             <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
@@ -233,82 +118,52 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           </div>
         )}
 
-        {/* Alerta de Sucesso ao Reenviar Código */}
+        {/* Notificação de Sucesso ao Reenviar */}
         {resendSuccess && (
           <div className="mb-4 p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-300 font-mono flex items-center space-x-2 animate-in fade-in">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Novo código enviado com sucesso para o seu e-mail!</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>Nova confirmação enviada com sucesso para o seu e-mail!</span>
           </div>
         )}
 
-        {/* Formulário com as 6 caixas de digitação */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="flex items-center justify-center gap-2 sm:gap-2.5">
-            {digits.map((digit, i) => (
-              <input
-                key={i}
-                ref={(el) => {
-                  inputRefs.current[i] = el;
-                }}
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleDigitChange(i, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(i, e)}
-                onPaste={handlePaste}
-                autoComplete="one-time-code"
-                className={`w-11 h-13 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-mono font-bold rounded-xl border bg-brand-surface transition focus:outline-none focus:ring-2 focus:ring-white/40 text-white ${
-                  digit
-                    ? "border-brand-borderHighlight bg-white/[0.08]"
-                    : "border-brand-border placeholder-neutral-600"
-                }`}
-              />
-            ))}
-          </div>
+        {/* Botão de Ação Primária: Abrir o Gmail Diretamente */}
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={handleOpenGmail}
+            className="w-full py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 cursor-pointer"
+          >
+            <span>Abrir o Meu Gmail</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
 
-          {/* Contador de Expiração de 5 Minutos */}
-          <div className="flex items-center justify-between text-xs font-mono px-1">
-            <div className="flex items-center space-x-1.5">
-              <Clock className={`w-3.5 h-3.5 ${isExpired ? "text-rose-400" : "text-brand-muted"}`} />
-              <span className={isExpired ? "text-rose-400 font-semibold" : "text-brand-secondary"}>
-                {isExpired ? "Código expirado" : `Expira em ${formatTime(secondsLeft)}`}
-              </span>
-            </div>
+          {/* Ações Secundárias: Reenviar e Fechar/Login */}
+          <div className="flex items-center justify-between text-xs font-mono pt-1 px-1">
+            {onResend && (
+              <button
+                type="button"
+                onClick={handleResendClick}
+                disabled={resending}
+                className="text-[11px] text-neutral-400 hover:text-white flex items-center space-x-1.5 transition cursor-pointer disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3 h-3 ${resending ? "animate-spin" : ""}`} />
+                <span>{resending ? "Reenviando..." : "Não recebeu? Reenviar"}</span>
+              </button>
+            )}
 
             <button
               type="button"
-              onClick={handleResendClick}
-              disabled={resending}
-              className="text-[11px] text-white hover:underline flex items-center space-x-1 disabled:opacity-50 font-semibold cursor-pointer"
+              onClick={onClose}
+              className="text-[11px] text-white font-semibold hover:underline flex items-center space-x-1 ml-auto cursor-pointer"
             >
-              <RefreshCw className={`w-3 h-3 ${resending ? "animate-spin" : ""}`} />
-              <span>{resending ? "Enviando..." : "Reenviar código"}</span>
+              <span>Ir para Login</span>
+              <ArrowRight className="w-3 h-3" />
             </button>
           </div>
+        </div>
 
-          {/* Botão de Confirmação */}
-          <button
-            type="submit"
-            disabled={loading || digits.join("").length < 6 || isExpired}
-            className="w-full py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {loading ? (
-              <span className="font-mono text-xs animate-pulse">
-                Validando token e ativando conta...
-              </span>
-            ) : (
-              <>
-                <span>Confirmar e Ativar Terminal</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="mt-4 pt-3 border-t border-brand-border/60 text-center text-[10px] font-mono text-brand-muted">
-          Terminal protegido por SHA-256 e Autenticação de 2 Fatores Ativa
+        <div className="mt-5 pt-3.5 border-t border-brand-border/60 text-center text-[10px] font-mono text-brand-muted">
+          Terminal protegido por infraestrutura Phantom-X Edge • Ativação Segura
         </div>
       </div>
     </div>

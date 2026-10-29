@@ -234,16 +234,27 @@ export function renderVerificationEmailHtml(name: string, code: string): string 
     <div class="container">
       <div class="logo-badge">🛡️ PHANTOM-X CLOAKER</div>
       <h1 class="greeting">Olá, ${cleanName}</h1>
-      <p class="subtext">Seu token de verificação de conta é:</p>
+      <p class="subtext">Sua conta na plataforma Phantom-X foi criada com sucesso.</p>
 
-      <!-- Quadrado preto com degradê branco leve -->
+      <p class="instruction" style="margin-top: 0;">
+        Para ativar o seu acesso de operador e iniciar seus testes no Plano Trial, confirme o seu e-mail clicando no botão abaixo:
+      </p>
+
+      <!-- Botão Oficial de Ativação de Conta -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="https://phantom-x-two.vercel.app/login?confirmed=1" style="display: inline-block; background-color: #ffffff; color: #000000; font-family: -apple-system, sans-serif; font-weight: 700; font-size: 14px; padding: 14px 32px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);">
+          Confirmar e Ativar Minha Conta &rarr;
+        </a>
+      </div>
+
+      <!-- Quadrado preto com degradê branco leve com Token Opcional -->
       <div class="otp-box">
         <div class="otp-code">${code}</div>
-        <div class="otp-expiry">⏳ Válido por 5 minutos • Código único de uso único</div>
+        <div class="otp-expiry">⏳ Código de Ativação do Operador</div>
       </div>
 
       <p class="instruction">
-        Insira o seu código no campo de verificação para confirmar a sua conta. Se você não solicitou este código, por favor, ignore este e-mail.
+        Se você não solicitou este cadastro, por favor, ignore esta mensagem.
       </p>
 
       <p class="closing">Um abraço,<br/>Equipe Phantom-X.</p>
@@ -261,12 +272,14 @@ export function renderVerificationEmailText(name: string, code: string): string 
   const cleanName = name || "Operador";
   return `Olá, ${cleanName}
 
-Seu token de verificação de conta é:
+Sua conta na plataforma Phantom-X foi criada com sucesso!
 
-[ ${code} ]
-(Válido por 5 minutos)
+Para confirmar o seu e-mail e ativar sua conta, acesse o link:
+https://phantom-x-two.vercel.app/login?confirmed=1
 
-Insira o seu código no campo de verificação para confirmar a sua conta. Se você não solicitou este código, por favor, ignore este e-mail.
+Código de ativação: [ ${code} ]
+
+Se você não solicitou este cadastro, por favor ignore este e-mail.
 
 Um abraço,
 Equipe Phantom-X.`;

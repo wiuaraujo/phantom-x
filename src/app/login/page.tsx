@@ -377,16 +377,13 @@ function LoginFormInner() {
         Terminal protegido por SHA-256 com Salting e Detecção de Força Bruta
       </div>
 
-      {/* Modal de Verificação de Código de 6 Dígitos (Pop-up do Sistema) */}
+      {/* Modal de Confirmação de Conta via Gmail */}
       <EmailVerificationModal
         isOpen={showVerificationModal}
         onClose={() => setShowVerificationModal(false)}
         email={unverifiedUser?.email || ""}
         name={unverifiedUser?.name || ""}
-        expiresAt={expiresAt}
-        onConfirm={handleConfirmVerification}
         onResend={handleResendVerification}
-        loading={verificationLoading}
       />
     </div>
   );

@@ -115,58 +115,8 @@ function SignupFormInner() {
       return;
     }
 
-    // Dispara envio do e-mail de confirmação oficial com expiração de 5 min
+    // Provisiona a conta do operador e envia confirmação para o Gmail
     setLoading(true);
-    try {
-      const res = await fetch("/api/v1/auth/send-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail, name: cleanName }),
-      });
-      const data = await res.json();
-
-      if (!data.success) {
-        setError(data.error || "Falha ao enviar e-mail de verificação.");
-        setLoading(false);
-        return;
-      }
-
-      setExpiresAt(data?.expiresAt || (Date.now() + 5 * 60 * 1000));
-      setShowVerificationModal(true);
-    } catch {
-      setError("Erro de conexão ao solicitar código. Verifique sua rede e tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleConfirmVerification = async (inputCode: string) => {
-    setVerificationLoading(true);
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    // Validação estrita do código enviado para o Gmail
-    try {
-      const remoteRes = await fetch("/api/v1/auth/verify-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail, code: inputCode }),
-      });
-      const remoteData = await remoteRes.json();
-
-      if (!remoteData.success) {
-        setVerificationLoading(false);
-        throw new Error(
-          remoteData.error ||
-            "Código de verificação incorreto ou expirado. Verifique os números recebidos na sua caixa de entrada do Gmail."
-        );
-      }
-    } catch (err: any) {
-      setVerificationLoading(false);
-      throw err;
-    }
-
-    // Token verificado com sucesso via e-mail real! Finaliza o provisionamento e login da conta
     try {
       const result = await auth.signup({
         name,
@@ -178,27 +128,32 @@ function SignupFormInner() {
       });
 
       if (!result.success) {
-        setVerificationLoading(false);
-        throw new Error(result.error || "Falha ao provisionar a conta de operador.");
+        setError(result.error || "Falha ao provisionar a conta de operador.");
+        setLoading(false);
+        return;
       }
 
-      setShowVerificationModal(false);
-      const planParam = searchParams.get("plan");
-      const isPaid = searchParams.get("paid") === "1" || !!searchParams.get("session_id");
+      // Envia e-mail de confirmação de conta para o Gmail
+      try {
+        await fetch("/api/v1/auth/send-verification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: cleanEmail, name: cleanName }),
+        });
+      } catch {}
 
-      if (planParam && ["starter", "growth", "scale"].includes(planParam)) {
-        if (isPaid) {
-          router.push(`/dashboard?upgraded=1&plan=${planParam}`);
-        } else {
-          router.push(`/dashboard?upgrade_prompt=${planParam}`);
-        }
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (err: any) {
-      setVerificationLoading(false);
-      throw err;
+      setShowVerificationModal(true);
+    } catch {
+      setError("Erro de conexão ao criar conta. Verifique sua rede e tente novamente.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleConfirmVerification = async () => {
+    setShowVerificationModal(false);
+    const planParam = searchParams.get("plan");
+    router.push(planParam ? `/login?plan=${planParam}&email=${encodeURIComponent(email)}` : `/login?email=${encodeURIComponent(email)}`);
   };
 
   const handleResendVerification = async (): Promise<void> => {
@@ -542,16 +497,21 @@ function SignupFormInner() {
         Protegido por infraestrutura Phantom-X Edge • Criptografia SHA-256 + Salt
       </div>
 
-      {/* Pop-up Modal de Verificação de E-mail com Token de 6 Números */}
+      {/* Pop-up Modal de Confirmação de Conta via Gmail */}
       <EmailVerificationModal
         isOpen={showVerificationModal}
-        onClose={() => setShowVerificationModal(false)}
+        onClose={() => {
+          setShowVerificationModal(false);
+          const planParam = searchParams.get("plan");
+          router.push(
+            planParam
+              ? `/login?plan=${planParam}&email=${encodeURIComponent(email)}`
+              : `/login?email=${encodeURIComponent(email)}`
+          );
+        }}
         email={email}
         name={name}
-        expiresAt={expiresAt}
-        onConfirm={handleConfirmVerification}
         onResend={handleResendVerification}
-        loading={verificationLoading}
       />
     </div>
   );
