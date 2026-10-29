@@ -352,17 +352,6 @@ function LoginFormInner() {
             Criar conta de operador
           </Link>
         </div>
-
-        {/* Link Direto para Painel Admin */}
-        <div className="mt-3 text-center">
-          <Link
-            href="/admin"
-            className="text-[11px] font-mono text-neutral-500 hover:text-red-400 transition inline-flex items-center space-x-1"
-          >
-            <ShieldCheck className="w-3 h-3 text-red-500/70" />
-            <span>Acesso Mestre / Painel Admin</span>
-          </Link>
-        </div>
       </div>
 
       {/* Mobile Value Proposition Badges */}
