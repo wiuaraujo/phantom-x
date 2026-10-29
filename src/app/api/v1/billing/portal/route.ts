@@ -8,10 +8,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { userEmail, customerId, returnUrl } = body;
 
+    const origin = req.headers.get("origin") || req.nextUrl.origin || undefined;
+
     const portal = await createCustomerPortalSession({
       customerId,
       userEmail,
       returnUrl,
+      origin,
     });
 
     return NextResponse.json(portal);

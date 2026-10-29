@@ -56,6 +56,8 @@ function MobileAppNavContent() {
     { label: "Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
   ];
 
+  const isAdmin = session?.user?.role === "admin" || session?.user?.email?.toLowerCase() === "wiuaraujo@gmail.com";
+
   const allNavItems = [
     { label: "Visão Geral & Matriz", href: "/dashboard", icon: LayoutDashboard },
     { label: "Auditoria Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
@@ -66,6 +68,7 @@ function MobileAppNavContent() {
     { label: "Cloudflare Worker", href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
     { label: "Configurações do Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
     { label: "Configurações do Perfil", href: "/dashboard/settings?tab=profile", icon: User },
+    ...(isAdmin ? [{ label: "Painel Admin Master", href: "/admin", icon: ShieldCheck, badge: "Master" }] : []),
   ];
 
   const isMoreActive =

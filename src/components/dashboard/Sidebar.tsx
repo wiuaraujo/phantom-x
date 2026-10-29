@@ -59,6 +59,7 @@ function SidebarContent() {
   }, []);
 
   const currentTab = searchParams?.get("tab");
+  const isAdmin = session?.user?.role === "admin" || session?.user?.email?.toLowerCase() === "wiuaraujo@gmail.com";
 
   const navItems = [
     { label: "Visão Geral & Matriz", href: "/dashboard", icon: LayoutDashboard },
@@ -70,6 +71,7 @@ function SidebarContent() {
     { label: "Cloudflare Worker", href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
     { label: "Configurações do Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
     { label: "Configurações do Perfil", href: "/dashboard/settings?tab=profile", icon: User },
+    ...(isAdmin ? [{ label: "Painel Admin", href: "/admin", icon: ShieldCheck, badge: "Master" }] : []),
   ];
 
   return (

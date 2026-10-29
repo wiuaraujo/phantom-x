@@ -56,19 +56,31 @@ export interface CreateCheckoutParams {
   userName?: string;
   successUrl?: string;
   cancelUrl?: string;
+  origin?: string;
+}
+
+function resolveAppUrl(customOrigin?: string): string {
+  if (customOrigin && customOrigin.startsWith("http")) return customOrigin;
+  if (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("localhost")) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 }
 
 /**
  * Cria uma Sessão Oficial do Stripe Checkout para Assinatura Recorrente Mensal
  */
 export async function createStripeCheckoutSession(params: CreateCheckoutParams) {
-  const { planId, userId, userEmail, userName, successUrl, cancelUrl } = params;
+  const { planId, userId, userEmail, userName, successUrl, cancelUrl, origin } = params;
   const planConfig = STRIPE_PRICES[planId];
   if (!planConfig) {
     throw new Error(`Plano inválido para checkout Stripe: ${planId}`);
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = resolveAppUrl(origin);
   const defaultSuccess = `${appUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}&plan=${planId}&upgraded=1`;
   const defaultCancel = `${appUrl}/dashboard?canceled=1`;
 
@@ -173,9 +185,10 @@ export async function createCustomerPortalSession(params: {
   customerId?: string;
   userEmail?: string;
   returnUrl?: string;
+  origin?: string;
 }) {
-  const { customerId, userEmail, returnUrl } = params;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const { customerId, userEmail, returnUrl, origin } = params;
+  const appUrl = resolveAppUrl(origin);
   const defaultReturn = `${appUrl}/dashboard/settings?tab=billing`;
 
   if (

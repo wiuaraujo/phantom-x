@@ -14,6 +14,7 @@ import {
   User,
   Zap,
   Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getPlanDefinition, PlanId } from "@/lib/plans";
@@ -283,6 +284,18 @@ export const Header: React.FC<HeaderProps> = ({
             <LogOut className="w-4 h-4" />
           </button>
 
+          {/* Admin Master Link Button */}
+          {(session?.user?.role === "admin" || session?.user?.email?.toLowerCase() === "wiuaraujo@gmail.com") && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-[10px] font-mono text-red-400 hover:bg-red-500/20 transition font-bold"
+              title="Acessar Painel Master Admin"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+              <span>ADMIN</span>
+            </Link>
+          )}
+
           {/* User Avatar & Dropdown Menu */}
           <div ref={userMenuRef} className="relative">
             <div
@@ -370,6 +383,17 @@ export const Header: React.FC<HeaderProps> = ({
                     <Radio className="w-3.5 h-3.5 text-brand-secondary" />
                     <span>Cloudflare Worker &amp; Edge</span>
                   </Link>
+
+                  {(session?.user?.role === "admin" || session?.user?.email?.toLowerCase() === "wiuaraujo@gmail.com") && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 border border-red-500/20 transition font-medium"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
+                      <span className="font-semibold">Painel Admin Master</span>
+                    </Link>
+                  )}
 
                   <button
                     onClick={handleLogout}

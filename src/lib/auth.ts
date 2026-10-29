@@ -591,6 +591,14 @@ export const auth = {
   },
 
   /**
+   * Retorna o usuário autenticado da sessão ativa
+   */
+  getUser(): User | null {
+    const session = this.getSession();
+    return session?.user || null;
+  },
+
+  /**
    * Atualiza o perfil e configurações da conta do usuário autenticado
    */
   updateCurrentUserProfile(data: {

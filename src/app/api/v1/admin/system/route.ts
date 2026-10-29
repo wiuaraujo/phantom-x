@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +14,25 @@ const AUTHORIZED_MASTER_KEYS = [
 ];
 
 export async function GET(req: NextRequest) {
+  // Verifica se o usuário possui cookie de sessão administrativa ativo
+  let isOperatorAdmin = false;
+  let adminEmail = "admin@phantomx.pro";
+
+  const cookieToken = req.cookies.get("phantom_token")?.value;
+  if (cookieToken) {
+    try {
+      const decoded = JSON.parse(Buffer.from(cookieToken, "base64").toString("utf-8"));
+      if (decoded && (decoded.role === "admin" || decoded.email?.toLowerCase() === "wiuaraujo@gmail.com")) {
+        isOperatorAdmin = true;
+        adminEmail = decoded.email;
+      }
+    } catch {}
+  }
+
   return NextResponse.json({
     success: true,
+    isOperatorAdmin,
+    adminEmail,
     data: {
       globalKillSwitchActive,
       edgeEngineVersion: "Phantom-X Edge Core v2.4",
@@ -29,16 +47,81 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action, passkey, email, password } = body;
 
+    // 0. VERIFICAÇÃO AUTOMÁTICA DE SESSÃO ADMIN ATIVA (VIA COOKIE)
+    if (action === "check_session") {
+      const cookieToken = req.cookies.get("phantom_token")?.value;
+      if (cookieToken) {
+        try {
+          const decoded = JSON.parse(Buffer.from(cookieToken, "base64").toString("utf-8"));
+          if (decoded && (decoded.role === "admin" || decoded.email?.toLowerCase() === "wiuaraujo@gmail.com")) {
+            const adminToken = `px_master_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
+            return NextResponse.json({
+              success: true,
+              isAdmin: true,
+              message: "Sessão de Administrador detectada automaticamente.",
+              adminSession: {
+                token: adminToken,
+                role: "master_administrator",
+                name: decoded.name || "Administrador Master",
+                email: decoded.email,
+                authenticatedAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+              },
+            });
+          }
+        } catch {}
+      }
+
+      return NextResponse.json({ success: false, isAdmin: false });
+    }
+
     // 1. AUTENTICAÇÃO MESTRE PARA O PAINEL ADMIN
     if (action === "auth_admin") {
       const input = (passkey || password || "").trim();
-      const isValid = AUTHORIZED_MASTER_KEYS.includes(input);
+      let isAuthorized = AUTHORIZED_MASTER_KEYS.includes(input);
+      let resolvedEmail = email || "admin@phantomx.pro";
+      let resolvedName = "Engenheiro Chefe de Operações";
 
-      if (!isValid) {
+      // Se não bateu com a chave mestra direta, tenta validar via credenciais do Supabase
+      if (!isAuthorized && input) {
+        const candidateEmail = email?.trim() || "wiuaraujo@gmail.com";
+        try {
+          const { data: authData, error: aErr } = await supabase.auth.signInWithPassword({
+            email: candidateEmail,
+            password: input,
+          });
+
+          if (!aErr && authData?.user) {
+            const userRole = authData.user.user_metadata?.role || "admin";
+            if (userRole === "admin" || candidateEmail.toLowerCase() === "wiuaraujo@gmail.com") {
+              isAuthorized = true;
+              resolvedEmail = authData.user.email || candidateEmail;
+              resolvedName = authData.user.user_metadata?.name || "Administrador Master";
+            }
+          }
+        } catch {}
+      }
+
+      // Também verifica se tem cookie de admin ativo no momento do envio
+      if (!isAuthorized) {
+        const cookieToken = req.cookies.get("phantom_token")?.value;
+        if (cookieToken) {
+          try {
+            const decoded = JSON.parse(Buffer.from(cookieToken, "base64").toString("utf-8"));
+            if (decoded && (decoded.role === "admin" || decoded.email?.toLowerCase() === "wiuaraujo@gmail.com")) {
+              isAuthorized = true;
+              resolvedEmail = decoded.email;
+              resolvedName = decoded.name || "Administrador Master";
+            }
+          } catch {}
+        }
+      }
+
+      if (!isAuthorized) {
         return NextResponse.json(
           {
             success: false,
-            error: "Chave Mestra de Acesso Incorreta. Acesso Negado ao Terminal de Governança.",
+            error: "Credenciais de Acesso Inválidas. Insira a Chave Mestra ou a Senha da sua Conta de Administrador.",
           },
           { status: 401 }
         );
@@ -53,8 +136,8 @@ export async function POST(req: NextRequest) {
         adminSession: {
           token: adminToken,
           role: "master_administrator",
-          name: "Engenheiro Chefe de Operações",
-          email: email || "admin@phantomx.pro",
+          name: resolvedName,
+          email: resolvedEmail,
           authenticatedAt: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
         },

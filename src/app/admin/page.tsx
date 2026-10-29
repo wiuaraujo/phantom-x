@@ -40,7 +40,10 @@ import {
   DollarSign,
   ArrowUpRight,
   Award,
+  ArrowLeft,
 } from "lucide-react";
+import Link from "next/link";
+import { auth } from "@/lib/auth";
 import { Logo } from "@/components/ui/Logo";
 import { PHANTOM_PLANS, PlanId, getPlanDefinition } from "@/lib/plans";
 
@@ -114,6 +117,8 @@ export default function AdminPortalPage() {
   // Estado de Autenticação Mestra
   const [isAdminAuth, setIsAdminAuth] = useState(false);
   const [passkeyInput, setPasskeyInput] = useState("");
+  const [adminEmailInput, setAdminEmailInput] = useState("wiuaraujo@gmail.com");
+  const [activePlatformUser, setActivePlatformUser] = useState<any>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
 
@@ -141,18 +146,54 @@ export default function AdminPortalPage() {
   // Kill-Switch Global
   const [killSwitchActive, setKillSwitchActive] = useState(false);
 
-  // 1. Verifica se já existe sessão administrativa válida
+  // 1. Verifica se já existe sessão administrativa válida ou usuário admin logado na plataforma
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const u = auth.getSession()?.user;
+      setActivePlatformUser(u);
+      if (u?.email) setAdminEmailInput(u.email);
+
+      // A. Se já houver sessão administrativa salva válida no localStorage
       const stored = localStorage.getItem(ADMIN_STORAGE_SESSION);
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
           if (parsed && parsed.token && Date.now() < new Date(parsed.expiresAt).getTime()) {
             setIsAdminAuth(true);
+            return;
           }
         } catch {}
       }
+
+      // B. Se o operador estiver autenticado na plataforma como Admin, concede acesso direto instantaneamente
+      if (u && (u.role === "admin" || u.email?.toLowerCase() === "wiuaraujo@gmail.com")) {
+        const session = {
+          token: `px_master_${Date.now().toString(36)}`,
+          role: "master_administrator",
+          name: u.name || "Administrador Master",
+          email: u.email,
+          authenticatedAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+        };
+        localStorage.setItem(ADMIN_STORAGE_SESSION, JSON.stringify(session));
+        setIsAdminAuth(true);
+        return;
+      }
+
+      // C. Consulta a rota do servidor para validar cookie de sessão
+      fetch("/api/v1/admin/system", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "check_session" }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.isAdmin && data.adminSession) {
+            localStorage.setItem(ADMIN_STORAGE_SESSION, JSON.stringify(data.adminSession));
+            setIsAdminAuth(true);
+          }
+        })
+        .catch(() => {});
     }
   }, []);
 
@@ -202,12 +243,17 @@ export default function AdminPortalPage() {
       const res = await fetch("/api/v1/admin/system", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "auth_admin", passkey: passkeyInput }),
+        body: JSON.stringify({
+          action: "auth_admin",
+          passkey: passkeyInput,
+          email: adminEmailInput,
+          password: passkeyInput,
+        }),
       });
       const data = await res.json();
 
       if (!data.success) {
-        setAuthError(data.error || "Chave mestra inválida.");
+        setAuthError(data.error || "Chave mestra ou senha inválida.");
         setAuthLoading(false);
         return;
       }
@@ -355,16 +401,62 @@ export default function AdminPortalPage() {
           )}
 
           <form onSubmit={handleAdminLogin} className="space-y-4">
+            {/* Se o usuário já estiver logado na plataforma */}
+            {activePlatformUser && (
+              <div className="p-3 rounded-xl bg-neutral-900/90 border border-white/10 text-xs font-mono flex items-center justify-between">
+                <div className="truncate mr-2">
+                  <span className="text-neutral-400 block text-[10px]">CONTA PLATAFORMA ATIVA:</span>
+                  <span className="text-white font-semibold truncate block">{activePlatformUser.email}</span>
+                </div>
+                {activePlatformUser.role === "admin" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const session = {
+                        token: `px_master_${Date.now().toString(36)}`,
+                        role: "master_administrator",
+                        name: activePlatformUser.name || "Administrador Master",
+                        email: activePlatformUser.email,
+                        authenticatedAt: new Date().toISOString(),
+                        expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+                      };
+                      localStorage.setItem(ADMIN_STORAGE_SESSION, JSON.stringify(session));
+                      setIsAdminAuth(true);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] uppercase shrink-0 transition"
+                  >
+                    Entrar Direto
+                  </button>
+                )}
+              </div>
+            )}
+
             <div>
               <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-300 mb-1.5">
-                Chave Mestra de Governança
+                E-mail do Administrador (Opcional se usar Chave Mestra)
+              </label>
+              <div className="relative">
+                <input
+                  type="email"
+                  value={adminEmailInput}
+                  onChange={(e) => setAdminEmailInput(e.target.value)}
+                  placeholder="seu.email@exemplo.com"
+                  className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-neutral-800 text-white placeholder-neutral-600 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition shadow-inner"
+                />
+                <Mail className="w-4 h-4 text-neutral-500 absolute right-3.5 top-3" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-300 mb-1.5">
+                Senha de Administrador ou Chave Mestra
               </label>
               <div className="relative">
                 <input
                   type="password"
                   value={passkeyInput}
                   onChange={(e) => setPasskeyInput(e.target.value)}
-                  placeholder="Insira a chave mestra ou senha master..."
+                  placeholder="Sua senha de conta ou chave mestra..."
                   autoFocus
                   required
                   className="w-full px-4 py-3 rounded-xl bg-black/60 border border-neutral-800 text-white placeholder-neutral-600 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition shadow-inner"
@@ -381,19 +473,29 @@ export default function AdminPortalPage() {
               {authLoading ? (
                 <span className="flex items-center space-x-2">
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Validando Chave Mestra...</span>
+                  <span>Validando Acesso...</span>
                 </span>
               ) : (
                 <span className="flex items-center space-x-2">
                   <Unlock className="w-3.5 h-3.5" />
-                  <span>Desbloquear Centro de Comando</span>
+                  <span>Desbloquear Painel Master</span>
                 </span>
               )}
             </button>
           </form>
 
-          <div className="mt-6 pt-4 border-t border-neutral-800/80 text-center text-[10px] font-mono text-neutral-500">
-            Acesso auditado por SHA-256 e IP Logging • Rota Isolada do Frontend
+          <div className="mt-5 pt-4 border-t border-neutral-800/80 flex items-center justify-between text-[11px] font-mono text-neutral-400">
+            <Link href="/dashboard" className="hover:text-white transition flex items-center space-x-1">
+              <ArrowLeft className="w-3 h-3" />
+              <span>Ir para Dashboard</span>
+            </Link>
+            <Link href="/login" className="hover:text-white transition">
+              Tela de Login
+            </Link>
+          </div>
+
+          <div className="mt-3 text-center text-[10px] font-mono text-neutral-500">
+            Acesso auditado por SHA-256 e IP Logging • Rota Isolada de Governança
           </div>
         </div>
       </div>
@@ -454,6 +556,16 @@ export default function AdminPortalPage() {
             </span>
             <span className="sm:hidden">{killSwitchActive ? "EMERGÊNCIA" : "NORMAL"}</span>
           </button>
+
+          {/* Botão Retornar ao Dashboard */}
+          <Link
+            href="/dashboard"
+            className="px-3 py-1.5 rounded-xl text-xs font-mono font-medium text-neutral-300 hover:text-white bg-neutral-900 border border-white/10 hover:border-white/20 transition flex items-center space-x-1.5"
+            title="Voltar ao Dashboard da Plataforma"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Dashboard</span>
+          </Link>
 
           {/* Botão Sair */}
           <button

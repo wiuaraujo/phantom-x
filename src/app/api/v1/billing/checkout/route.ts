@@ -31,6 +31,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const origin = req.headers.get("origin") || req.nextUrl.origin || undefined;
+
     const checkout = await createStripeCheckoutSession({
       planId: planId as Exclude<PlanId, "free">,
       userId: loggedUserId,
@@ -38,6 +40,7 @@ export async function POST(req: NextRequest) {
       userName: userName || (loggedUserEmail ? loggedUserEmail.split("@")[0] : undefined),
       successUrl,
       cancelUrl,
+      origin,
     });
 
     return NextResponse.json(checkout);
