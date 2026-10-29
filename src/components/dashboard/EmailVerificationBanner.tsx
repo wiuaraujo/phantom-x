@@ -2,14 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { auth } from "@/lib/auth";
-import { createVerificationToken } from "@/lib/emailService";
 import { EmailVerificationModal } from "@/components/auth/EmailVerificationModal";
 import { ShieldAlert, ShieldCheck, Mail, ArrowRight, CheckCircle2 } from "lucide-react";
 
 export function EmailVerificationBanner() {
   const [session, setSession] = useState(() => auth.getSession());
   const [showModal, setShowModal] = useState(false);
-  const [activeCode, setActiveCode] = useState("");
   const [expiresAt, setExpiresAt] = useState(0);
   const [loading, setLoading] = useState(false);
   const [justVerified, setJustVerified] = useState(false);
@@ -23,9 +21,7 @@ export function EmailVerificationBanner() {
     if (current?.user && current.user.emailVerified !== true) {
       const timer = setTimeout(() => {
         const user = current.user;
-        const record = createVerificationToken(user.email, user.name);
-        setActiveCode(record.code);
-        setExpiresAt(record.expiresAt);
+        setExpiresAt(Date.now() + 5 * 60 * 1000);
 
         fetch("/api/v1/auth/send-verification", {
           method: "POST",
@@ -69,11 +65,9 @@ export function EmailVerificationBanner() {
 
   const handleStartVerification = () => {
     const user = session.user;
-    const record = createVerificationToken(user.email, user.name);
-    setActiveCode(record.code);
-    setExpiresAt(record.expiresAt);
+    setExpiresAt(Date.now() + 5 * 60 * 1000);
 
-    // Dispara e-mail de confirmação
+    // Dispara e-mail de confirmação para o Gmail
     fetch("/api/v1/auth/send-verification", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -92,7 +86,7 @@ export function EmailVerificationBanner() {
       const res = await auth.confirmEmailAndLogin(session.user.id, code, true);
       if (!res.success) {
         setLoading(false);
-        throw new Error(res.error || "Código de verificação incorreto.");
+        throw new Error(res.error || "Código de verificação incorreto ou expirado.");
       }
 
       setLoading(false);
@@ -106,22 +100,22 @@ export function EmailVerificationBanner() {
     }
   };
 
-  const handleResend = async (): Promise<string> => {
+  const handleResend = async (): Promise<void> => {
     const user = session.user;
-    const record = createVerificationToken(user.email, user.name);
-    setActiveCode(record.code);
-    setExpiresAt(record.expiresAt);
 
-    fetch("/api/v1/auth/send-verification", {
+    const res = await fetch("/api/v1/auth/send-verification", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: user.email,
         name: user.name,
       }),
-    }).catch(() => {});
-
-    return record.code;
+    });
+    const data = await res.json();
+    if (!data.success) {
+      throw new Error(data.error || "Falha ao reenviar código. Aguarde alguns instantes.");
+    }
+    setExpiresAt(data.expiresAt || (Date.now() + 5 * 60 * 1000));
   };
 
   return (
@@ -143,7 +137,7 @@ export function EmailVerificationBanner() {
 
         <button
           onClick={handleStartVerification}
-          className="self-start sm:self-auto px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-semibold text-xs font-mono transition flex items-center space-x-1.5 shrink-0 shadow-sm"
+          className="self-start sm:self-auto px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-semibold text-xs font-mono transition flex items-center space-x-1.5 shrink-0 shadow-sm cursor-pointer"
         >
           <Mail className="w-3.5 h-3.5" />
           <span>Confirmar E-mail</span>
@@ -156,7 +150,6 @@ export function EmailVerificationBanner() {
         onClose={() => setShowModal(false)}
         email={session.user.email}
         name={session.user.name}
-        activeCode={activeCode}
         expiresAt={expiresAt}
         onConfirm={handleConfirm}
         onResend={handleResend}

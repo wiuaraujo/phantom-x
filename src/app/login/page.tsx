@@ -22,7 +22,6 @@ import {
   KeyRound,
   UserPlus,
 } from "lucide-react";
-import { createVerificationToken } from "@/lib/emailService";
 import { EmailVerificationModal } from "@/components/auth/EmailVerificationModal";
 
 function LoginFormInner() {
@@ -80,23 +79,17 @@ function LoginFormInner() {
         // Se a conta existe e a senha está correta, mas O E-MAIL AINDA NÃO FOI CONFIRMADO
         if (result.requiresEmailVerification && result.unverifiedUser) {
           setUnverifiedUser(result.unverifiedUser);
+          setExpiresAt(Date.now() + 5 * 60 * 1000);
 
-          // Gera código de 6 números com expiração de 5 min
-          const record = createVerificationToken(result.unverifiedUser.email, result.unverifiedUser.name);
-          setActiveCode(record.code);
-          setExpiresAt(record.expiresAt);
-
-          // Dispara o e-mail de confirmação
-          try {
-            fetch("/api/v1/auth/send-verification", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                email: result.unverifiedUser.email,
-                name: result.unverifiedUser.name,
-              }),
-            }).catch(() => {});
-          } catch {}
+          // Dispara o e-mail de confirmação para o Gmail
+          fetch("/api/v1/auth/send-verification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: result.unverifiedUser.email,
+              name: result.unverifiedUser.name,
+            }),
+          }).catch(() => {});
 
           // Abre o Pop-up Modal imediatamente!
           setShowVerificationModal(true);
@@ -128,7 +121,7 @@ function LoginFormInner() {
       const res = await auth.confirmEmailAndLogin(unverifiedUser.id, inputCode, rememberMe);
       if (!res.success) {
         setVerificationLoading(false);
-        throw new Error(res.error || "Código de verificação incorreto.");
+        throw new Error(res.error || "Código de verificação incorreto ou expirado.");
       }
 
       setShowVerificationModal(false);
@@ -140,24 +133,22 @@ function LoginFormInner() {
     }
   };
 
-  const handleResendVerification = async (): Promise<string> => {
-    if (!unverifiedUser) return "";
-    const record = createVerificationToken(unverifiedUser.email, unverifiedUser.name);
-    setActiveCode(record.code);
-    setExpiresAt(record.expiresAt);
+  const handleResendVerification = async (): Promise<void> => {
+    if (!unverifiedUser) return;
 
-    try {
-      fetch("/api/v1/auth/send-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: unverifiedUser.email,
-          name: unverifiedUser.name,
-        }),
-      }).catch(() => {});
-    } catch {}
-
-    return record.code;
+    const res = await fetch("/api/v1/auth/send-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: unverifiedUser.email,
+        name: unverifiedUser.name,
+      }),
+    });
+    const data = await res.json();
+    if (!data.success) {
+      throw new Error(data.error || "Falha ao reenviar código. Aguarde alguns instantes.");
+    }
+    setExpiresAt(data.expiresAt || (Date.now() + 5 * 60 * 1000));
   };
 
   return (
@@ -381,7 +372,6 @@ function LoginFormInner() {
         onClose={() => setShowVerificationModal(false)}
         email={unverifiedUser?.email || ""}
         name={unverifiedUser?.name || ""}
-        activeCode={activeCode}
         expiresAt={expiresAt}
         onConfirm={handleConfirmVerification}
         onResend={handleResendVerification}

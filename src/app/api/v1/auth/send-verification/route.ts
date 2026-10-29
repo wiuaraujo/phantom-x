@@ -52,13 +52,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Token de verificação gerado e enviado com sucesso.",
+      message: "Token de verificação enviado para o seu e-mail com sucesso.",
       supabaseDispatched,
-      supabaseNotice: supabaseErrorNotice,
       expiresAt: record.expiresAt,
-      code: record.code, // Incluído para preview instantâneo na UI
-      htmlPreview: htmlEmail,
-      textPreview: textEmail,
     });
   } catch (error: any) {
     return NextResponse.json(

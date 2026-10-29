@@ -317,30 +317,28 @@ export const auth = {
     }
 
     const user = users[userIndex];
-    const { verifyOtpCode } = await import("./emailService");
-    const verifyRes = verifyOtpCode(code, user.email);
 
-    if (!verifyRes.success) {
-      // Tenta validar contra o endpoint do Supabase Auth caso o código tenha vindo por e-mail real do Supabase
-      try {
-        const remoteRes = await fetch("/api/v1/auth/verify-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: user.email, code }),
-        });
-        const remoteData = await remoteRes.json();
-        if (!remoteData.success) {
-          return {
-            success: false,
-            error: verifyRes.error || remoteData.error || "Código de verificação incorreto.",
-          };
-        }
-      } catch {
+    // Validação estrita via endpoint de verificação do Supabase Auth
+    try {
+      const remoteRes = await fetch("/api/v1/auth/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email, code }),
+      });
+      const remoteData = await remoteRes.json();
+      if (!remoteData.success) {
         return {
           success: false,
-          error: verifyRes.error || "Código de verificação incorreto.",
+          error:
+            remoteData.error ||
+            "Código de verificação incorreto ou expirado. Verifique os 6 números recebidos no seu Gmail.",
         };
       }
+    } catch {
+      return {
+        success: false,
+        error: "Falha de comunicação ao verificar o código. Tente novamente.",
+      };
     }
 
     // Marca o e-mail como confirmado permanentemente via OTP!

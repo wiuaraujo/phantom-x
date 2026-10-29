@@ -15,10 +15,6 @@ import {
   CountryCallingCode,
   formatPhoneNumber,
 } from "@/lib/countryCodes";
-import {
-  createVerificationToken,
-  verifyOtpCode,
-} from "@/lib/emailService";
 import { EmailVerificationModal } from "@/components/auth/EmailVerificationModal";
 import {
   Lock,
@@ -110,55 +106,53 @@ function SignupFormInner() {
       return;
     }
 
-    // 1. Gera código renovável de 6 dígitos que expira em 5 minutos
-    const record = createVerificationToken(cleanEmail, cleanName);
-    setActiveCode(record.code);
-    setExpiresAt(record.expiresAt);
-
-    // 2. Dispara e-mail com o template oficial (HTML + degradê leve + assinatura)
+    // Dispara envio do e-mail de confirmação oficial com expiração de 5 min
+    setLoading(true);
     try {
-      fetch("/api/v1/auth/send-verification", {
+      const res = await fetch("/api/v1/auth/send-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: cleanEmail, name: cleanName }),
-      }).catch(() => {});
-    } catch {}
+      });
+      const data = await res.json();
 
-    // 3. Abre o Pop-up de Verificação com padrão visual do sistema
-    setShowVerificationModal(true);
+      setExpiresAt(data?.expiresAt || (Date.now() + 5 * 60 * 1000));
+      setShowVerificationModal(true);
+    } catch {
+      setExpiresAt(Date.now() + 5 * 60 * 1000);
+      setShowVerificationModal(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleConfirmVerification = async (inputCode: string) => {
     setVerificationLoading(true);
 
     const cleanEmail = email.trim().toLowerCase();
-    let isCodeValid = false;
 
-    // 1. Testa token gerado localmente
-    const verifyResult = verifyOtpCode(inputCode, cleanEmail);
-    if (verifyResult.success) {
-      isCodeValid = true;
-    } else {
-      // 2. Testa token recebido no e-mail real do Gmail via Supabase Auth
-      try {
-        const remoteRes = await fetch("/api/v1/auth/verify-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: cleanEmail, code: inputCode }),
-        });
-        const remoteData = await remoteRes.json();
-        if (remoteData.success) {
-          isCodeValid = true;
-        }
-      } catch {}
-    }
+    // Validação estrita do código enviado para o Gmail
+    try {
+      const remoteRes = await fetch("/api/v1/auth/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail, code: inputCode }),
+      });
+      const remoteData = await remoteRes.json();
 
-    if (!isCodeValid) {
+      if (!remoteData.success) {
+        setVerificationLoading(false);
+        throw new Error(
+          remoteData.error ||
+            "Código de verificação incorreto ou expirado. Verifique os números recebidos na sua caixa de entrada do Gmail."
+        );
+      }
+    } catch (err: any) {
       setVerificationLoading(false);
-      throw new Error(verifyResult.error || "Código de verificação incorreto ou expirado.");
+      throw err;
     }
 
-    // Token verificado com sucesso! Finaliza o provisionamento e login da conta
+    // Token verificado com sucesso via e-mail real! Finaliza o provisionamento e login da conta
     try {
       const result = await auth.signup({
         name,
@@ -182,22 +176,20 @@ function SignupFormInner() {
     }
   };
 
-  const handleResendVerification = async (): Promise<string> => {
+  const handleResendVerification = async (): Promise<void> => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = name.trim();
-    const record = createVerificationToken(cleanEmail, cleanName);
-    setActiveCode(record.code);
-    setExpiresAt(record.expiresAt);
 
-    try {
-      fetch("/api/v1/auth/send-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail, name: cleanName }),
-      }).catch(() => {});
-    } catch {}
-
-    return record.code;
+    const res = await fetch("/api/v1/auth/send-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: cleanEmail, name: cleanName }),
+    });
+    const data = await res.json();
+    if (!data.success) {
+      throw new Error(data.error || "Falha ao reenviar código. Aguarde alguns instantes.");
+    }
+    setExpiresAt(data.expiresAt || (Date.now() + 5 * 60 * 1000));
   };
 
   return (
@@ -524,7 +516,6 @@ function SignupFormInner() {
         onClose={() => setShowVerificationModal(false)}
         email={email}
         name={name}
-        activeCode={activeCode}
         expiresAt={expiresAt}
         onConfirm={handleConfirmVerification}
         onResend={handleResendVerification}
