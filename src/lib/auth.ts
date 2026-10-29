@@ -9,6 +9,8 @@ export interface RegisteredUser {
   phone?: string; // Telefone com DDD/DDI
   phoneCountryCode?: string; // DDI selecionado (ex: +55)
   emailVerified?: boolean; // Confirmação obrigatória via token de 6 dígitos
+  emailOtpVerified?: boolean; // Confirmação estrita via fluxo OTP (6 dígitos)
+  emailConfirmedAt?: string; // Data e hora da validação
   passwordHash: string;
   salt: string;
   role: "admin" | "operator";
@@ -138,7 +140,8 @@ export const auth = {
       }
       return parsed.map((u: any) => ({
         ...u,
-        emailVerified: u.emailVerified === true,
+        emailVerified: u.emailOtpVerified === true,
+        emailOtpVerified: u.emailOtpVerified === true,
       }));
     } catch {
       return SEED_USERS;
@@ -243,8 +246,8 @@ export const auth = {
       };
     }
 
-    // 3.5. VALIDAÇÃO OBRIGATÓRIA: E-MAIL NÃO CONFIRMADO (EXIGE OTP 6 NÚMEROS)
-    if (user.emailVerified !== true) {
+    // 3.5. VALIDAÇÃO OBRIGATÓRIA: E-MAIL NÃO CONFIRMADO VIA OTP (EXIGE OTP 6 NÚMEROS)
+    if (user.emailOtpVerified !== true) {
       return {
         success: false,
         requiresEmailVerification: true,
@@ -318,14 +321,32 @@ export const auth = {
     const verifyRes = verifyOtpCode(code, user.email);
 
     if (!verifyRes.success) {
-      return {
-        success: false,
-        error: verifyRes.error || "Código de verificação incorreto.",
-      };
+      // Tenta validar contra o endpoint do Supabase Auth caso o código tenha vindo por e-mail real do Supabase
+      try {
+        const remoteRes = await fetch("/api/v1/auth/verify-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: user.email, code }),
+        });
+        const remoteData = await remoteRes.json();
+        if (!remoteData.success) {
+          return {
+            success: false,
+            error: verifyRes.error || remoteData.error || "Código de verificação incorreto.",
+          };
+        }
+      } catch {
+        return {
+          success: false,
+          error: verifyRes.error || "Código de verificação incorreto.",
+        };
+      }
     }
 
-    // Marca o e-mail como confirmado permanentemente!
+    // Marca o e-mail como confirmado permanentemente via OTP!
     user.emailVerified = true;
+    user.emailOtpVerified = true;
+    user.emailConfirmedAt = new Date().toISOString();
     user.failedAttempts = 0;
     user.lockoutUntil = null;
     user.lastLoginAt = new Date().toISOString();
@@ -444,6 +465,8 @@ export const auth = {
       phone: cleanPhone,
       phoneCountryCode,
       emailVerified: true,
+      emailOtpVerified: true,
+      emailConfirmedAt: new Date().toISOString(),
       passwordHash,
       salt,
       role: "operator",
@@ -532,7 +555,7 @@ export const auth = {
       }
 
       // Sincroniza o status real de confirmação de e-mail na sessão ativa
-      session.user.emailVerified = matchedUser.emailVerified === true;
+      session.user.emailVerified = matchedUser.emailOtpVerified === true;
 
       return session;
     } catch {

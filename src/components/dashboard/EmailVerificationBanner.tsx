@@ -18,6 +18,26 @@ export function EmailVerificationBanner() {
     // Sincroniza sessão ativa
     const current = auth.getSession();
     setSession(current);
+
+    // Se o usuário entrar na conta e o e-mail ainda não estiver confirmado, abre o pop-up automaticamente!
+    if (current?.user && current.user.emailVerified !== true) {
+      const timer = setTimeout(() => {
+        const user = current.user;
+        const record = createVerificationToken(user.email, user.name);
+        setActiveCode(record.code);
+        setExpiresAt(record.expiresAt);
+
+        fetch("/api/v1/auth/send-verification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: user.email, name: user.name }),
+        }).catch(() => {});
+
+        setShowModal(true);
+      }, 400);
+
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   if (!session?.user) return null;

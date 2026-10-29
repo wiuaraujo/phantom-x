@@ -4,6 +4,7 @@ import {
   renderVerificationEmailHtml,
   renderVerificationEmailText,
 } from "@/lib/emailService";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,16 +18,43 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const record = createVerificationToken(email, name || "Operador");
+    const cleanEmail = email.trim().toLowerCase();
+    const record = createVerificationToken(cleanEmail, name || "Operador");
     const htmlEmail = renderVerificationEmailHtml(record.name, record.code);
     const textEmail = renderVerificationEmailText(record.name, record.code);
 
-    // Em produção com Resend / Sendgrid / Supabase Auth, o e-mail real é despachado via SMTP/API aqui.
-    console.log(`[Phantom-X Mailer] Token gerado para ${record.email}: ${record.code} (Expira em 5 min)`);
+    let supabaseDispatched = false;
+    let supabaseErrorNotice: string | null = null;
+
+    // Dispara o e-mail real via Supabase Auth para a caixa de entrada (Gmail, Outlook, etc.)
+    try {
+      const { error: sbErr } = await supabase.auth.signInWithOtp({
+        email: cleanEmail,
+        options: {
+          shouldCreateUser: true,
+        },
+      });
+
+      if (!sbErr) {
+        supabaseDispatched = true;
+      } else {
+        supabaseErrorNotice = sbErr.message;
+        console.warn(`[Supabase Auth Mailer] Aviso para ${cleanEmail}: ${sbErr.message}`);
+      }
+    } catch (e: any) {
+      supabaseErrorNotice = e?.message || "Falha de rede ao disparar e-mail via Supabase";
+      console.warn(`[Supabase Auth Mailer] Exceção para ${cleanEmail}: ${e?.message}`);
+    }
+
+    console.log(
+      `[Phantom-X Mailer] Token gerado para ${record.email}: ${record.code} (Expira em 5 min | Supabase real email dispatched: ${supabaseDispatched})`
+    );
 
     return NextResponse.json({
       success: true,
-      message: "Token de verificação enviado com sucesso.",
+      message: "Token de verificação gerado e enviado com sucesso.",
+      supabaseDispatched,
+      supabaseNotice: supabaseErrorNotice,
       expiresAt: record.expiresAt,
       code: record.code, // Incluído para preview instantâneo na UI
       htmlPreview: htmlEmail,

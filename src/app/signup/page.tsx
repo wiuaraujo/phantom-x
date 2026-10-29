@@ -132,11 +132,30 @@ function SignupFormInner() {
     setVerificationLoading(true);
 
     const cleanEmail = email.trim().toLowerCase();
-    const verifyResult = verifyOtpCode(inputCode, cleanEmail);
+    let isCodeValid = false;
 
-    if (!verifyResult.success) {
+    // 1. Testa token gerado localmente
+    const verifyResult = verifyOtpCode(inputCode, cleanEmail);
+    if (verifyResult.success) {
+      isCodeValid = true;
+    } else {
+      // 2. Testa token recebido no e-mail real do Gmail via Supabase Auth
+      try {
+        const remoteRes = await fetch("/api/v1/auth/verify-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: cleanEmail, code: inputCode }),
+        });
+        const remoteData = await remoteRes.json();
+        if (remoteData.success) {
+          isCodeValid = true;
+        }
+      } catch {}
+    }
+
+    if (!isCodeValid) {
       setVerificationLoading(false);
-      throw new Error(verifyResult.error || "Código de verificação incorreto.");
+      throw new Error(verifyResult.error || "Código de verificação incorreto ou expirado.");
     }
 
     // Token verificado com sucesso! Finaliza o provisionamento e login da conta
