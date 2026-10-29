@@ -51,7 +51,6 @@ function SignupFormInner() {
 
   // Email Verification OTP State (Código de 6 Números com expiração de 5 min)
   const [showVerificationModal, setShowVerificationModal] = useState(false);
-  const [activeCode, setActiveCode] = useState("");
   const [expiresAt, setExpiresAt] = useState(0);
   const [verificationLoading, setVerificationLoading] = useState(false);
 
@@ -116,11 +115,16 @@ function SignupFormInner() {
       });
       const data = await res.json();
 
+      if (!data.success) {
+        setError(data.error || "Falha ao enviar e-mail de verificação.");
+        setLoading(false);
+        return;
+      }
+
       setExpiresAt(data?.expiresAt || (Date.now() + 5 * 60 * 1000));
       setShowVerificationModal(true);
     } catch {
-      setExpiresAt(Date.now() + 5 * 60 * 1000);
-      setShowVerificationModal(true);
+      setError("Erro de conexão ao solicitar código. Verifique sua rede e tente novamente.");
     } finally {
       setLoading(false);
     }

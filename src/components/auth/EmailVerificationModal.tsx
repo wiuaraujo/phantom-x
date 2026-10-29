@@ -18,7 +18,6 @@ interface EmailVerificationModalProps {
   onClose: () => void;
   email: string;
   name?: string;
-  activeCode?: string;
   expiresAt: number;
   onConfirm: (code: string) => Promise<void>;
   onResend: () => Promise<string | void>;

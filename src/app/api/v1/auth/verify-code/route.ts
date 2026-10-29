@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { verifyServerOtp, getServerOtp } from "@/lib/serverOtpStore";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,15 +26,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validação estrita do token OTP no Supabase Auth
-    const { data, error } = await supabase.auth.verifyOtp({
-      email: cleanEmail,
-      token: cleanCode,
-      type: "email",
-    });
+    let isVerified = false;
+    let failureReason = "Código de verificação incorreto ou expirado. Verifique os números recebidos na sua caixa de entrada do Gmail.";
 
-    if (error) {
-      console.warn(`[Phantom-X Auth] Falha ao verificar OTP para ${cleanEmail}: ${error.message}`);
+    // 1. Testa contra o token armazenado no servidor backend (expiração estrita de 5 min)
+    const serverResult = verifyServerOtp(cleanEmail, cleanCode);
+    if (serverResult.success) {
+      isVerified = true;
+    } else if (serverResult.error) {
+      failureReason = serverResult.error;
+    }
+
+    // 2. Se não bateu no servidor, testa também contra o Supabase Auth OTP (para códigos disparados pelo mailer nativo do Supabase)
+    if (!isVerified) {
+      try {
+        const { data: sbData, error: sbError } = await supabase.auth.verifyOtp({
+          email: cleanEmail,
+          token: cleanCode,
+          type: "email",
+        });
+
+        if (!sbError && sbData?.user) {
+          isVerified = true;
+        }
+      } catch (e: any) {
+        console.warn(`[Verify Code] Supabase verifyOtp exceção: ${e?.message}`);
+      }
+    }
+
+    // 3. Se nenhuma das duas autoridades validou o código: FALHA ESTRITA!
+    if (!isVerified) {
       return NextResponse.json(
         {
           success: false,
@@ -42,29 +66,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Se validado com sucesso, confirma o e-mail no perfil do Supabase
+    // 4. Sucesso: atualiza perfil no Supabase Auth como confirmado
     try {
-      if (data?.user?.id) {
-        await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
+      const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
+      const existing = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
+      if (existing) {
+        await supabaseAdmin.auth.admin.updateUserById(existing.id, {
           email_confirm: true,
           user_metadata: {
+            ...existing.user_metadata,
             email_verified: true,
             verified_at: new Date().toISOString(),
           },
         });
       }
     } catch (e: any) {
-      console.warn(`[Phantom-X Auth] Aviso ao atualizar metadata no Supabase: ${e?.message}`);
+      console.warn(`[Verify Code] Aviso ao atualizar Supabase metadata: ${e?.message}`);
     }
 
     return NextResponse.json({
       success: true,
-      message: "Código verificado com sucesso via Supabase Auth.",
-      data,
+      message: "Código verificado e conta confirmada com sucesso!",
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error?.message || "Erro interno ao validar o código." },
+      { success: false, error: error?.message || "Erro interno ao validar código." },
       { status: 500 }
     );
   }

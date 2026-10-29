@@ -40,7 +40,6 @@ function LoginFormInner() {
   // Email Verification OTP Modal State
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [unverifiedUser, setUnverifiedUser] = useState<{ id: string; name: string; email: string } | null>(null);
-  const [activeCode, setActiveCode] = useState("");
   const [expiresAt, setExpiresAt] = useState(0);
   const [verificationLoading, setVerificationLoading] = useState(false);
 
@@ -82,14 +81,22 @@ function LoginFormInner() {
           setExpiresAt(Date.now() + 5 * 60 * 1000);
 
           // Dispara o e-mail de confirmação para o Gmail
-          fetch("/api/v1/auth/send-verification", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: result.unverifiedUser.email,
-              name: result.unverifiedUser.name,
-            }),
-          }).catch(() => {});
+          try {
+            const res = await fetch("/api/v1/auth/send-verification", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: result.unverifiedUser.email,
+                name: result.unverifiedUser.name,
+              }),
+            });
+            const data = await res.json();
+            if (!data.success) {
+              setError(data.error || "Falha ao enviar e-mail de confirmação.");
+              setLoading(false);
+              return;
+            }
+          } catch {}
 
           // Abre o Pop-up Modal imediatamente!
           setShowVerificationModal(true);
