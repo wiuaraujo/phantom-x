@@ -1,4 +1,5 @@
-import { DeviceType, CloakerMode, CloakilioConfig, CloakerDetectedLayer } from "@/types";
+import { DeviceType, CloakerMode, CloakilioConfig, CloakerDetectedLayer, PlanId } from "@/types";
+import { LATAM_COUNTRIES } from "./plans";
 
 export type CloakerClassification =
   | "human-like"
@@ -463,10 +464,32 @@ export class CloakerEngine {
   }
 
   /**
-   * Gera o código completo e compilado de um Cloudflare Worker pronto para subir
+   * Gera o código completo e compilado de um Cloudflare Worker pronto para subir,
+   * aplicando de forma rigorosa as capacidades do plano contratado pelo operador.
    */
-  public static generateCloudflareWorkerCode(config: CloakilioConfig): string {
-    const countriesStr = JSON.stringify(config.paisesPermitidos);
+  public static generateCloudflareWorkerCode(config: CloakilioConfig, planId: PlanId = "free"): string {
+    const isStarterOrFree = planId === "free" || planId === "starter";
+    const isGrowth = planId === "growth" || planId === "pro";
+    const isScale = planId === "scale" || planId === "global";
+
+    // Regras de Cobertura Geográfica Fiel ao Plano
+    let allowedGeos = config.paisesPermitidos;
+    let planHeader = "PLANO: FREE SANDBOX (100 Eventos)";
+
+    if (planId === "starter") {
+      allowedGeos = ["BR"]; // Somente Brasil (1 país)
+      planHeader = "PLANO: STARTER (R$ 149) - Somente Brasil (1 país) | 10.000 cliques";
+    } else if (isGrowth) {
+      allowedGeos = config.paisesPermitidos.length > 0
+        ? config.paisesPermitidos.filter((c) => LATAM_COUNTRIES.includes(c))
+        : LATAM_COUNTRIES;
+      planHeader = "PLANO: GROWTH (R$ 389) - Cobertura Latam (20 países) | 100.000 cliques";
+    } else if (isScale) {
+      allowedGeos = config.paisesPermitidos; // Global 247
+      planHeader = "PLANO: SCALE (R$ 529) - Cobertura Global (247 Países) | Cliques Ilimitados";
+    }
+
+    const countriesStr = JSON.stringify(allowedGeos);
     const blockedAsnsStr = JSON.stringify(config.blockedAsns);
     const botPatternsStr = JSON.stringify(config.botPatterns, null, 2);
 
@@ -474,6 +497,7 @@ export class CloakerEngine {
  * ============================================================================
  * 🛡️ MOTOR DE BORDA PHANTOM-X - CLOUDFLARE WORKER ENGINE
  * ============================================================================
+ * ${planHeader}
  * Gerado automaticamente via Phantom-X Command Center
  * Entrega transparente na borda via Reverse Proxy puro (HTTP 200 OK sem redirects)
  */
@@ -489,6 +513,7 @@ const CONFIG = {
   PERMITIR_DESKTOP: ${config.permitirDesktop},
   RISCO_MAXIMO: ${config.riscoMaximo},
   API_KEY: "${config.proxyCheckApiKey}",
+  KILL_SWITCH_ENABLED: ${isScale ? "true" : "false"},
 };
 
 const BLOCKED_ASNS = new Set(${blockedAsnsStr});
@@ -537,7 +562,16 @@ export default {
       return fetch(request);
     }
 
-    // 3. Modos Forçados
+    // 3. Kill-Switch de Emergência Instantâneo (Recurso exclusivo do plano Scale)
+    if (CONFIG.KILL_SWITCH_ENABLED) {
+      const emergencyHeader = request.headers.get("x-phantom-kill-switch") === "1";
+      const emergencyEnv = typeof env !== "undefined" && env.KILL_SWITCH === "true";
+      if (emergencyHeader || emergencyEnv) {
+        return serveTarget(request, CONFIG.WHITEPAGE_URL, true);
+      }
+    }
+
+    // 4. Modos Forçados Manuais
     if (CONFIG.MODO === "SO_WHITEPAGE") {
       return serveTarget(request, CONFIG.WHITEPAGE_URL, true);
     }

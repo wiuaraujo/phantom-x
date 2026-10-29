@@ -16,6 +16,13 @@ import {
   BOT_PATTERNS,
 } from "./cloakerEngine";
 import { resolveLocationMetadata } from "./geoFlags";
+import {
+  checkEventLimit,
+  checkDomainLimit,
+  checkCampaignLimit,
+  isCountryAllowedForPlan,
+  PlanId,
+} from "./plans";
 
 // Global traffic hub definitions with precise states/provinces
 export const GLOBAL_LOCATIONS = [
@@ -74,6 +81,18 @@ function getActiveUserId(): string {
     }
   } catch {}
   return "master";
+}
+
+function getActiveUserPlan(): PlanId {
+  if (typeof window === "undefined") return "free";
+  try {
+    const raw = localStorage.getItem("phantom_session");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.user?.plan) return parsed.user.plan;
+    }
+  } catch {}
+  return "free";
 }
 
 function getUserScopedKey(suffix: string): string {
@@ -372,7 +391,17 @@ export const store = {
     }
 
     const limit = filter?.limit || 50;
+    const userPlan = getActiveUserPlan();
+    if (userPlan === "free" && result.length > 100) {
+      result = result.slice(0, 100);
+    }
     return result.slice(0, limit);
+  },
+
+  canGenerateMoreEvents(): { allowed: boolean; current: number; max: number; reason?: string } {
+    const plan = getActiveUserPlan();
+    const allEvents = loadUserArray<TrafficEvent>("events", eventsStore);
+    return checkEventLimit(allEvents.length, plan);
   },
 
   ingestEvent(payload: {
@@ -451,6 +480,14 @@ export const store = {
       threatReasons: assessment.threatReasons,
     };
 
+    const userPlan = getActiveUserPlan();
+    const allEvents = loadUserArray<TrafficEvent>("events", eventsStore);
+    const limitCheck = checkEventLimit(allEvents.length, userPlan);
+    if (!limitCheck.allowed) {
+      // Bloqueia persistência de eventos caso o limite contratado do plano tenha sido atingido
+      return newEvent;
+    }
+
     eventsStore.unshift(newEvent);
     if (eventsStore.length > 500) {
       eventsStore.pop();
@@ -473,6 +510,13 @@ export const store = {
   },
 
   generateRandomSimulatedEvent(): TrafficEvent {
+    const userPlan = getActiveUserPlan();
+    const allEvents = loadUserArray<TrafficEvent>("events", eventsStore);
+    const limitCheck = checkEventLimit(allEvents.length, userPlan);
+    if (!limitCheck.allowed) {
+      throw new Error(limitCheck.reason || "Limite de eventos do plano contratado atingido.");
+    }
+
     const loc = GLOBAL_LOCATIONS[Math.floor(Math.random() * GLOBAL_LOCATIONS.length)];
     const camp = campaignsStore[Math.floor(Math.random() * campaignsStore.length)];
     const domainName = camp?.domainName || domainsStore[0]?.name || "gateway.phantomx.pro";
@@ -573,7 +617,6 @@ export const store = {
       isSimulated: true,
     };
 
-    const allEvents = loadUserArray<TrafficEvent>("events", eventsStore);
     allEvents.unshift(event);
     if (allEvents.length > 500) {
       allEvents.pop();
@@ -644,11 +687,22 @@ export const store = {
     saveUserArray("domains", updatedDomains);
   },
 
+  getActiveUserPlan(): PlanId {
+    return getActiveUserPlan();
+  },
+
   getDomains(): Domain[] {
     return loadUserArray<Domain>("domains", domainsStore);
   },
 
   addDomain(name: string): Domain {
+    const userPlan = getActiveUserPlan();
+    const current = loadUserArray<Domain>("domains", domainsStore);
+    const domainCheck = checkDomainLimit(current.length, userPlan);
+    if (!domainCheck.allowed) {
+      throw new Error(domainCheck.reason || "Limite de domínios atingido para o plano contratado.");
+    }
+
     const cleanName = name.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
     const newDomain: Domain = {
       id: `dom_${Date.now().toString(36)}`,
@@ -674,7 +728,6 @@ export const store = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    const current = loadUserArray<Domain>("domains", domainsStore);
     current.push(newDomain);
     domainsStore = current;
     saveUserArray("domains", current);
@@ -709,6 +762,13 @@ export const store = {
   },
 
   createCampaign(data: Partial<Campaign>): Campaign {
+    const userPlan = getActiveUserPlan();
+    const currentCamps = loadUserArray<Campaign>("campaigns", campaignsStore);
+    const campCheck = checkCampaignLimit(currentCamps.length, userPlan);
+    if (!campCheck.allowed) {
+      throw new Error(campCheck.reason || "Limite de camuflagens atingido para o plano contratado.");
+    }
+
     const currentDomains = this.getDomains();
     const domain = currentDomains.find((d) => d.id === data.domainId) || currentDomains[0];
     const newCamp: Campaign = {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { siteConfig } from "@/config/site";
@@ -23,13 +23,40 @@ import {
   User,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { getPlanDefinition, PlanId } from "@/lib/plans";
+import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
 
 function SidebarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [collapsed, setCollapsed] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const session = auth.getSession();
+  const [currentPlan, setCurrentPlan] = useState<PlanId>(session?.user?.plan || "free");
+  const planDef = getPlanDefinition(currentPlan);
   const displayName = session?.user?.nickname || session?.user?.name?.split(" ")[0] || "Operador";
+
+  useEffect(() => {
+    auth.syncPlanWithBackend().then((res) => {
+      if (res.plan) setCurrentPlan(res.plan);
+    });
+
+    const handlePlanChange = (e: any) => {
+      if (e.detail?.plan) setCurrentPlan(e.detail.plan);
+    };
+    window.addEventListener("phantom_plan_changed", handlePlanChange);
+
+    const interval = setInterval(() => {
+      auth.syncPlanWithBackend().then((res) => {
+        if (res.plan) setCurrentPlan(res.plan);
+      });
+    }, 20000);
+
+    return () => {
+      window.removeEventListener("phantom_plan_changed", handlePlanChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   const currentTab = searchParams?.get("tab");
 
@@ -156,28 +183,61 @@ function SidebarContent() {
           </div>
         )}
 
-        {/* User Profile Card */}
-        <Link
-          href="/dashboard/settings?tab=profile"
-          className={`rounded-xl bg-brand-surface border border-brand-border flex items-center ${
-            collapsed ? "justify-center p-2" : "p-2.5 space-x-2.5"
-          } hover:bg-brand-hover transition block`}
-          title={`Perfil: ${displayName} (${session?.user?.timezone || "America/Sao_Paulo"})`}
-        >
-          <div className="w-8 h-8 rounded-full bg-white text-black font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
-            {displayName[0] ? displayName[0].toUpperCase() : "W"}
-          </div>
-          {!collapsed && (
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-semibold text-brand-white truncate">
-                {displayName}
-              </div>
-              <div className="text-[10px] text-brand-muted font-mono truncate">
-                {session?.user?.timezone || "America/Sao_Paulo"}
-              </div>
+        {/* User Profile Card & Plan Status */}
+        <div className="rounded-xl bg-brand-surface border border-brand-border p-2.5 space-y-2">
+          <Link
+            href="/dashboard/settings?tab=profile"
+            className={`flex items-center ${
+              collapsed ? "justify-center p-0" : "space-x-2.5"
+            } hover:opacity-90 transition`}
+            title={`Perfil: ${displayName} (${session?.user?.timezone || "America/Sao_Paulo"})`}
+          >
+            <div className="w-8 h-8 rounded-full bg-white text-black font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
+              {displayName[0] ? displayName[0].toUpperCase() : "W"}
             </div>
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-semibold text-brand-white truncate">
+                  {displayName}
+                </div>
+                <div className="text-[10px] text-brand-muted font-mono truncate">
+                  {session?.user?.timezone || "America/Sao_Paulo"}
+                </div>
+              </div>
+            )}
+          </Link>
+
+          {/* Tag do Plano & Botão Ver Planos */}
+          {!collapsed ? (
+            <div className="pt-2 border-t border-brand-border flex items-center justify-between gap-1.5">
+              <span
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                  currentPlan === "free"
+                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                    : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                }`}
+              >
+                {currentPlan === "free" ? "Plano Trial" : planDef.name}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md bg-white text-black hover:bg-neutral-200 transition shadow-sm cursor-pointer"
+              >
+                Ver Planos
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowUpgradeModal(true)}
+              className="w-full py-1 rounded bg-amber-500/20 text-amber-400 text-[9px] font-mono font-bold flex items-center justify-center border border-amber-500/30 cursor-pointer"
+              title="Ver Planos"
+            >
+              Planos
+            </button>
           )}
-        </Link>
+        </div>
 
         <Link
           href="/"
@@ -205,6 +265,12 @@ function SidebarContent() {
           {!collapsed && <span className="ml-3 font-semibold">Sair do Sistema</span>}
         </button>
       </div>
+
+      <UpgradePlanModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        reason="Conheça nossos planos comerciais e escale suas camuflagens com limites ampliados."
+      />
     </aside>
   );
 }

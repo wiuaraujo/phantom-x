@@ -5,14 +5,21 @@ import { Header } from "@/components/dashboard/Header";
 import { store } from "@/lib/store";
 import { TrafficEvent, RiskCategory } from "@/types";
 import { LocationBadge } from "@/lib/geoFlags";
-import { Download, Search, Filter, ShieldCheck, ChevronLeft, ChevronRight, Server, RotateCcw } from "lucide-react";
+import { Download, Search, Filter, ShieldCheck, ChevronLeft, ChevronRight, Server, RotateCcw, Zap } from "lucide-react";
+import { auth } from "@/lib/auth";
+import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
+import { getPlanDefinition } from "@/lib/plans";
 
 export default function EventsExplorerPage() {
   const [events, setEvents] = useState<TrafficEvent[]>([]);
   const [search, setSearch] = useState("");
   const [selectedRisk, setSelectedRisk] = useState<RiskCategory | "all">("all");
   const [page, setPage] = useState(1);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const pageSize = 15;
+  const session = auth.getSession();
+  const userPlan = session?.user?.plan || "free";
+  const planDef = getPlanDefinition(userPlan);
 
   const loadEvents = () => {
     setEvents(
@@ -138,6 +145,51 @@ export default function EventsExplorerPage() {
           </div>
         </div>
 
+        {/* Quota Banner Condizente com o Plano */}
+        <div className={`p-3.5 rounded-xl border text-xs font-mono flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md ${
+          userPlan === "scale"
+            ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-200"
+            : userPlan === "growth"
+            ? "bg-purple-950/20 border-purple-500/30 text-purple-200"
+            : userPlan === "starter"
+            ? "bg-neutral-900 border-neutral-700 text-neutral-200"
+            : "bg-brand-surface border-amber-500/30 text-amber-200"
+        }`}>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${
+              userPlan === "scale"
+                ? "bg-emerald-400"
+                : userPlan === "growth"
+                ? "bg-purple-400"
+                : userPlan === "starter"
+                ? "bg-blue-400"
+                : "bg-amber-400 animate-pulse"
+            }`} />
+            <span className="text-brand-secondary">
+              Plano <strong className="text-white">{planDef.name}</strong> — Eventos analisados:{" "}
+              <strong className={
+                planDef.limits.maxEventsMonthly !== -1 && events.length >= planDef.limits.maxEventsMonthly
+                  ? "text-red-400 font-bold"
+                  : "text-white"
+              }>
+                {events.length.toLocaleString("pt-BR")}
+              </strong>{" "}
+              / {planDef.limits.maxEventsMonthly === -1 ? "Ilimitados" : `${planDef.limits.maxEventsMonthly.toLocaleString("pt-BR")} no mês`}
+              {" "}(Região: {planDef.region} {planDef.flags})
+            </span>
+          </div>
+
+          {userPlan !== "scale" && (
+            <button
+              onClick={() => setShowUpgradeModal(true)}
+              className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-bold text-[11px] hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
+            >
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>{userPlan === "free" ? "Ativar Plano Comercial" : "Expandir Cota de Cliques"}</span>
+            </button>
+          )}
+        </div>
+
         {/* Events Table */}
         <div className="bg-brand-surface border border-brand-border rounded-xl p-5 shadow-glow-sm">
           <div className="overflow-x-auto">
@@ -247,6 +299,14 @@ export default function EventsExplorerPage() {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Plan Modal */}
+      <UpgradePlanModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        title="Limite de Eventos Atingido"
+        reason="Sua conta gratuita atingiu o limite de 100 eventos. Para continuar analisando requisições e operando sem cortes, faça upgrade para o plano Starter (R$ 149), Growth (R$ 389) ou Scale (R$ 529)."
+      />
     </div>
   );
 }

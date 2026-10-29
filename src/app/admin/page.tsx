@@ -34,8 +34,15 @@ import {
   Clock,
   Mail,
   Phone,
+  Crown,
+  Zap,
+  TrendingUp,
+  DollarSign,
+  ArrowUpRight,
+  Award,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { PHANTOM_PLANS, PlanId, getPlanDefinition } from "@/lib/plans";
 
 interface OperatorUser {
   id: string;
@@ -50,6 +57,10 @@ interface OperatorUser {
   emailConfirmedAt: string | null;
   createdAt: string;
   lastSignInAt: string | null;
+  plan?: PlanId;
+  planStatus?: string;
+  planActivatedAt?: string;
+  planExpiresAt?: string;
   activeOtp?: {
     code: string;
     expiresAt: number;
@@ -86,6 +97,14 @@ interface SystemOverviewData {
     totalCampaigns: number;
     blockedReviewersToday: number;
     trafficProcessedMB: number;
+    mrr?: number;
+    totalPaidSubscriptions?: number;
+    planBreakdown?: {
+      free: number;
+      starter: number;
+      growth: number;
+      scale: number;
+    };
   };
 }
 
@@ -99,7 +118,7 @@ export default function AdminPortalPage() {
   const [authLoading, setAuthLoading] = useState(false);
 
   // Estados de Dados Administrativos
-  const [activeTab, setActiveTab] = useState<"users" | "domains" | "campaigns" | "traffic" | "system">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "plans" | "domains" | "traffic" | "system">("users");
   const [overview, setOverview] = useState<SystemOverviewData | null>(null);
   const [operators, setOperators] = useState<OperatorUser[]>([]);
   const [loadingData, setLoadingData] = useState(false);
@@ -108,6 +127,12 @@ export default function AdminPortalPage() {
   // Filtros de Operadores
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "confirmed" | "pending" | "admin">("all");
+
+  // Liberação e Gestão de Planos
+  const [selectedUserForPlan, setSelectedUserForPlan] = useState<OperatorUser | null>(null);
+  const [targetPlan, setTargetPlan] = useState<PlanId>("growth");
+  const [targetPlanStatus, setTargetPlanStatus] = useState<"active" | "trial" | "canceled">("active");
+  const [savingPlan, setSavingPlan] = useState(false);
 
   // Ações em andamento por usuário
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -234,6 +259,17 @@ export default function AdminPortalPage() {
       setActionLoadingId(null);
       setTimeout(() => setActionNotice(null), 5000);
     }
+  };
+
+  const handleSaveUserPlan = async () => {
+    if (!selectedUserForPlan) return;
+    setSavingPlan(true);
+    await handleUserAction("update_plan", selectedUserForPlan, {
+      plan: targetPlan,
+      planStatus: targetPlanStatus,
+    });
+    setSavingPlan(false);
+    setSelectedUserForPlan(null);
   };
 
   const handleToggleKillSwitch = async () => {
@@ -472,7 +508,7 @@ export default function AdminPortalPage() {
         )}
 
         {/* KPI Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           {/* Card 1: Total Operadores */}
           <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
@@ -494,7 +530,21 @@ export default function AdminPortalPage() {
             </div>
           </div>
 
-          {/* Card 2: Domínios Registrados */}
+          {/* Card 2: Receita Recorrente (MRR) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-amber-500/20 backdrop-blur-md shadow-lg">
+            <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
+              <span>MRR ESTIMADO</span>
+              <DollarSign className="w-4 h-4 text-amber-400" />
+            </div>
+            <div className="text-2xl sm:text-3xl font-poppins font-bold text-amber-300">
+              R$ {(overview?.metrics?.mrr || 0).toLocaleString("pt-BR")}
+            </div>
+            <div className="mt-2 text-[10px] font-mono text-neutral-400 truncate">
+              {overview?.metrics?.totalPaidSubscriptions || 0} assinantes ativos
+            </div>
+          </div>
+
+          {/* Card 3: Domínios Registrados */}
           <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
               <span>DOMÍNIOS DE BORDA</span>
@@ -508,7 +558,7 @@ export default function AdminPortalPage() {
             </div>
           </div>
 
-          {/* Card 3: Campanhas Ativas */}
+          {/* Card 4: Campanhas Ativas */}
           <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
               <span>CAMPANHAS</span>
@@ -522,8 +572,8 @@ export default function AdminPortalPage() {
             </div>
           </div>
 
-          {/* Card 4: Bots & Reviewers Bloqueados */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg">
+          {/* Card 5: Bots & Reviewers Bloqueados */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
               <span>REVIEWERS BARRADOS</span>
               <ShieldCheck className="w-4 h-4 text-rose-400" />
@@ -548,6 +598,16 @@ export default function AdminPortalPage() {
             >
               <Users className="w-3.5 h-3.5" />
               <span>Operadores ({operators.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("plans")}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-mono transition flex items-center space-x-1.5 cursor-pointer ${
+                activeTab === "plans" ? "bg-white text-black font-bold shadow-md" : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-400" />
+              <span>Planos &amp; Markup</span>
             </button>
 
             <button
@@ -633,6 +693,7 @@ export default function AdminPortalPage() {
                       <th className="py-3 px-4">Operador</th>
                       <th className="py-3 px-4">E-mail & Telefone</th>
                       <th className="py-3 px-4">Cargo</th>
+                      <th className="py-3 px-4">Plano Atual</th>
                       <th className="py-3 px-4">Confirmação de E-mail</th>
                       <th className="py-3 px-4">Token OTP no Backend</th>
                       <th className="py-3 px-4 text-right">Ações de Governança</th>
@@ -688,6 +749,23 @@ export default function AdminPortalPage() {
                                 }`}
                               >
                                 {user.role === "admin" ? "Master Admin" : "Operador"}
+                              </span>
+                            </td>
+
+                            {/* Plano Atual */}
+                            <td className="py-3 px-4">
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                                  user.plan === "scale" || user.plan === "global"
+                                    ? "bg-emerald-950/70 border-emerald-500/50 text-emerald-300"
+                                    : user.plan === "growth" || user.plan === "pro"
+                                    ? "bg-purple-950/70 border-purple-500/50 text-purple-300"
+                                    : user.plan === "starter"
+                                    ? "bg-blue-950/70 border-blue-500/50 text-blue-300"
+                                    : "bg-neutral-800 border-neutral-700 text-neutral-400"
+                                }`}
+                              >
+                                {user.plan ? (user.plan === "pro" ? "GROWTH" : user.plan === "global" ? "SCALE" : user.plan.toUpperCase()) : "FREE"}
                               </span>
                             </td>
 
@@ -757,6 +835,20 @@ export default function AdminPortalPage() {
                                   </button>
                                 )}
 
+                                {/* Liberar / Alterar Plano */}
+                                <button
+                                  onClick={() => {
+                                    setSelectedUserForPlan(user);
+                                    setTargetPlan((user.plan as PlanId) || "growth");
+                                    setTargetPlanStatus((user.planStatus as any) || "active");
+                                  }}
+                                  className="px-2 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-bold text-[10px] transition border border-amber-500/30 flex items-center space-x-1 cursor-pointer"
+                                  title="Liberar ou Alterar Plano deste Operador"
+                                >
+                                  <Crown className="w-3 h-3 text-amber-400" />
+                                  <span>Plano</span>
+                                </button>
+
                                 {/* Gerar Token OTP Novo */}
                                 <button
                                   onClick={() => handleUserAction("generate_otp", user)}
@@ -807,7 +899,301 @@ export default function AdminPortalPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* ABA 2: DOMÍNIOS GLOBAIS DA INFRAESTRUTURA                                 */}
+        {/* ABA: GESTÃO ESTRATÉGICA DE PLANOS & MARKUP COMPETITIVO                    */}
+        {/* ========================================================================= */}
+        {activeTab === "plans" && (
+          <div className="space-y-6">
+            {/* Header Estratégico */}
+            <div className="p-6 rounded-2xl bg-neutral-900/80 border border-white/10 backdrop-blur-md">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-300 font-bold mb-2">
+                    <Crown className="w-3.5 h-3.5 text-amber-400" />
+                    <span>POSICIONAMENTO COMPETITIVO &amp; ALTO MARKUP</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-white font-poppins">
+                    Planos Comerciais &amp; Governança de Assinaturas
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-mono mt-1 max-w-2xl leading-relaxed">
+                    Estratégia desenhada para superar a concorrência direta: cobramos menos no ticket final (~R$ 50 a R$ 100 de vantagem), entregamos 50% mais domínios e camuflagens, cliques ilimitados e margem de contribuição de 97%+ operando sobre Edge Workers.
+                  </p>
+                </div>
+
+                <div className="flex items-center space-x-3 shrink-0">
+                  <div className="px-4 py-3 rounded-xl bg-black/60 border border-white/10 text-right">
+                    <div className="text-[10px] text-neutral-400 font-mono uppercase">MRR Projetado</div>
+                    <div className="text-lg font-bold text-emerald-400 font-mono">
+                      R$ {(
+                        operators.filter((u) => u.plan === "starter").length * 149 +
+                        operators.filter((u) => u.plan === "growth" || u.plan === "pro").length * 389 +
+                        operators.filter((u) => u.plan === "scale" || u.plan === "global").length * 529
+                      ).toLocaleString("pt-BR")},00
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Métricas de Distribuição por Plano */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-mono">
+              <div className="p-4 rounded-xl bg-neutral-900/60 border border-white/10">
+                <div className="text-[10px] text-neutral-400 uppercase">Free Sandbox (100 Eventos)</div>
+                <div className="text-2xl font-bold text-neutral-300 mt-1">
+                  {operators.filter((u) => !u.plan || u.plan === "free").length}
+                </div>
+                <div className="text-[10px] text-amber-400 mt-1">1 Domínio • 1 Cloaker • 100 Evs</div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-blue-950/30 border border-blue-500/30">
+                <div className="text-[10px] text-blue-300 uppercase">Starter (R$ 149)</div>
+                <div className="text-2xl font-bold text-blue-200 mt-1">
+                  {operators.filter((u) => u.plan === "starter").length}
+                </div>
+                <div className="text-[10px] text-blue-400 mt-1">3 Domínios • Somente Brasil 🇧🇷</div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-purple-950/30 border border-purple-500/30">
+                <div className="text-[10px] text-purple-300 uppercase">Growth (R$ 389)</div>
+                <div className="text-2xl font-bold text-purple-200 mt-1">
+                  {operators.filter((u) => u.plan === "growth" || u.plan === "pro").length}
+                </div>
+                <div className="text-[10px] text-purple-400 mt-1">12 Domínios • Latam &amp; Tier 1 🌎</div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30">
+                <div className="text-[10px] text-emerald-300 uppercase">Scale (R$ 529)</div>
+                <div className="text-2xl font-bold text-emerald-200 mt-1">
+                  {operators.filter((u) => u.plan === "scale" || u.plan === "global").length}
+                </div>
+                <div className="text-[10px] text-emerald-400 mt-1">60 Domínios • 247 Países 🌐</div>
+              </div>
+            </div>
+
+            {/* Ativador Rápido de Planos para Master Admin */}
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-900 via-neutral-950 to-neutral-900 border border-white/10 shadow-xl">
+              <div className="flex items-center space-x-2 text-white font-bold text-sm font-poppins mb-3">
+                <Zap className="w-4 h-4 text-amber-400" />
+                <span>Liberação Direta de Plano para Operador</span>
+              </div>
+              <p className="text-xs text-neutral-400 font-mono mb-4">
+                Selecione qualquer operador cadastrado para liberar o plano desejado imediatamente sem necessidade de checkout ou gateway externo.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 font-mono text-xs">
+                <div>
+                  <label className="block text-[10px] text-neutral-400 mb-1">OPERADOR ALVO</label>
+                  <select
+                    value={selectedUserForPlan?.id || ""}
+                    onChange={(e) => {
+                      const found = operators.find((u) => u.id === e.target.value);
+                      if (found) {
+                        setSelectedUserForPlan(found);
+                        setTargetPlan((found.plan as PlanId) || "growth");
+                        setTargetPlanStatus((found.planStatus as any) || "active");
+                      }
+                    }}
+                    className="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white focus:outline-none"
+                  >
+                    <option value="">Selecione um operador...</option>
+                    {operators.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} ({u.email}) — [{u.plan ? u.plan.toUpperCase() : "FREE"}]
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-neutral-400 mb-1">PLANO A ATRIBUIR</label>
+                  <select
+                    value={targetPlan}
+                    onChange={(e: any) => setTargetPlan(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white focus:outline-none"
+                  >
+                    <option value="free">Plano Trial (100 Eventos / 1 Domínio / Brasil)</option>
+                    <option value="starter">Starter (R$ 149 - 10k Cliques / 3 Domínios / Brasil)</option>
+                    <option value="growth">Growth (R$ 389 - 100k Cliques / 12 Domínios / Latam)</option>
+                    <option value="scale">Scale (R$ 529 - Ilimitado / 60 Domínios / Global 247 Países)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-neutral-400 mb-1">STATUS DO PLANO</label>
+                  <select
+                    value={targetPlanStatus}
+                    onChange={(e: any) => setTargetPlanStatus(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white focus:outline-none"
+                  >
+                    <option value="active">🟢 Ativo (Acesso Total Liberado)</option>
+                    <option value="trial">🟡 Trial Especial (Testes)</option>
+                    <option value="canceled">🔴 Cancelado / Desativado (Revogar)</option>
+                  </select>
+                </div>
+
+                <div className="flex items-end">
+                  <button
+                    onClick={handleSaveUserPlan}
+                    disabled={!selectedUserForPlan || savingPlan}
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs font-mono uppercase tracking-wider transition shadow-lg disabled:opacity-40 cursor-pointer flex items-center justify-center space-x-1.5"
+                  >
+                    {savingPlan ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Crown className="w-3.5 h-3.5" />
+                    )}
+                    <span>{targetPlanStatus === "canceled" ? "Desativar Plano" : "Liberar Plano"}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Matriz Comparativa Estratégica vs Concorrente Direto */}
+            <div className="bg-neutral-900/70 border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-base font-bold text-white font-poppins">
+                    Inteligência Competitiva &amp; Arbitragem de Margem (Markup)
+                  </h4>
+                  <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                    Como o Phantom-X neutraliza o Cloakilio entregando maior proposta de valor com custo de infraestrutura 90% inferior
+                  </p>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold">
+                  Margem Bruta Estimada: 97.4%
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead>
+                    <tr className="border-b border-white/10 bg-neutral-950/80 text-neutral-400 uppercase text-[10px] tracking-wider">
+                      <th className="py-3 px-4">Critério &amp; Nível</th>
+                      <th className="py-3 px-4 text-neutral-400">Concorrente Direto (Cloakilio)</th>
+                      <th className="py-3 px-4 text-white font-bold">Phantom-X (Nossa Solução)</th>
+                      <th className="py-3 px-4 text-emerald-400 font-bold">Diferencial &amp; Vantagem Comercial</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-[11px]">
+                    <tr className="hover:bg-white/[0.02]">
+                      <td className="py-3 px-4 font-bold text-neutral-300">Conta Gratuita</td>
+                      <td className="py-3 px-4 text-neutral-400">Período de teste sem travas claras</td>
+                      <td className="py-3 px-4 text-white font-bold">1 Domínio / 1 Cloaker / 100 eventos apenas</td>
+                      <td className="py-3 px-4 text-amber-300">Limitação estrita para forçar upgrade rápido</td>
+                    </tr>
+                    <tr className="hover:bg-white/[0.02]">
+                      <td className="py-3 px-4 font-bold text-neutral-300">Plano Starter</td>
+                      <td className="py-3 px-4 text-neutral-400">R$ 197/mês • Brasil 1 • 2 Domínios • 4 Páginas</td>
+                      <td className="py-3 px-4 text-blue-300 font-bold">R$ 149/mês • 10.000 cliques • Somente Brasil 🇧🇷 • 3 Domínios • 6 Páginas</td>
+                      <td className="py-3 px-4 text-emerald-300 font-bold">R$ 48 MAIS BARATO + 50% MAIS DOMÍNIOS</td>
+                    </tr>
+                    <tr className="hover:bg-white/[0.02]">
+                      <td className="py-3 px-4 font-bold text-neutral-300">Plano Growth (Popular)</td>
+                      <td className="py-3 px-4 text-neutral-400">R$ 347/mês • Latam 20 • 10 Domínios • 20 Páginas</td>
+                      <td className="py-3 px-4 text-purple-300 font-bold">R$ 389/mês • 100.000 cliques • 🇺🇸 EUA + 🇪🇺 27 Países • 12 Domínios</td>
+                      <td className="py-3 px-4 text-emerald-300 font-bold">TICKET ELEVADO (R$ 389) + 12 DOMÍNIOS + ASN HEURISTICS</td>
+                    </tr>
+                    <tr className="hover:bg-white/[0.02]">
+                      <td className="py-3 px-4 font-bold text-neutral-300">Plano Scale</td>
+                      <td className="py-3 px-4 text-neutral-400">R$ 597/mês • Todos 247 • 50 Domínios • 200 Páginas</td>
+                      <td className="py-3 px-4 text-emerald-300 font-bold">R$ 529/mês • Cliques Ilimitados • 🌐 247 Países • 60 Domínios</td>
+                      <td className="py-3 px-4 text-emerald-300 font-bold">R$ 68 MAIS BARATO + 60 DOMÍNIOS + KILL-SWITCH</td>
+                    </tr>
+                    <tr className="hover:bg-white/[0.02]">
+                      <td className="py-3 px-4 font-bold text-neutral-300">Arquitetura de Borda</td>
+                      <td className="py-3 px-4 text-neutral-400">Servidores VPS dedicados de alto custo</td>
+                      <td className="py-3 px-4 text-white font-bold">Cloudflare Workers Edge v2.4 Serverless</td>
+                      <td className="py-3 px-4 text-emerald-300">Custo &lt; R$ 0,02 por 10.000 requisições</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Grid dos 4 Planos com Especificações */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+              {[PHANTOM_PLANS.free, PHANTOM_PLANS.starter, PHANTOM_PLANS.growth, PHANTOM_PLANS.scale].map((plan) => {
+                const subscribers = operators.filter((u) => {
+                  const p = u.plan || "free";
+                  if (plan.id === "growth") return p === "growth" || p === "pro";
+                  if (plan.id === "scale") return p === "scale" || p === "global";
+                  return p === plan.id;
+                }).length;
+
+                return (
+                  <div
+                    key={plan.id}
+                    className={`rounded-2xl p-5 border flex flex-col justify-between transition ${
+                      plan.id === "growth"
+                        ? "bg-neutral-900 border-white/40 shadow-2xl ring-1 ring-white/20"
+                        : plan.id === "scale"
+                        ? "bg-neutral-900/90 border-emerald-500/30"
+                        : "bg-neutral-900/60 border-white/10"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-neutral-300">
+                          {plan.badge || plan.id.toUpperCase()}
+                        </span>
+                        <span className="text-xs text-neutral-400">
+                          {subscribers} {subscribers === 1 ? "operador" : "operadores"}
+                        </span>
+                      </div>
+
+                      <h5 className="text-base font-bold text-white font-poppins">{plan.name}</h5>
+                      <p className="text-[11px] text-neutral-400 mt-0.5 line-clamp-2">{plan.tagline}</p>
+
+                      <div className="my-4 pb-3 border-b border-white/10">
+                        <div className="text-2xl font-bold text-white font-poppins">
+                          {plan.priceFormatted}
+                          <span className="text-xs text-neutral-400 font-mono font-normal"> {plan.period}</span>
+                        </div>
+                        <div className="text-[11px] text-neutral-400 mt-1">
+                          Região: <strong className="text-white">{plan.region}</strong> {plan.flags}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 text-[11px] text-neutral-300">
+                        <div className="flex items-center justify-between">
+                          <span className="text-neutral-400">Domínios:</span>
+                          <span className="font-bold text-white">{plan.limits.maxDomains}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-neutral-400">Camuflagens:</span>
+                          <span className="font-bold text-white">{plan.limits.maxCampaigns}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-neutral-400">Páginas:</span>
+                          <span className="font-bold text-white">{plan.limits.maxPages}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-neutral-400">Cliques:</span>
+                          <span className={`font-bold ${plan.limits.maxEventsMonthly === -1 ? "text-emerald-400" : "text-white"}`}>
+                            {plan.limits.maxEventsMonthly === -1 ? "Ilimitados" : `${plan.limits.maxEventsMonthly.toLocaleString("pt-BR")} /mês`}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-white/10">
+                      <div className="text-[10px] text-neutral-500 uppercase mb-2">Tráfego Otimizado</div>
+                      <div className="flex flex-wrap gap-1">
+                        {plan.trafficSources.map((source) => (
+                          <span
+                            key={source}
+                            className="px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-[9px] text-neutral-300"
+                          >
+                            {source}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
         {/* ========================================================================= */}
         {activeTab === "domains" && (
           <div className="p-6 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md space-y-4">
@@ -964,6 +1350,118 @@ export default function AdminPortalPage() {
           </div>
         )}
       </main>
+
+      {/* Modal de Liberação de Plano para Operador */}
+      {selectedUserForPlan && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-neutral-950 border border-white/20 rounded-2xl p-6 shadow-2xl font-mono text-xs">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+              <div className="flex items-center space-x-2">
+                <Crown className="w-5 h-5 text-amber-400" />
+                <h3 className="text-base font-bold text-white font-poppins">Liberar / Alterar Plano de Assinatura</h3>
+              </div>
+              <button
+                onClick={() => setSelectedUserForPlan(null)}
+                className="text-neutral-400 hover:text-white p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Informações do Operador */}
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 mb-4 flex items-center justify-between">
+              <div>
+                <div className="font-bold text-white text-sm">{selectedUserForPlan.name}</div>
+                <div className="text-neutral-400 text-[11px]">{selectedUserForPlan.email}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] text-neutral-400 uppercase">Plano Atual</div>
+                <span className="font-bold text-amber-300 uppercase">
+                  {selectedUserForPlan.plan || "free"}
+                </span>
+              </div>
+            </div>
+
+            {/* Seleção de Novos Planos */}
+            <div className="space-y-2 mb-4">
+              <label className="block text-[11px] text-neutral-400 uppercase">Selecione o Plano a Liberar:</label>
+              {(["free", "starter", "growth", "scale"] as PlanId[]).map((pId) => {
+                const planInfo = PHANTOM_PLANS[pId];
+                const isSelected = targetPlan === pId;
+
+                return (
+                  <div
+                    key={pId}
+                    onClick={() => setTargetPlan(pId)}
+                    className={`p-3 rounded-xl border cursor-pointer transition flex items-center justify-between ${
+                      isSelected
+                        ? "bg-white/10 border-white text-white"
+                        : "bg-black/40 border-white/10 text-neutral-300 hover:border-white/30"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold text-sm">{planInfo.name}</span>
+                        {planInfo.isPopular && (
+                          <span className="px-1.5 py-0.5 rounded bg-white text-black text-[9px] font-bold">
+                            MAIS POPULAR
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-neutral-400 mt-0.5">
+                        {planInfo.limits.maxDomains} Domínios • {planInfo.limits.maxCampaigns} Camuflagens • {planInfo.region}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="font-bold text-white text-sm">{planInfo.priceFormatted}</div>
+                      <div className="text-[10px] text-neutral-400">{planInfo.period}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Status do Plano */}
+            <div className="mb-5">
+              <label className="block text-[11px] text-neutral-400 uppercase mb-1">Status da Assinatura:</label>
+              <select
+                value={targetPlanStatus}
+                onChange={(e: any) => setTargetPlanStatus(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white focus:outline-none"
+              >
+                <option value="active">Ativo (Acesso Liberado Imediato)</option>
+                <option value="trial">Em Período de Testes (Trial Especial)</option>
+                <option value="canceled">Cancelado / Suspenso</option>
+              </select>
+            </div>
+
+            {/* Ações */}
+            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setSelectedUserForPlan(null)}
+                className="px-4 py-2 rounded-xl bg-neutral-900 border border-white/10 text-neutral-300 hover:text-white"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveUserPlan}
+                disabled={savingPlan}
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs uppercase tracking-wider transition shadow-lg flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {savingPlan ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Check className="w-3.5 h-3.5" />
+                )}
+                <span>Salvar &amp; Liberar Plano</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,6 +4,9 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/dashboard/Header";
 import { store } from "@/lib/store";
 import { Campaign, Domain, CloakerMode } from "@/types";
+import { auth } from "@/lib/auth";
+import { checkCampaignLimit, getPlanDefinition, isCountryAllowedForPlan } from "@/lib/plans";
+import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
 import {
   Plus,
   Trash2,
@@ -18,14 +21,34 @@ import {
   Cpu,
   ArrowRight,
   Server,
+  Zap,
+  Lock,
 } from "lucide-react";
 
-const COMMON_GEOS = ["BR", "US", "PT", "ES", "GB", "DE", "FR", "CA"];
+const COMMON_GEOS = [
+  { code: "BR", flag: "🇧🇷", name: "Brasil" },
+  { code: "MX", flag: "🇲🇽", name: "México" },
+  { code: "AR", flag: "🇦🇷", name: "Argentina" },
+  { code: "CO", flag: "🇨🇴", name: "Colômbia" },
+  { code: "CL", flag: "🇨🇱", name: "Chile" },
+  { code: "US", flag: "🇺🇸", name: "EUA" },
+  { code: "PT", flag: "🇵🇹", name: "Portugal" },
+  { code: "ES", flag: "🇪🇸", name: "Espanha" },
+  { code: "GB", flag: "🇬🇧", name: "Reino Unido" },
+  { code: "DE", flag: "🇩🇪", name: "Alemanha" },
+];
 
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
   const [showModal, setShowModal] = useState(false);
+
+  // Controle de Planos e Limites
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState("");
+  const session = auth.getSession();
+  const userPlan = session?.user?.plan || "free";
+  const planDef = getPlanDefinition(userPlan);
 
   // New campaign form state
   const [name, setName] = useState("");
@@ -66,9 +89,17 @@ export default function CampaignsPage() {
   };
 
   const toggleCountry = (code: string) => {
+    const check = isCountryAllowedForPlan(code, userPlan);
+    if (!check.allowed) {
+      setUpgradeReason(check.reason || "Este país não está incluso no seu plano contratado.");
+      setShowUpgradeModal(true);
+      return;
+    }
+
     const list = [...allowedCountries];
     const idx = list.indexOf(code);
     if (idx >= 0) {
+      if (list.length === 1) return; // Mantém ao menos 1 país
       list.splice(idx, 1);
     } else {
       list.push(code);
@@ -76,9 +107,27 @@ export default function CampaignsPage() {
     setAllowedCountries(list);
   };
 
+  const handleOpenCreateCampaign = () => {
+    const limitCheck = checkCampaignLimit(campaigns.length, userPlan);
+    if (!limitCheck.allowed) {
+      setUpgradeReason(limitCheck.reason || "Limite de camuflagens ativas atingido.");
+      setShowUpgradeModal(true);
+      return;
+    }
+    setShowModal(true);
+  };
+
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !ofertaUrl || !whitepageUrl) return;
+
+    const limitCheck = checkCampaignLimit(campaigns.length, userPlan);
+    if (!limitCheck.allowed) {
+      setUpgradeReason(limitCheck.reason || "Limite de camuflagens ativas atingido.");
+      setShowModal(false);
+      setShowUpgradeModal(true);
+      return;
+    }
 
     store.createCampaign({
       name,
@@ -127,12 +176,62 @@ export default function CampaignsPage() {
           </div>
 
           <button
-            onClick={() => setShowModal(true)}
+            onClick={handleOpenCreateCampaign}
             className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-1.5 shrink-0"
           >
             <Plus className="w-4 h-4 text-white dark:text-black" />
             <span>Nova Campanha Cloaker</span>
           </button>
+        </div>
+
+        {/* Plan Quota Banner */}
+        <div className="bg-brand-surface/70 border border-brand-border rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+              userPlan === "free"
+                ? "bg-neutral-800 text-neutral-300 border border-neutral-700"
+                : userPlan === "scale"
+                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                : "bg-white text-black font-black"
+            }`}>
+              Plano {planDef.name}
+            </span>
+            <span className="text-brand-secondary text-[11px]">
+              Camuflagens ativas: <strong className="text-white">{campaigns.length}</strong> / {planDef.limits.maxCampaigns}
+            </span>
+            <span className="text-neutral-500">•</span>
+            <span className="text-brand-secondary text-[11px]">
+              Região: <strong className="text-white">{planDef.region}</strong> {planDef.flags}
+            </span>
+            <span className="text-neutral-500">•</span>
+            <span className="text-brand-secondary text-[11px]">
+              Capacidade:{" "}
+              <strong className={userPlan === "scale" ? "text-emerald-400 font-bold" : "text-white"}>
+                {planDef.limits.maxEventsMonthly === -1
+                  ? "Cliques Ilimitados"
+                  : `${planDef.limits.maxEventsMonthly.toLocaleString("pt-BR")} cliques/mês`}
+              </strong>
+            </span>
+          </div>
+
+          {userPlan !== "scale" && (
+            <button
+              onClick={() => {
+                setUpgradeReason(
+                  userPlan === "free"
+                    ? "Faça o upgrade para o plano Starter (R$ 149), Growth (R$ 389) ou Scale (R$ 529) para desbloquear camuflagens, domínios e proteção avançada."
+                    : userPlan === "starter"
+                    ? "Faça o upgrade para o plano Growth (R$ 389) ou Scale (R$ 529) para desbloquear tráfego internacional na América Latina, telemetria de GPU e 100.000 cliques."
+                    : "Faça o upgrade para o plano Scale (R$ 529) para desbloquear cliques 100% ilimitados, todos os 247 países e Kill-Switch de emergência."
+                );
+                setShowUpgradeModal(true);
+              }}
+              className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-bold text-[11px] hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-1.5 self-start sm:self-auto shrink-0 cursor-pointer"
+            >
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>{userPlan === "free" ? "Ativar Plano Comercial" : "Expandir Limites (Upgrade)"}</span>
+            </button>
+          )}
         </div>
 
         {/* Campaigns Table */}
@@ -162,7 +261,7 @@ export default function CampaignsPage() {
                           Crie sua primeira campanha para proteger ofertas contra moderadores de anúncios e robôs espiões.
                         </div>
                         <button
-                          onClick={() => setShowModal(true)}
+                          onClick={handleOpenCreateCampaign}
                           className="mt-2 inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm"
                         >
                           <Plus className="w-3.5 h-3.5 text-white dark:text-black" />
@@ -371,26 +470,52 @@ export default function CampaignsPage() {
 
               {/* Geo-Fencing selection */}
               <div>
-                <label className="block text-brand-secondary mb-1">GEO-FENCING (PAÍSES AUTORIZADOS)</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-brand-secondary text-[11px] font-mono uppercase">
+                    Geo-Fencing (Países Autorizados)
+                  </label>
+                  <span className="text-[10px] font-mono text-neutral-400">
+                    {userPlan === "free" || userPlan === "starter"
+                      ? "🇧🇷 Somente Brasil (1)"
+                      : userPlan === "growth" || userPlan === "pro"
+                      ? "🌎 Latam (20 países)"
+                      : "🌐 Todos os Países (247)"}
+                  </span>
+                </div>
+
                 <div className="flex flex-wrap gap-1.5">
-                  {COMMON_GEOS.map((code) => {
-                    const isSelected = allowedCountries.includes(code);
+                  {COMMON_GEOS.map((geo) => {
+                    const isSelected = allowedCountries.includes(geo.code);
+                    const isAllowed = isCountryAllowedForPlan(geo.code, userPlan).allowed;
+
                     return (
                       <button
                         type="button"
-                        key={code}
-                        onClick={() => toggleCountry(code)}
-                        className={`px-2.5 py-1 rounded text-[11px] font-mono transition border ${
+                        key={geo.code}
+                        onClick={() => toggleCountry(geo.code)}
+                        className={`px-2.5 py-1 rounded text-[11px] font-mono transition border flex items-center space-x-1.5 ${
                           isSelected
-                            ? "bg-white text-black font-bold border-white"
-                            : "bg-brand-black text-brand-secondary border-brand-border hover:border-brand-borderHighlight"
+                            ? "bg-white text-black font-bold border-white shadow-sm"
+                            : isAllowed
+                            ? "bg-brand-black text-brand-secondary border-brand-border hover:border-brand-borderHighlight hover:text-white"
+                            : "bg-neutral-950 text-neutral-600 border-neutral-900 cursor-pointer opacity-70 hover:opacity-100"
                         }`}
+                        title={
+                          isAllowed
+                            ? `${geo.name} (${geo.code})`
+                            : `${geo.name} indisponível no plano ${planDef.name}. Clique para fazer upgrade.`
+                        }
                       >
-                        {code}
+                        <span>{geo.flag}</span>
+                        <span>{geo.code}</span>
+                        {!isAllowed && <Lock className="w-2.5 h-2.5 text-neutral-500 ml-0.5" />}
                       </button>
                     );
                   })}
                 </div>
+                <span className="text-[10px] text-brand-muted mt-1.5 block font-mono">
+                  Visitantes fora dos países selecionados são direcionados automaticamente para a Safe Page (HTTP 200).
+                </span>
               </div>
 
               {/* Checkbox fbclid */}
@@ -452,6 +577,14 @@ export default function CampaignsPage() {
           </div>
         </div>
       )}
+
+      {/* Upgrade Plan Modal */}
+      <UpgradePlanModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        title="Limite de Campanhas Atingido"
+        reason={upgradeReason}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { Logo } from "@/components/ui/Logo";
 import { RotatingGlobe } from "@/components/ui/RotatingGlobe";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { TIMEZONE_REGIONS, DEFAULT_TIMEZONE } from "@/lib/timezones";
 import {
   COUNTRY_CALLING_CODES,
@@ -54,10 +55,19 @@ function SignupFormInner() {
   const [expiresAt, setExpiresAt] = useState(0);
   const [verificationLoading, setVerificationLoading] = useState(false);
 
+  const [paidBanner, setPaidBanner] = useState<string | null>(null);
+
   useEffect(() => {
     const emailParam = searchParams.get("email");
     if (emailParam) {
       setEmail(emailParam);
+    }
+    const isPaid = searchParams.get("paid") === "1" || !!searchParams.get("session_id");
+    const planParam = searchParams.get("plan");
+    if (isPaid && planParam) {
+      setPaidBanner(
+        `Pagamento do Plano ${planParam.toUpperCase()} aprovado na Stripe! Defina seus dados abaixo para acessar o painel imediatamente.`
+      );
     }
   }, [searchParams]);
 
@@ -173,7 +183,18 @@ function SignupFormInner() {
       }
 
       setShowVerificationModal(false);
-      router.push("/dashboard");
+      const planParam = searchParams.get("plan");
+      const isPaid = searchParams.get("paid") === "1" || !!searchParams.get("session_id");
+
+      if (planParam && ["starter", "growth", "scale"].includes(planParam)) {
+        if (isPaid) {
+          router.push(`/dashboard?upgraded=1&plan=${planParam}`);
+        } else {
+          router.push(`/dashboard?upgrade_prompt=${planParam}`);
+        }
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setVerificationLoading(false);
       throw err;
@@ -229,6 +250,13 @@ function SignupFormInner() {
             Configure seu acesso de operador e tenha visibilidade total sobre seu tráfego.
           </p>
         </div>
+
+        {paidBanner && (
+          <div className="mb-4 sm:mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 font-mono flex items-center space-x-2">
+            <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400" />
+            <span>{paidBanner}</span>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 sm:mb-5 p-3.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs text-white font-mono space-y-2">
@@ -546,10 +574,7 @@ export default function SignupPage() {
         </Link>
         <div className="flex items-center space-x-2">
           <ThemeToggle />
-          <span className="text-[10px] font-mono text-emerald-400 bg-brand-surface border border-brand-border px-2 py-0.5 rounded-full flex items-center space-x-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>PoPs Ativos</span>
-          </span>
+          <LanguageSelector />
         </div>
       </div>
 
@@ -578,10 +603,7 @@ export default function SignupPage() {
           </Link>
           <div className="flex items-center space-x-2">
             <ThemeToggle />
-            <div className="flex items-center space-x-2 text-[11px] font-mono text-brand-muted bg-brand-surface px-2.5 py-1 rounded-full border border-brand-border">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>PoPs Operacionais Ativos</span>
-            </div>
+            <LanguageSelector />
           </div>
         </div>
 

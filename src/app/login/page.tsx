@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { Logo } from "@/components/ui/Logo";
 import { RotatingGlobe } from "@/components/ui/RotatingGlobe";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import {
   Eye,
   EyeOff,
@@ -195,11 +196,14 @@ function LoginFormInner() {
 
         {/* Notificação de Sessão Requerida */}
         {authRequiredNotice && !error && (
-          <div className="mb-4 sm:mb-5 p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs text-blue-200 font-sans flex items-start space-x-2.5">
-            <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-            <div className="text-[11px] leading-tight">
-              <span className="font-semibold block text-blue-100">Autenticação Requerida</span>
-              Acesso restrito. Identifique-se com sua conta ou cadastre-se primeiro.
+          <div className="mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-xl bg-gradient-to-b from-white/[0.08] via-neutral-950 to-black border border-white/15 text-xs text-neutral-300 font-sans shadow-lg shadow-black/50 ring-1 ring-white/5 animate-in fade-in duration-300">
+            <div className="space-y-0.5">
+              <span className="font-semibold block text-white text-xs tracking-tight">
+                Autenticação Requerida
+              </span>
+              <p className="text-[11px] text-neutral-400 leading-normal">
+                Acesso restrito. Identifique-se com sua conta ou cadastre-se primeiro.
+              </p>
             </div>
           </div>
         )}
@@ -405,10 +409,7 @@ export default function LoginPage() {
         </Link>
         <div className="flex items-center space-x-2">
           <ThemeToggle />
-          <span className="text-[10px] font-mono text-emerald-400 bg-brand-surface border border-brand-border px-2 py-0.5 rounded-full flex items-center space-x-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Seguro</span>
-          </span>
+          <LanguageSelector />
         </div>
       </div>
 
@@ -437,10 +438,7 @@ export default function LoginPage() {
           </Link>
           <div className="flex items-center space-x-2">
             <ThemeToggle />
-            <div className="flex items-center space-x-2 text-[11px] font-mono text-brand-muted bg-brand-surface px-2.5 py-1 rounded-full border border-brand-border">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Console Seguro</span>
-            </div>
+            <LanguageSelector />
           </div>
         </div>
 

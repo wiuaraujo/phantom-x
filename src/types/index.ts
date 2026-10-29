@@ -40,6 +40,8 @@ export interface PhantomCloakerConfig {
 // Compatibilidade de tipo
 export type CloakilioConfig = PhantomCloakerConfig;
 
+export type PlanId = "free" | "starter" | "growth" | "scale" | "pro" | "global";
+
 export interface User {
   id: string;
   name: string;
@@ -50,6 +52,10 @@ export interface User {
   role: "admin" | "member" | "viewer";
   timezone?: string;
   emailVerified?: boolean;
+  plan?: PlanId;
+  planStatus?: "active" | "trial" | "expired" | "canceled";
+  planActivatedAt?: string;
+  planExpiresAt?: string | null;
   organizationId: string;
   organizationName: string;
   createdAt: string;

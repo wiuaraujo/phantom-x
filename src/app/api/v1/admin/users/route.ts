@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { getServerOtp, setServerOtp } from "@/lib/serverOtpStore";
+import { setServerUserPlan, getServerUserPlanSync } from "@/lib/serverPlanStore";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,28 @@ export async function GET(req: NextRequest) {
         timezone: profile?.timezone || u.user_metadata?.timezone || "America/Sao_Paulo",
         emailVerified: isEmailVerified,
         emailConfirmedAt: u.email_confirmed_at || u.user_metadata?.verified_at || null,
+        plan:
+          getServerUserPlanSync(u.id)?.plan ||
+          (email ? getServerUserPlanSync(email)?.plan : null) ||
+          profile?.plan ||
+          u.user_metadata?.plan ||
+          "free",
+        planStatus:
+          getServerUserPlanSync(u.id)?.planStatus ||
+          (email ? getServerUserPlanSync(email)?.planStatus : null) ||
+          profile?.plan_status ||
+          u.user_metadata?.plan_status ||
+          "trial",
+        planActivatedAt:
+          getServerUserPlanSync(u.id)?.planActivatedAt ||
+          profile?.plan_activated_at ||
+          u.user_metadata?.plan_activated_at ||
+          u.created_at,
+        planExpiresAt:
+          getServerUserPlanSync(u.id)?.planExpiresAt ||
+          profile?.plan_expires_at ||
+          u.user_metadata?.plan_expires_at ||
+          null,
         createdAt: u.created_at,
         lastSignInAt: u.last_sign_in_at || null,
         activeOtp: activeOtpRecord
@@ -209,6 +232,36 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
           success: true,
           message: "Usuário excluído permanentemente do cluster.",
+        });
+      }
+
+      // 6. LIBERAÇÃO OU ALTERAÇÃO DE PLANO DE ASSINATURA PELO MASTER ADMIN
+      case "update_plan": {
+        if (!targetUserId) {
+          return NextResponse.json({ success: false, error: "Usuário não localizado." }, { status: 404 });
+        }
+
+        const targetPlan = body.plan || "free";
+        const targetStatus = body.planStatus || body.status || "active";
+        const expiresAt = body.planExpiresAt || null;
+
+        // Atualiza 100% no backend (Memória + Supabase Auth + Profiles)
+        const record = await setServerUserPlan(
+          targetUserId,
+          email || body.email || "",
+          targetPlan,
+          targetStatus,
+          expiresAt,
+          "admin_master"
+        );
+
+        return NextResponse.json({
+          success: true,
+          message:
+            targetStatus === "canceled"
+              ? `Plano suspenso com sucesso. Acesso e limites do operador retornados para Free Trial.`
+              : `Plano '${targetPlan.toUpperCase()}' ativado com sucesso para o operador com 100% de efeito no backend!`,
+          planRecord: record,
         });
       }
 

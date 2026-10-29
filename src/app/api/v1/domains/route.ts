@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
+import { checkDomainLimit, PlanId } from "@/lib/plans";
+import { getServerUserPlan } from "@/lib/serverPlanStore";
 
 export async function GET() {
   const domains = store.getDomains();
@@ -15,12 +17,39 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Resolve o plano real do operador no backend
+    const planHeader = req.headers.get("x-user-plan") as PlanId | null;
+    const cookie = req.cookies.get("phantom_token")?.value;
+    let identifier: string | undefined = undefined;
+    if (cookie) {
+      try {
+        const decoded = JSON.parse(Buffer.from(cookie, "base64").toString("utf-8"));
+        identifier = decoded.id || decoded.email;
+      } catch {}
+    }
+
+    const planRecord = await getServerUserPlan(identifier);
+    const userPlan: PlanId =
+      planRecord.planStatus === "canceled" || planRecord.planStatus === "expired"
+        ? "free"
+        : planHeader || planRecord.plan || "free";
+
+    const currentDomains = store.getDomains();
+    const limitCheck = checkDomainLimit(currentDomains.length, userPlan);
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: limitCheck.reason, limitReached: true, activePlan: userPlan },
+        { status: 403 }
+      );
+    }
+
     const newDomain = store.addDomain(name);
     return NextResponse.json({ success: true, domain: newDomain });
-  } catch {
+  } catch (err: any) {
     return NextResponse.json(
-      { success: false, error: "Erro ao registrar domínio." },
-      { status: 500 }
+      { success: false, error: err.message || "Erro ao registrar domínio." },
+      { status: 400 }
     );
   }
 }

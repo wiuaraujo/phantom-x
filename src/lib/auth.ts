@@ -1,4 +1,4 @@
-import { User } from "@/types";
+import { User, PlanId } from "@/types";
 
 export interface RegisteredUser {
   id: string;
@@ -15,6 +15,10 @@ export interface RegisteredUser {
   salt: string;
   role: "admin" | "operator";
   timezone?: string; // Fuso-horário configurado (ex: America/Sao_Paulo)
+  plan?: PlanId; // Plano de assinatura do operador (free, starter, pro, global)
+  planStatus?: "active" | "trial" | "expired" | "canceled";
+  planActivatedAt?: string;
+  planExpiresAt?: string | null;
   organizationId: string;
   organizationName: string;
   failedAttempts: number;
@@ -67,6 +71,10 @@ const SEED_USERS: RegisteredUser[] = [
     salt: MASTER_ADMIN_SALT,
     role: "admin",
     timezone: "America/Sao_Paulo",
+    plan: "global",
+    planStatus: "active",
+    planActivatedAt: "2026-01-01T00:00:00.000Z",
+    planExpiresAt: null,
     organizationId: "org_phantom_hq",
     organizationName: "Phantom-X Command Center",
     failedAttempts: 0,
@@ -284,6 +292,10 @@ export const auth = {
         role: user.role === "admin" ? "admin" : "member",
         timezone: user.timezone || "America/Sao_Paulo",
         emailVerified: true,
+        plan: user.plan || "free",
+        planStatus: user.planStatus || "trial",
+        planActivatedAt: user.planActivatedAt || user.createdAt,
+        planExpiresAt: user.planExpiresAt || null,
         organizationId: user.organizationId,
         organizationName: user.organizationName,
         createdAt: user.createdAt,
@@ -366,6 +378,10 @@ export const auth = {
         role: user.role === "admin" ? "admin" : "member",
         timezone: user.timezone || "America/Sao_Paulo",
         emailVerified: true,
+        plan: user.plan || "free",
+        planStatus: user.planStatus || "trial",
+        planActivatedAt: user.planActivatedAt || user.createdAt,
+        planExpiresAt: user.planExpiresAt || null,
         organizationId: user.organizationId,
         organizationName: user.organizationName,
         createdAt: user.createdAt,
@@ -465,6 +481,10 @@ export const auth = {
       emailVerified: true,
       emailOtpVerified: true,
       emailConfirmedAt: new Date().toISOString(),
+      plan: "free",
+      planStatus: "trial",
+      planActivatedAt: new Date().toISOString(),
+      planExpiresAt: null,
       passwordHash,
       salt,
       role: "operator",
@@ -504,6 +524,10 @@ export const auth = {
         role: "member",
         timezone: newUser.timezone,
         emailVerified: true,
+        plan: "free",
+        planStatus: "trial",
+        planActivatedAt: newUser.planActivatedAt,
+        planExpiresAt: null,
         organizationId: newUser.organizationId,
         organizationName: newUser.organizationName,
         createdAt: newUser.createdAt,
@@ -552,8 +576,12 @@ export const auth = {
         return null;
       }
 
-      // Sincroniza o status real de confirmação de e-mail na sessão ativa
+      // Sincroniza o status real de confirmação de e-mail e plano na sessão ativa
       session.user.emailVerified = matchedUser.emailOtpVerified === true;
+      session.user.plan = matchedUser.plan || "free";
+      session.user.planStatus = matchedUser.planStatus || "trial";
+      session.user.planActivatedAt = matchedUser.planActivatedAt || matchedUser.createdAt;
+      session.user.planExpiresAt = matchedUser.planExpiresAt || null;
 
       return session;
     } catch {
@@ -617,6 +645,84 @@ export const auth = {
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
 
     return { success: true, user: updatedUser };
+  },
+
+  /**
+   * Atualiza o plano de assinatura do operador (Governança Master)
+   */
+  updateUserPlan(
+    userId: string,
+    plan: PlanId,
+    status: "active" | "trial" | "expired" | "canceled" = "active",
+    expiresAt?: string | null
+  ): { success: boolean; error?: string } {
+    if (typeof window === "undefined") return { success: false, error: "Ambiente inválido" };
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === userId);
+    if (idx === -1) return { success: false, error: "Operador não localizado no cofre" };
+
+    const activatedAt = new Date().toISOString();
+    users[idx].plan = plan;
+    users[idx].planStatus = status;
+    users[idx].planActivatedAt = activatedAt;
+    users[idx].planExpiresAt = expiresAt ?? null;
+    this.saveUsers(users);
+
+    // Se for o usuário ativo na sessão, sincroniza imediatamente
+    const session = this.getSession();
+    if (session && (session.user.id === userId || session.user.email === users[idx].email)) {
+      session.user.plan = plan;
+      session.user.planStatus = status;
+      session.user.planActivatedAt = activatedAt;
+      session.user.planExpiresAt = expiresAt ?? null;
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    }
+
+    return { success: true };
+  },
+
+  /**
+   * Obtém o plano atual do operador ativo
+   */
+  getUserPlan(userId?: string): PlanId {
+    if (typeof window === "undefined") return "free";
+    const session = this.getSession();
+    if (session?.user?.plan) return session.user.plan;
+    return "free";
+  },
+
+  /**
+   * Sincroniza em tempo real o plano do operador com as liberações feitas pelo Master Admin
+   */
+  async syncPlanWithBackend(): Promise<{ plan: PlanId; changed: boolean }> {
+    if (typeof window === "undefined") return { plan: "free", changed: false };
+    const session = this.getSession();
+    if (!session?.user) return { plan: "free", changed: false };
+
+    try {
+      const res = await fetch(
+        `/api/v1/auth/sync?userId=${encodeURIComponent(session.user.id)}&email=${encodeURIComponent(session.user.email)}`,
+        { cache: "no-store" }
+      );
+      const data = await res.json();
+      if (data.success && data.plan) {
+        const currentPlan = session.user.plan || "free";
+        const currentStatus = session.user.planStatus || "trial";
+        const changed = currentPlan !== data.plan || currentStatus !== data.planStatus;
+
+        if (changed) {
+          session.user.plan = data.plan;
+          session.user.planStatus = data.planStatus;
+          session.user.planActivatedAt = data.planActivatedAt || session.user.planActivatedAt;
+          session.user.planExpiresAt = data.planExpiresAt || null;
+          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+
+          window.dispatchEvent(new CustomEvent("phantom_plan_changed", { detail: data }));
+        }
+        return { plan: data.plan, changed };
+      }
+    } catch {}
+    return { plan: session.user.plan || "free", changed: false };
   },
 
   /**

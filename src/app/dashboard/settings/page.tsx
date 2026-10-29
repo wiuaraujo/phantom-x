@@ -11,6 +11,8 @@ import { CloakerEngine } from "@/lib/cloakerEngine";
 import { PhantomCloakerConfig, CloakerMode } from "@/types";
 import { TIMEZONE_REGIONS } from "@/lib/timezones";
 import { getDashboardGreeting } from "@/lib/userGreeting";
+import { getPlanDefinition } from "@/lib/plans";
+import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
 import {
   COUNTRY_CALLING_CODES,
   DEFAULT_COUNTRY_CALLING_CODE,
@@ -38,6 +40,10 @@ import {
   LogOut,
   Radio,
   FileCode,
+  CreditCard,
+  Crown,
+  ExternalLink,
+  Zap,
 } from "lucide-react";
 
 const COMMON_GEOS = [
@@ -53,7 +59,7 @@ const COMMON_GEOS = [
   { code: "AU", label: "Austrália" },
 ];
 
-type SettingsTab = "cloaker" | "worker" | "profile";
+type SettingsTab = "cloaker" | "worker" | "profile" | "billing";
 
 function SettingsPageContent() {
   const router = useRouter();
@@ -61,14 +67,14 @@ function SettingsPageContent() {
   const tabParam = searchParams.get("tab") as SettingsTab | null;
 
   const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
-    if (tabParam === "worker" || tabParam === "profile" || tabParam === "cloaker") {
+    if (tabParam === "worker" || tabParam === "profile" || tabParam === "cloaker" || tabParam === "billing") {
       return tabParam;
     }
     return "cloaker";
   });
 
   useEffect(() => {
-    if (tabParam === "worker" || tabParam === "profile" || tabParam === "cloaker") {
+    if (tabParam === "worker" || tabParam === "profile" || tabParam === "cloaker" || tabParam === "billing") {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
@@ -79,6 +85,32 @@ function SettingsPageContent() {
   };
 
   const session = auth.getSession();
+  const userPlan = session?.user?.plan || "free";
+  const planDef = getPlanDefinition(userPlan);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [loadingPortal, setLoadingPortal] = useState(false);
+
+  const handleOpenStripePortal = async () => {
+    setLoadingPortal(true);
+    try {
+      const res = await fetch("/api/v1/billing/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail: session?.user?.email,
+          returnUrl: window.location.href,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (e) {
+      console.warn("Portal error", e);
+    } finally {
+      setLoadingPortal(false);
+    }
+  };
 
   // User Profile configuration state
   const [profileName, setProfileName] = useState(session?.user?.name || "");
@@ -233,6 +265,8 @@ function SettingsPageContent() {
             ? "Configurações do Cloaker"
             : activeTab === "worker"
             ? "Cloudflare Worker & Scripts"
+            : activeTab === "billing"
+            ? "Assinatura & Faturamento Stripe"
             : "Configurações do Perfil & Conta"
         }
         subtitle={
@@ -240,6 +274,8 @@ function SettingsPageContent() {
             ? "Motor de Borda Phantom-X (6 camadas), regras de moderação, Safe/Blackpage e ASNs"
             : activeTab === "worker"
             ? "Código JavaScript compilado pronto para deploy direto na Cloudflare e snippets de borda"
+            : activeTab === "billing"
+            ? "Gestão do plano contratado, limites operacionais e checkout com pagamentos processados pela Stripe"
             : "Gerenciamento de perfil do operador, fuso-horário operacional, credenciais de API e sessão"
         }
       />
@@ -286,6 +322,19 @@ function SettingsPageContent() {
           >
             <User className="w-3.5 h-3.5 shrink-0" />
             <span className="whitespace-nowrap">Configurações do Perfil</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleTabChange("billing")}
+            className={`flex-1 sm:flex-initial flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs transition ${
+              activeTab === "billing"
+                ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold shadow-sm"
+                : "text-brand-secondary hover:text-brand-white hover:bg-brand-hover"
+            }`}
+          >
+            <CreditCard className="w-3.5 h-3.5 shrink-0" />
+            <span className="whitespace-nowrap">Assinatura &amp; Stripe</span>
           </button>
         </div>
 
@@ -1016,6 +1065,140 @@ function SettingsPageContent() {
             </div>
           </div>
         )}
+
+        {/* ================================================================= */}
+        {/* TAB 4: ASSINATURA & FATURAMENTO STRIPE                            */}
+        {/* ================================================================= */}
+        {activeTab === "billing" && (
+          <div className="space-y-6 animate-in fade-in">
+            {/* Card Principal do Plano Ativo */}
+            <div className="p-6 rounded-2xl bg-brand-surface border border-brand-border space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 text-white text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
+                    <span className={`w-2 h-2 rounded-full ${
+                      userPlan === "scale"
+                        ? "bg-emerald-400"
+                        : userPlan === "growth"
+                        ? "bg-purple-400"
+                        : userPlan === "starter"
+                        ? "bg-blue-400"
+                        : "bg-amber-400 animate-pulse"
+                    }`} />
+                    <span>Plano Ativo no Phantom-X</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white font-poppins">
+                    {planDef.name}
+                  </h3>
+                  <p className="text-brand-secondary text-xs mt-1">
+                    {planDef.tagline}
+                  </p>
+                </div>
+
+                <div className="text-left sm:text-right">
+                  <div className="text-3xl font-extrabold text-white font-poppins">
+                    {planDef.priceFormatted}
+                    <span className="text-xs text-brand-secondary font-mono font-normal"> {planDef.period}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid de Limites Operacionais */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-brand-border text-xs font-mono">
+                <div className="p-3.5 rounded-xl bg-brand-black border border-brand-border">
+                  <span className="text-brand-secondary text-[11px] block">Cliques / Mês</span>
+                  <span className="text-base font-bold text-white mt-0.5 block">
+                    {planDef.limits.maxEventsMonthly === -1
+                      ? "Ilimitados"
+                      : `${planDef.limits.maxEventsMonthly.toLocaleString("pt-BR")}/mês`}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-brand-black border border-brand-border">
+                  <span className="text-brand-secondary text-[11px] block">Domínios</span>
+                  <span className="text-base font-bold text-emerald-400 mt-0.5 block">
+                    Até {planDef.limits.maxDomains}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-brand-black border border-brand-border">
+                  <span className="text-brand-secondary text-[11px] block">Camuflagens</span>
+                  <span className="text-base font-bold text-purple-400 mt-0.5 block">
+                    Até {planDef.limits.maxCampaigns} ativas
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-brand-black border border-brand-border">
+                  <span className="text-brand-secondary text-[11px] block">Região</span>
+                  <span className="text-xs font-bold text-white mt-0.5 block truncate">
+                    {planDef.flags}
+                  </span>
+                </div>
+              </div>
+
+              {/* Botões de Ação Stripe */}
+              <div className="flex flex-wrap items-center gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-sm flex items-center space-x-2 cursor-pointer"
+                >
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>{userPlan === "free" ? "Ver Planos & Fazer Upgrade" : "Mudar / Fazer Upgrade de Plano"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleOpenStripePortal}
+                  disabled={loadingPortal}
+                  className="px-5 py-2.5 rounded-xl bg-brand-black hover:bg-brand-hover text-white border border-brand-border font-medium text-xs transition flex items-center space-x-2 cursor-pointer"
+                >
+                  {loadingPortal ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <CreditCard className="w-3.5 h-3.5 text-neutral-400" />
+                  )}
+                  <span>Gerenciar Cartão &amp; Faturas na Stripe</span>
+                  <ExternalLink className="w-3 h-3 text-neutral-500" />
+                </button>
+              </div>
+            </div>
+
+            {/* Informações sobre Métodos de Pagamento Stripe */}
+            <div className="p-5 rounded-2xl bg-brand-surface border border-brand-border space-y-3">
+              <h4 className="font-semibold text-white text-xs uppercase tracking-wider font-mono">
+                Métodos de Pagamento Homologados pela Stripe
+              </h4>
+              <p className="text-brand-secondary text-xs leading-relaxed">
+                Todas as transações de assinatura da Phantom-X utilizam a infraestrutura oficial da Stripe com criptografia SSL ponta a ponta e certificação PCI-DSS Nível 1.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs font-mono">
+                <div className="p-3.5 rounded-xl bg-brand-black border border-brand-border flex items-start space-x-2.5">
+                  <CreditCard className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold text-white block">Cartão de Crédito Nacional e Internacional</span>
+                    <span className="text-brand-secondary text-[11px] leading-snug block mt-0.5">
+                      Visa, Mastercard, Elo, Hipercard e American Express com renovação mensal automática.
+                    </span>
+                  </div>
+                </div>
+                <div className="p-3.5 rounded-xl bg-brand-black border border-brand-border flex items-start space-x-2.5">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold text-white block">Boleto Bancário &amp; Notas Fiscais</span>
+                    <span className="text-brand-secondary text-[11px] leading-snug block mt-0.5">
+                      Emissão automática de faturas e recibos em PDF para sua contabilidade empresarial.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <UpgradePlanModal
+          isOpen={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          title="Upgrade de Plano Phantom-X"
+          reason="Escolha o plano ideal para a sua escala de tráfego. Pagamento 100% seguro via Stripe com ativação instantânea."
+        />
       </div>
     </div>
   );

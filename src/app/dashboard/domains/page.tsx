@@ -4,13 +4,23 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/dashboard/Header";
 import { store } from "@/lib/store";
 import { Domain } from "@/types";
-import { Plus, CheckCircle2, AlertCircle, RefreshCw, Trash2, Globe2, ShieldCheck, X } from "lucide-react";
+import { Plus, CheckCircle2, AlertCircle, RefreshCw, Trash2, Globe2, ShieldCheck, X, Zap, Lock } from "lucide-react";
+import { auth } from "@/lib/auth";
+import { checkDomainLimit, getPlanDefinition } from "@/lib/plans";
+import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
 
 export default function DomainsPage() {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newDomainName, setNewDomainName] = useState("");
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
+
+  // Controle de Planos e Limites
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState("");
+  const session = auth.getSession();
+  const userPlan = session?.user?.plan || "free";
+  const planDef = getPlanDefinition(userPlan);
 
   const loadDomains = () => {
     setDomains(store.getDomains());
@@ -20,9 +30,27 @@ export default function DomainsPage() {
     loadDomains();
   }, []);
 
+  const handleOpenAddDomain = () => {
+    const limitCheck = checkDomainLimit(domains.length, userPlan);
+    if (!limitCheck.allowed) {
+      setUpgradeReason(limitCheck.reason || "Limite de domínios atingido.");
+      setShowUpgradeModal(true);
+      return;
+    }
+    setShowAddModal(true);
+  };
+
   const handleAddDomain = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDomainName) return;
+
+    const limitCheck = checkDomainLimit(domains.length, userPlan);
+    if (!limitCheck.allowed) {
+      setUpgradeReason(limitCheck.reason || "Limite de domínios atingido.");
+      setShowAddModal(false);
+      setShowUpgradeModal(true);
+      return;
+    }
 
     store.addDomain(newDomainName);
     setNewDomainName("");
@@ -65,12 +93,53 @@ export default function DomainsPage() {
           </div>
 
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={handleOpenAddDomain}
             className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-1.5 shrink-0"
           >
             <Plus className="w-4 h-4 text-white dark:text-black" />
             <span>Adicionar Domínio</span>
           </button>
+        </div>
+
+        {/* Plan Quota Banner */}
+        <div className="bg-brand-surface/70 border border-brand-border rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+              userPlan === "free"
+                ? "bg-neutral-800 text-neutral-300 border border-neutral-700"
+                : userPlan === "scale"
+                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                : "bg-white text-black font-black"
+            }`}>
+              Plano {planDef.name}
+            </span>
+            <span className="text-brand-secondary text-[11px]">
+              Domínios em uso: <strong className="text-white">{domains.length}</strong> / {planDef.limits.maxDomains}
+            </span>
+            <span className="text-neutral-500">•</span>
+            <span className="text-brand-secondary text-[11px]">
+              Região: <strong className="text-white">{planDef.region}</strong> {planDef.flags}
+            </span>
+          </div>
+
+          {userPlan !== "scale" && (
+            <button
+              onClick={() => {
+                setUpgradeReason(
+                  userPlan === "free"
+                    ? "Faça upgrade para conectar até 3 domínios no Starter (R$ 149), 12 no Growth (R$ 389) ou 60 no Scale (R$ 529)."
+                    : userPlan === "starter"
+                    ? "Faça upgrade para o Growth (R$ 389) ou Scale (R$ 529) para conectar até 12 ou 60 domínios customizados com terminação TLS."
+                    : "Faça upgrade para o Scale (R$ 529) para conectar até 60 domínios com prioridade máxima e cliques ilimitados."
+                );
+                setShowUpgradeModal(true);
+              }}
+              className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-bold text-[11px] hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-1.5 self-start sm:self-auto shrink-0 cursor-pointer"
+            >
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>{userPlan === "free" ? "Ativar Plano Comercial" : "Expandir Limite de Domínios"}</span>
+            </button>
+          )}
         </div>
 
         {/* Domains List */}
@@ -85,7 +154,7 @@ export default function DomainsPage() {
                 Adicione o primeiro domínio ou subdomínio para rotear seu tráfego através do cluster Phantom-X com certificação TLS instantânea.
               </p>
               <button
-                onClick={() => setShowAddModal(true)}
+                onClick={handleOpenAddDomain}
                 className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm"
               >
                 <Plus className="w-4 h-4 text-white dark:text-black" />
@@ -247,6 +316,14 @@ export default function DomainsPage() {
           </div>
         </div>
       )}
+
+      {/* Upgrade Plan Modal */}
+      <UpgradePlanModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        title="Limite de Domínios Atingido"
+        reason={upgradeReason}
+      />
     </div>
   );
 }

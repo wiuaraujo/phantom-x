@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { store } from "@/lib/store";
+import { getServerUserPlanSync } from "@/lib/serverPlanStore";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,7 @@ export async function GET(req: NextRequest) {
     let pendingUsersCount = 0;
     let domainsCount = 0;
     let campaignsCount = 0;
+    const planCounts = { free: 0, starter: 0, growth: 0, scale: 0 };
 
     // 1. Testa conectividade e busca dados no Supabase
     try {
@@ -24,16 +27,41 @@ export async function GET(req: NextRequest) {
         usersCount = userList.users.length;
         confirmedUsersCount = userList.users.filter((u) => u.email_confirmed_at || u.user_metadata?.email_verified === true).length;
         pendingUsersCount = usersCount - confirmedUsersCount;
+
+        userList.users.forEach((u) => {
+          const cached = getServerUserPlanSync(u.id) || (u.email ? getServerUserPlanSync(u.email) : null);
+          const plan = cached?.plan || (u.user_metadata?.plan as string) || "free";
+          const status = cached?.planStatus || (u.user_metadata?.plan_status as string) || "trial";
+          if (status === "canceled" || status === "expired") {
+            planCounts.free++;
+          } else if (plan === "starter") {
+            planCounts.starter++;
+          } else if (plan === "growth" || plan === "pro") {
+            planCounts.growth++;
+          } else if (plan === "scale" || plan === "global") {
+            planCounts.scale++;
+          } else {
+            planCounts.free++;
+          }
+        });
       }
     } catch {
       supabaseStatus = "degraded";
     }
 
-    // 2. Busca contagem de domínios
+    // 2. Busca contagem de domínios e campanhas
     try {
       const { data: doms } = await supabase.from("domains").select("id", { count: "exact" });
       domainsCount = doms?.length || 0;
     } catch {}
+
+    const localDomains = store.getDomains().length;
+    const localCampaigns = store.getCampaigns().length;
+    domainsCount = Math.max(domainsCount, localDomains);
+    campaignsCount = Math.max(campaignsCount, localCampaigns);
+
+    const mrr = planCounts.starter * 149 + planCounts.growth * 389 + planCounts.scale * 529;
+    const totalPaidSubscriptions = planCounts.starter + planCounts.growth + planCounts.scale;
 
     // 3. Status de Infraestrutura Edge Phantom-X
     const edgeEngine = {
@@ -70,6 +98,9 @@ export async function GET(req: NextRequest) {
           totalCampaigns: campaignsCount,
           blockedReviewersToday: 142,
           trafficProcessedMB: 840,
+          mrr,
+          totalPaidSubscriptions,
+          planBreakdown: planCounts,
         },
       },
     });
