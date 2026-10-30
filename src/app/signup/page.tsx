@@ -619,7 +619,7 @@ export default function SignupPage() {
         {/* Bottom Slogan / Footer Indicator */}
         <div className="relative z-10 pt-4 flex flex-wrap items-center justify-between text-[11px] font-mono text-brand-muted border-t border-white/10 gap-2">
           <span>SLA 99.99% • Criptografia Ponta a Ponta</span>
-          <span>phantomx.pro</span>
+          <span>phantom-x.pro</span>
         </div>
       </div>
 

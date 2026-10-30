@@ -63,7 +63,7 @@ const SEED_USERS: RegisteredUser[] = [
     name: "Engenheiro Operações (Master)",
     nickname: "Will",
     username: "admin",
-    email: "admin@phantomx.pro",
+    email: "admin@phantom-x.pro",
     phone: "(11) 99999-9999",
     phoneCountryCode: "+55",
     emailVerified: false, // Força confirmação no primeiro acesso!

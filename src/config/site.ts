@@ -31,19 +31,19 @@ export const siteConfig = {
   title: "Phantom-X — Inteligência, Monitoramento e Roteamento de Tráfego Web",
   description:
     "Monitore acessos, entenda a origem das visitas e acompanhe a atividade das suas campanhas em uma única plataforma, com dados organizados em tempo real.",
-  url: "https://phantomx.pro",
-  ogImage: "https://phantomx.pro/og.png",
+  url: "https://phantom-x.pro",
+  ogImage: "https://phantom-x.pro/og.png",
   company: {
     name: "Phantom-X Technologies Inc.",
-    supportEmail: "suporte@phantomx.pro",
-    salesEmail: "contato@phantomx.pro",
+    supportEmail: "suporte@phantom-x.pro",
+    salesEmail: "contato@phantom-x.pro",
   },
   links: {
     github: "https://github.com/wiuaraujo/phantom-x",
     docs: "/docs",
     terms: "/terms",
     privacy: "/privacy",
-    status: "https://status.phantomx.pro",
+    status: "https://status.phantom-x.pro",
   },
   nav: [
     { label: "Funcionalidades", href: "#features" },

@@ -62,7 +62,7 @@ export default function PrivacyPage() {
             <p>
               Para esclarecimentos ou solicitações relativas a dados pessoais, os titulares e
               operadores podem entrar em contato com nosso Encarregado de Proteção de Dados (DPO)
-              através do e-mail <strong>dpo@phantomx.pro</strong>.
+              através do e-mail <strong>dpo@phantom-x.pro</strong>.
             </p>
           </section>
         </div>

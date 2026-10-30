@@ -293,7 +293,7 @@ export default function DomainsPage() {
                 />
                 <span className="block text-[11px] text-brand-muted mt-1.5 leading-tight font-mono">
                   Após adicionar, você precisará criar o registro CNAME apontando para{" "}
-                  <code className="text-brand-white font-bold bg-brand-surface px-1.5 py-0.5 rounded border border-brand-border">cname.phantomx.pro</code>.
+                  <code className="text-brand-white font-bold bg-brand-surface px-1.5 py-0.5 rounded border border-brand-border">cname.phantom-x.pro</code>.
                 </span>
               </div>
 

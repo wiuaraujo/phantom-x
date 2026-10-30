@@ -491,7 +491,7 @@ export default function LoginPage() {
         {/* Bottom Slogan / Footer Indicator */}
         <div className="relative z-10 pt-4 flex flex-wrap items-center justify-between text-[11px] font-mono text-brand-muted border-t border-white/10 gap-2">
           <span>Sessão Criptografada • TLS 1.3</span>
-          <span>phantomx.pro</span>
+          <span>phantom-x.pro</span>
         </div>
       </div>
 

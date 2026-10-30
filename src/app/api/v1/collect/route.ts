@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const domain = body.domain || "checkout.phantomx.pro";
+    const domain = body.domain || "checkout.phantom-x.pro";
     const targetUrl = body.targetUrl || "https://meusite.com/oferta";
     const campaignId = body.campaignId;
     const referrer = body.referrer || req.headers.get("referer") || "Direto";
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const campaignId = url.searchParams.get("c") || undefined;
   const targetUrl = url.searchParams.get("dest") || "https://meusite.com/oferta";
-  const domain = url.host || "trk.phantomx.pro";
+  const domain = url.host || "trk.phantom-x.pro";
   const referrer = req.headers.get("referer") || "Direto";
   const userAgent = req.headers.get("user-agent") || "Mozilla/5.0";
   const ip = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "177.18.99.12";

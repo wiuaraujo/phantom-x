@@ -326,7 +326,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <span>{session?.user?.name || "Operador Phantom"}</span>
                   </div>
                   <div className="text-[11px] text-brand-muted font-mono mt-0.5 truncate">
-                    {session?.user?.email || "operador@phantomx.pro"}
+                    {session?.user?.email || "operador@phantom-x.pro"}
                   </div>
                   <div className="text-[10px] text-brand-secondary font-mono mt-1">
                     Fuso: {session?.user?.timezone || "America/Sao_Paulo"}

@@ -66,7 +66,7 @@ export async function dispatchVerificationEmail(params: {
   const transporter = getSmtpTransporter();
   if (transporter) {
     try {
-      const from = process.env.SMTP_FROM || `Phantom-X <${process.env.SMTP_USER || "noreply@phantomx.pro"}>`;
+      const from = process.env.SMTP_FROM || `Phantom-X <${process.env.SMTP_USER || "noreply@phantom-x.pro"}>`;
       const info = await transporter.sendMail({
         from,
         to: cleanEmail,

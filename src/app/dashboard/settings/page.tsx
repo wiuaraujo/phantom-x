@@ -161,7 +161,7 @@ function SettingsPageContent() {
     name: profileName || "Willian",
     nickname: profileNickname || "Will",
     timezone: profileTimezone,
-    email: session?.user?.email || "admin@phantomx.pro",
+    email: session?.user?.email || "admin@phantom-x.pro",
     role: "admin",
     organizationId: "org",
     organizationName: "Phantom-X Command",
@@ -973,7 +973,7 @@ function SettingsPageContent() {
                     </label>
                     <input
                       type="email"
-                      value={session?.user?.email || "admin@phantomx.pro"}
+                      value={session?.user?.email || "admin@phantom-x.pro"}
                       disabled
                       className="w-full px-3 py-2 bg-neutral-100 dark:bg-brand-black/50 border border-brand-borderSubtle rounded-lg text-brand-secondary font-mono text-xs cursor-not-allowed"
                     />

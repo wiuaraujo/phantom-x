@@ -16,7 +16,7 @@ const AUTHORIZED_MASTER_KEYS = [
 export async function GET(req: NextRequest) {
   // Verifica se o usuário possui cookie de sessão administrativa ativo
   let isOperatorAdmin = false;
-  let adminEmail = "admin@phantomx.pro";
+  let adminEmail = "admin@phantom-x.pro";
 
   const cookieToken = req.cookies.get("phantom_token")?.value;
   if (cookieToken) {
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     if (action === "auth_admin") {
       const input = (passkey || password || "").trim();
       let isAuthorized = AUTHORIZED_MASTER_KEYS.includes(input);
-      let resolvedEmail = email || "admin@phantomx.pro";
+      let resolvedEmail = email || "admin@phantom-x.pro";
       let resolvedName = "Engenheiro Chefe de Operações";
 
       // Se não bateu com a chave mestra direta, tenta validar via credenciais do Supabase

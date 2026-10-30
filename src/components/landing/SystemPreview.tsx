@@ -49,7 +49,7 @@ import { LocationBadge, getCountryFlag } from "@/lib/geoFlags";
 type ConsoleTab = "overview" | "layers" | "worker" | "live";
 
 export const SystemPreview: React.FC = () => {
-  const [selectedDomain, setSelectedDomain] = useState("checkout.phantomx.pro");
+  const [selectedDomain, setSelectedDomain] = useState("checkout.phantom-x.pro");
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ConsoleTab>("overview");
   const [cloakerMode, setCloakerMode] = useState<CloakerMode>("AUTOMATICO");
@@ -391,7 +391,7 @@ export const SystemPreview: React.FC = () => {
             {/* Address Bar */}
             <div className="hidden sm:flex text-[11px] font-mono text-neutral-300 dark:text-brand-secondary items-center space-x-1.5 bg-black/40 dark:bg-brand-surface/80 px-3.5 py-1 rounded-full border border-white/10 dark:border-brand-border">
               <span className="text-neutral-400 dark:text-brand-muted">https://</span>
-              <span className="text-white font-medium">console.phantomx.pro/dashboard/cloaker</span>
+              <span className="text-white font-medium">console.phantom-x.pro/dashboard/cloaker</span>
             </div>
 
             {/* Direct Link to Live Dashboard & Theme Toggle */}

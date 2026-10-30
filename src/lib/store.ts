@@ -178,7 +178,7 @@ function generateDemoEventsPool(count: number = 60): TrafficEvent[] {
       id: `evt_demo_${Date.now().toString(36)}_${i}`,
       clickId: assessment.clickId,
       timestamp: new Date(now - timeOffset).toISOString(),
-      domain: "checkout.phantomx.pro",
+      domain: "checkout.phantom-x.pro",
       campaignId: "camp_demo",
       campaignName: "Lançamento Q4 — Tráfego Pago Meta",
       ip: rawIp,
@@ -267,11 +267,11 @@ export const store = {
   seedAccountDemo() {
     const defaultDom: Domain = {
       id: `dom_${Date.now().toString(36)}`,
-      name: "checkout.phantomx.pro",
+      name: "checkout.phantom-x.pro",
       status: "active",
       sslStatus: "valid",
       dnsRecords: [
-        { type: "CNAME", host: "checkout", expected: "cname.phantomx.pro", verified: true },
+        { type: "CNAME", host: "checkout", expected: "cname.phantom-x.pro", verified: true },
         { type: "TXT", host: "_phantom-challenge", expected: "phantom-verify=894318712", verified: true },
       ],
       eventsCount: 15,
@@ -289,7 +289,7 @@ export const store = {
         domainName: defaultDom.name,
         status: "active",
         targetUrl: "https://meusite.com/oferta",
-        fallbackUrl: "https://phantomx.pro/verificacao-seguranca",
+        fallbackUrl: "https://phantom-x.pro/verificacao-seguranca",
         utmSource: "meta",
         utmMedium: "cpc",
         utmCampaign: "teste_borda",
@@ -414,10 +414,10 @@ export const store = {
     utmParams?: Record<string, string>;
   }): TrafficEvent {
     const loc = GLOBAL_LOCATIONS[Math.floor(Math.random() * GLOBAL_LOCATIONS.length)];
-    const matchedDomain = payload.domain || domainsStore[0]?.name || "app.phantomx.pro";
+    const matchedDomain = payload.domain || domainsStore[0]?.name || "app.phantom-x.pro";
     const matchedCampaign = campaignsStore.find((c) => c.id === payload.campaignId) || campaignsStore[0];
     const targetUrl = payload.targetUrl || matchedCampaign?.targetUrl || "https://meusite.com/oferta";
-    const fallbackUrl = matchedCampaign?.fallbackUrl || "https://phantomx.pro/verificacao-seguranca";
+    const fallbackUrl = matchedCampaign?.fallbackUrl || "https://phantom-x.pro/verificacao-seguranca";
 
     const assessment = CloakerEngine.evaluateRequest({
       userAgent: payload.userAgent,
@@ -519,7 +519,7 @@ export const store = {
 
     const loc = GLOBAL_LOCATIONS[Math.floor(Math.random() * GLOBAL_LOCATIONS.length)];
     const camp = campaignsStore[Math.floor(Math.random() * campaignsStore.length)];
-    const domainName = camp?.domainName || domainsStore[0]?.name || "gateway.phantomx.pro";
+    const domainName = camp?.domainName || domainsStore[0]?.name || "gateway.phantom-x.pro";
     const targetUrl = camp?.targetUrl || camp?.ofertaUrl || "https://seusite.com/oferta";
     const fallbackUrl = camp?.fallbackUrl || camp?.whitepageUrl || "https://seusite.com/white";
 
@@ -713,7 +713,7 @@ export const store = {
         {
           type: "CNAME",
           host: cleanName.split(".")[0],
-          expected: "cname.phantomx.pro",
+          expected: "cname.phantom-x.pro",
           verified: false,
         },
         {
@@ -775,7 +775,7 @@ export const store = {
       id: `camp_${Date.now().toString(36)}`,
       name: data.name || "Nova Campanha Phantom-X",
       domainId: domain ? domain.id : "default",
-      domainName: domain ? domain.name : (currentDomains[0]?.name || "app.phantomx.pro"),
+      domainName: domain ? domain.name : (currentDomains[0]?.name || "app.phantom-x.pro"),
       status: "active",
       mode: data.mode || "AUTOMATICO",
       targetUrl: data.targetUrl || data.ofertaUrl || "https://seusite.com/oferta",
@@ -843,12 +843,12 @@ export const store = {
       id: `rule_${Date.now().toString(36)}`,
       name: data.name || "Nova Regra de Roteamento",
       domainId: domain ? domain.id : "default",
-      domainName: domain ? domain.name : "phantomx.pro",
+      domainName: domain ? domain.name : "phantom-x.pro",
       priority: data.priority || routingRulesStore.length + 1,
       status: "active",
       conditions: data.conditions || { maxRiskScore: 45 },
       destinationUrl: data.destinationUrl || "https://meusite.com/oferta",
-      fallbackUrl: data.fallbackUrl || "https://phantomx.pro/verificacao-seguranca",
+      fallbackUrl: data.fallbackUrl || "https://phantom-x.pro/verificacao-seguranca",
       hitsCount: 0,
       createdAt: new Date().toISOString(),
     };
