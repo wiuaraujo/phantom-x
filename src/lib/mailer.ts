@@ -31,7 +31,7 @@ function getSmtpTransporter() {
   }
 
   // Suporte para Resend SMTP se configurado
-  const resendKey = process.env.RESEND_API_KEY;
+  const resendKey = process.env.RESEND_API_KEY?.trim();
   if (resendKey) {
     return nodemailer.createTransport({
       host: "smtp.resend.com",
@@ -58,8 +58,9 @@ export async function dispatchVerificationEmail(params: {
   name: string;
   code: string;
   origin?: string;
+  apiKey?: string;
 }): Promise<SendEmailResult> {
-  const { to, name, code, origin } = params;
+  const { to, name, code, origin, apiKey } = params;
   const cleanEmail = to.trim().toLowerCase();
   const cleanName = name.trim() || "Operador";
 
@@ -72,8 +73,10 @@ export async function dispatchVerificationEmail(params: {
   const text = renderVerificationEmailText(cleanName, code, resolvedOrigin);
   const subject = `🛡️ [Phantom-X] Confirme sua conta de Operador (${code})`;
 
-  // 1. TENTA PRIMEIRO VIA API REST DA RESEND (Se RESEND_API_KEY estiver configurada)
-  if (process.env.RESEND_API_KEY) {
+  const resendKey = apiKey?.trim() || process.env.RESEND_API_KEY?.trim();
+
+  // 1. TENTA PRIMEIRO VIA API REST DA RESEND (Se resendKey estiver configurada)
+  if (resendKey) {
     try {
       const resendResult = await sendEmailViaResend({
         to: cleanEmail,
@@ -82,6 +85,7 @@ export async function dispatchVerificationEmail(params: {
         text,
         from: process.env.RESEND_FROM || "Phantom-X <contato@phantom-x.pro>",
         replyTo: "suporte@phantom-x.pro",
+        apiKey: resendKey,
       });
 
       if (resendResult.success) {
@@ -93,6 +97,11 @@ export async function dispatchVerificationEmail(params: {
         };
       } else {
         console.warn(`[Phantom-X Mailer] Resend falhou: ${resendResult.error}. Tentando transporte SMTP...`);
+        return {
+          success: false,
+          provider: "resend",
+          error: resendResult.error,
+        };
       }
     } catch (err: any) {
       console.warn(`[Phantom-X Mailer] Falha no provedor Resend: ${err?.message}`);
@@ -127,6 +136,6 @@ export async function dispatchVerificationEmail(params: {
   return {
     success: false,
     provider: "none",
-    error: "Nenhum provedor de e-mail ativo no momento. Disparo delegado ao Supabase Auth.",
+    error: "A chave RESEND_API_KEY não foi detectada no ambiente em execução. Por favor, configure a variável RESEND_API_KEY no painel da Vercel (e faça um Redeploy) ou insira a chave 're_...' no campo do painel.",
   };
 }

@@ -170,12 +170,29 @@ export async function POST(req: NextRequest) {
     if (action === "test_email") {
       const targetEmail = body.to || email || "wiuaraujo@gmail.com";
       const origin = req.headers.get("origin") || req.nextUrl.origin || "https://phantom-x.pro";
+      const providedKey = body.resendApiKey || body.apiKey;
+
+      if (providedKey && typeof providedKey === "string" && providedKey.trim().startsWith("re_")) {
+        process.env.RESEND_API_KEY = providedKey.trim();
+        try {
+          // Atualiza também no .env.local se estiver rodando localmente
+          const fs = await import("fs");
+          const path = await import("path");
+          const envPath = path.resolve(process.cwd(), ".env.local");
+          if (fs.existsSync(envPath)) {
+            let content = fs.readFileSync(envPath, "utf-8");
+            content = content.replace(/RESEND_API_KEY=.*/, `RESEND_API_KEY=${providedKey.trim()}`);
+            fs.writeFileSync(envPath, content, "utf-8");
+          }
+        } catch {}
+      }
 
       const res = await dispatchVerificationEmail({
         to: targetEmail,
         name: "Administrador Master",
         code: Math.floor(100000 + Math.random() * 900000).toString(),
         origin,
+        apiKey: providedKey,
       });
 
       return NextResponse.json({

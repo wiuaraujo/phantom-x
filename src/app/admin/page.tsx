@@ -154,6 +154,7 @@ export default function AdminPortalPage() {
 
   // Teste de Envio de E-mails (Resend)
   const [testEmailTarget, setTestEmailTarget] = useState("wiuaraujo@gmail.com");
+  const [resendApiKeyInput, setResendApiKeyInput] = useState("");
   const [testingEmail, setTestingEmail] = useState(false);
   const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
@@ -448,6 +449,7 @@ export default function AdminPortalPage() {
         body: JSON.stringify({
           action: "test_email",
           to: testEmailTarget,
+          resendApiKey: resendApiKeyInput || undefined,
         }),
       });
       const data = await res.json();
@@ -1650,7 +1652,7 @@ export default function AdminPortalPage() {
                         <div className="font-bold text-white flex items-center space-x-2">
                           <span>Serviço de Envio de E-mails (Resend API)</span>
                           <span className="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full font-mono font-bold">
-                            RESEND ATIVO
+                            RESEND ENGINE
                           </span>
                         </div>
                         <div className="text-[11px] text-neutral-400 mt-0.5">
@@ -1660,24 +1662,41 @@ export default function AdminPortalPage() {
                     </div>
                   </div>
 
-                  {/* Test Box */}
-                  <div className="pt-2 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <input
-                      type="email"
-                      value={testEmailTarget}
-                      onChange={(e) => setTestEmailTarget(e.target.value)}
-                      placeholder="seu.email@gmail.com para teste"
-                      className="px-3 py-1.5 rounded-lg bg-neutral-900 border border-white/10 text-white placeholder-neutral-500 text-xs font-mono focus:outline-none focus:border-emerald-500 flex-1"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSendTestEmail}
-                      disabled={testingEmail}
-                      className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition cursor-pointer disabled:opacity-50 shrink-0"
-                    >
-                      <Send className={`w-3.5 h-3.5 ${testingEmail ? "animate-spin" : ""}`} />
-                      <span>{testingEmail ? "Disparando..." : "Testar Envio no Gmail"}</span>
-                    </button>
+                  {/* Campos de Chave e E-mail de Teste */}
+                  <div className="pt-2 border-t border-white/10 space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-neutral-400 mb-1">CHAVE API DO RESEND (OPCIONAL SE JÁ ESTIVER NA VERCEL)</label>
+                        <input
+                          type="password"
+                          value={resendApiKeyInput}
+                          onChange={(e) => setResendApiKeyInput(e.target.value)}
+                          placeholder="re_123456789..."
+                          className="w-full px-3 py-1.5 rounded-lg bg-neutral-900 border border-white/10 text-white placeholder-neutral-600 text-xs font-mono focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-neutral-400 mb-1">E-MAIL DE DESTINO PARA TESTE (GMAIL)</label>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="email"
+                            value={testEmailTarget}
+                            onChange={(e) => setTestEmailTarget(e.target.value)}
+                            placeholder="seu.email@gmail.com"
+                            className="w-full px-3 py-1.5 rounded-lg bg-neutral-900 border border-white/10 text-white placeholder-neutral-500 text-xs font-mono focus:outline-none focus:border-emerald-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleSendTestEmail}
+                            disabled={testingEmail}
+                            className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition cursor-pointer disabled:opacity-50 shrink-0"
+                          >
+                            <Send className={`w-3.5 h-3.5 ${testingEmail ? "animate-spin" : ""}`} />
+                            <span>{testingEmail ? "Enviando..." : "Testar"}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {emailTestResult && (

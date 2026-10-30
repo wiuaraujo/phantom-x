@@ -1,8 +1,13 @@
 import { Resend } from "resend";
 
-const resendApiKey = process.env.RESEND_API_KEY;
-
-export const resend = resendApiKey ? new Resend(resendApiKey) : null;
+/**
+ * Obtém instância do cliente Resend dinamicamente a cada requisição
+ */
+export function getResendClient(customApiKey?: string): Resend | null {
+  const key = customApiKey?.trim() || process.env.RESEND_API_KEY?.trim();
+  if (!key) return null;
+  return new Resend(key);
+}
 
 export interface SendResendEmailParams {
   to: string | string[];
@@ -11,6 +16,7 @@ export interface SendResendEmailParams {
   text?: string;
   from?: string;
   replyTo?: string;
+  apiKey?: string;
 }
 
 export interface ResendResponse {
@@ -26,7 +32,8 @@ export interface ResendResponse {
  * Suporta fallback inteligente para onboarding@resend.dev se o DNS ainda estiver propagando
  */
 export async function sendEmailViaResend(params: SendResendEmailParams): Promise<ResendResponse> {
-  if (!resend) {
+  const client = getResendClient(params.apiKey);
+  if (!client) {
     return {
       success: false,
       provider: "resend",
@@ -39,7 +46,7 @@ export async function sendEmailViaResend(params: SendResendEmailParams): Promise
   const replyTo = params.replyTo || "suporte@phantom-x.pro";
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await client.emails.send({
       from,
       to: params.to,
       subject: params.subject,
@@ -59,7 +66,7 @@ export async function sendEmailViaResend(params: SendResendEmailParams): Promise
         !from.includes("onboarding@resend.dev")
       ) {
         console.log(`[Resend Mailer] Tentando envio de contingência via onboarding@resend.dev...`);
-        const fallbackRes = await resend.emails.send({
+        const fallbackRes = await client.emails.send({
           from: "Phantom-X <onboarding@resend.dev>",
           to: params.to,
           subject: params.subject,
