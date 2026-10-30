@@ -15,11 +15,14 @@ import {
   Zap,
   Sparkles,
   ShieldCheck,
+  Globe,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getPlanDefinition, PlanId } from "@/lib/plans";
 import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { useLanguage } from "@/lib/i18n";
 import { useDashboardNav } from "./DashboardNavContext";
 import { getDashboardGreeting } from "@/lib/userGreeting";
 
@@ -43,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectPeriod,
 }) => {
   const session = auth.getSession();
+  const { t, language } = useLanguage();
   const { openDrawer } = useDashboardNav();
   const [showNotifications, setShowNotifications] = useState(false);
   const [domainDropdown, setDomainDropdown] = useState(false);
@@ -54,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
   const notifRef = useRef<HTMLDivElement>(null);
   const domainRef = useRef<HTMLDivElement>(null);
 
-  const [greeting, setGreeting] = useState(() => getDashboardGreeting(session?.user));
+  const [greeting, setGreeting] = useState(() => getDashboardGreeting(session?.user, language));
 
   useEffect(() => {
     auth.syncPlanWithBackend().then((res) => {
@@ -79,12 +83,12 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   useEffect(() => {
-    setGreeting(getDashboardGreeting(session?.user));
+    setGreeting(getDashboardGreeting(session?.user, language));
     const interval = setInterval(() => {
-      setGreeting(getDashboardGreeting(session?.user));
+      setGreeting(getDashboardGreeting(session?.user, language));
     }, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     const handleDocClick = (e: MouseEvent | TouchEvent) => {
@@ -167,7 +171,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div ref={domainRef} className="relative hidden lg:block">
               <button
                 onClick={() => setDomainDropdown(!domainDropdown)}
-                className="flex items-center space-x-2 bg-brand-surface hover:bg-brand-hover border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono text-brand-white transition"
+                className="flex items-center space-x-2 bg-brand-surface hover:bg-brand-hover border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono text-brand-white transition cursor-pointer"
               >
                 <span className="truncate max-w-[140px]">{selectedDomain}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-brand-secondary" />
@@ -182,7 +186,7 @@ export const Header: React.FC<HeaderProps> = ({
                         onSelectDomain(dom);
                         setDomainDropdown(false);
                       }}
-                      className={`w-full text-left px-3 py-2 hover:bg-brand-hover transition flex items-center justify-between ${
+                      className={`w-full text-left px-3 py-2 hover:bg-brand-hover transition flex items-center justify-between cursor-pointer ${
                         selectedDomain === dom ? "text-brand-white font-bold" : "text-brand-secondary"
                       }`}
                     >
@@ -198,17 +202,21 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Desktop-only: Period Selector */}
           {onSelectPeriod && (
             <div className="hidden lg:flex items-center bg-brand-surface border border-brand-border rounded-lg p-0.5 text-xs font-mono">
-              {["24h", "7d", "30d"].map((p) => (
+              {[
+                { key: "24h", label: t.dashboard.period24h },
+                { key: "7d", label: t.dashboard.period7d },
+                { key: "30d", label: t.dashboard.period30d },
+              ].map((p) => (
                 <button
-                  key={p}
-                  onClick={() => onSelectPeriod(p)}
-                  className={`px-2.5 py-1 rounded-md transition ${
-                    selectedPeriod === p
+                  key={p.key}
+                  onClick={() => onSelectPeriod(p.key)}
+                  className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+                    selectedPeriod === p.key
                       ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold"
                       : "text-brand-secondary hover:text-brand-white"
                   }`}
                 >
-                  {p}
+                  {p.label}
                 </button>
               ))}
             </div>
@@ -217,7 +225,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Plan Badge / Upgrade Trigger */}
           <button
             onClick={() => setShowUpgradeModal(true)}
-            className={`hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition border ${
+            className={`hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition border cursor-pointer ${
               currentPlan === "free"
                 ? "bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20"
                 : currentPlan === "starter"
@@ -228,21 +236,24 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
             title="Gerenciar Plano Phantom-X"
           >
-            <span>{currentPlan === "free" ? "PLANO TRIAL" : planDef.name.toUpperCase()}</span>
+            <span>{currentPlan === "free" ? t.dashboard.trialPlan : planDef.name.toUpperCase()}</span>
             <span className="text-[10px] bg-white text-black px-1.5 py-0.5 rounded font-black tracking-wide">
-              VER PLANOS
+              {t.dashboard.viewPlans}
             </span>
           </button>
 
           {/* Theme Toggle (Visible everywhere) */}
           <ThemeToggle />
 
+          {/* Language Selector (Visible in header across the entire dashboard) */}
+          <LanguageSelector />
+
           {/* Notification Bell */}
           <div ref={notifRef} className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="p-1.5 sm:p-2 rounded-lg bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-secondary hover:text-white transition relative"
-              title="Notificações do Sistema"
+              className="p-1.5 sm:p-2 rounded-lg bg-brand-surface hover:bg-brand-hover border border-brand-border text-brand-secondary hover:text-white transition relative cursor-pointer"
+              title={t.dashboard.notifications}
             >
               <Bell className="w-4 h-4" />
               <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -251,22 +262,22 @@ export const Header: React.FC<HeaderProps> = ({
             {showNotifications && (
               <div className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-24px)] bg-brand-surface border border-brand-border rounded-xl shadow-2xl p-4 z-50 text-xs font-sans">
                 <div className="flex items-center justify-between border-b border-brand-border pb-2 mb-3">
-                  <span className="font-semibold text-brand-white">Eventos do Sistema</span>
-                  <span className="text-[10px] text-brand-muted font-mono">3 recentes</span>
+                  <span className="font-semibold text-brand-white">{t.dashboard.systemEvents}</span>
+                  <span className="text-[10px] text-brand-muted font-mono">2 recentes</span>
                 </div>
                 <div className="space-y-3 font-mono">
                   <div className="flex items-start space-x-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-brand-white text-[11px] font-medium">Mitigação de Tráfego Automático</div>
-                      <div className="text-brand-muted text-[10px]">12 requisições isoladas com sucesso</div>
+                      <div className="text-brand-white text-[11px] font-medium">{t.dashboard.systemMitigationTitle}</div>
+                      <div className="text-brand-muted text-[10px]">{t.dashboard.systemMitigationDesc}</div>
                     </div>
                   </div>
                   <div className="flex items-start space-x-2">
                     <Radio className="w-4 h-4 text-brand-secondary shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-brand-white text-[11px] font-medium">Novo pico de acessos (Brasil)</div>
-                      <div className="text-brand-muted text-[10px]">Latência média mantida em 18ms</div>
+                      <div className="text-brand-white text-[11px] font-medium">{t.dashboard.trafficPeakTitle}</div>
+                      <div className="text-brand-muted text-[10px]">{t.dashboard.trafficPeakDesc}</div>
                     </div>
                   </div>
                 </div>
@@ -277,9 +288,9 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Quick Logout Button (Visible on md+) */}
           <button
             onClick={handleLogout}
-            className="p-1.5 sm:p-2 rounded-lg bg-brand-surface hover:bg-rose-500/10 border border-brand-border hover:border-rose-500/30 text-brand-secondary hover:text-rose-500 transition"
-            title="Sair do Sistema / Desconectar"
-            aria-label="Sair do Sistema"
+            className="p-1.5 sm:p-2 rounded-lg bg-brand-surface hover:bg-rose-500/10 border border-brand-border hover:border-rose-500/30 text-brand-secondary hover:text-rose-500 transition cursor-pointer"
+            title={t.dashboard.logout}
+            aria-label={t.dashboard.logout}
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -329,7 +340,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {session?.user?.email || "operador@phantom-x.pro"}
                   </div>
                   <div className="text-[10px] text-brand-secondary font-mono mt-1">
-                    Fuso: {session?.user?.timezone || "America/Sao_Paulo"}
+                    {t.dashboard.timezoneLabel} {session?.user?.timezone || "America/Sao_Paulo"}
                   </div>
                 </div>
 
@@ -338,10 +349,10 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="p-2 mb-1 rounded-lg bg-brand-surface/70 border border-brand-borderSubtle">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-[10px] text-brand-muted uppercase font-mono">Plano Atual</div>
+                        <div className="text-[10px] text-brand-muted uppercase font-mono">{t.dashboard.currentPlan}</div>
                         <div className="text-xs font-bold font-mono">
                           <span className={currentPlan === "free" ? "text-amber-400 font-bold" : "text-emerald-400 font-bold"}>
-                            {currentPlan === "free" ? "Plano Trial" : planDef.name}
+                            {currentPlan === "free" ? t.dashboard.trialPlan : planDef.name}
                           </span>
                         </div>
                       </div>
@@ -352,7 +363,7 @@ export const Header: React.FC<HeaderProps> = ({
                         }}
                         className="px-2.5 py-1 rounded-md bg-white text-black text-[10px] font-bold hover:bg-neutral-200 transition cursor-pointer"
                       >
-                        Ver Planos
+                        {t.dashboard.viewPlans}
                       </button>
                     </div>
                   </div>
@@ -363,7 +374,7 @@ export const Header: React.FC<HeaderProps> = ({
                     className="flex items-center space-x-2 px-3 py-2 rounded-lg text-brand-secondary hover:text-brand-white hover:bg-brand-hover transition font-medium"
                   >
                     <User className="w-3.5 h-3.5 text-brand-secondary" />
-                    <span>Configurações do Perfil</span>
+                    <span>{t.dashboard.profileSettings}</span>
                   </Link>
 
                   <Link
@@ -372,7 +383,7 @@ export const Header: React.FC<HeaderProps> = ({
                     className="flex items-center space-x-2 px-3 py-2 rounded-lg text-brand-secondary hover:text-brand-white hover:bg-brand-hover transition font-medium"
                   >
                     <Settings className="w-3.5 h-3.5 text-brand-secondary" />
-                    <span>Configurações do Cloaker</span>
+                    <span>{t.dashboard.cloakerSettings}</span>
                   </Link>
 
                   <Link
@@ -381,7 +392,7 @@ export const Header: React.FC<HeaderProps> = ({
                     className="flex items-center space-x-2 px-3 py-2 rounded-lg text-brand-secondary hover:text-brand-white hover:bg-brand-hover transition font-medium"
                   >
                     <Radio className="w-3.5 h-3.5 text-brand-secondary" />
-                    <span>Cloudflare Worker &amp; Edge</span>
+                    <span>{t.dashboard.cloudflareWorker}</span>
                   </Link>
 
                   {(session?.user?.role === "admin" || session?.user?.email?.toLowerCase() === "wiuaraujo@gmail.com") && (
@@ -391,16 +402,16 @@ export const Header: React.FC<HeaderProps> = ({
                       className="flex items-center space-x-2 px-3 py-2 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 border border-red-500/20 transition font-medium"
                     >
                       <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
-                      <span className="font-semibold">Painel Admin Master</span>
+                      <span className="font-semibold">{t.dashboard.adminPanel}</span>
                     </Link>
                   )}
 
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg text-rose-500 hover:text-white hover:bg-rose-600 transition text-left font-medium"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg text-rose-500 hover:text-white hover:bg-rose-600 transition text-left font-medium cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    <span>Sair do Sistema</span>
+                    <span>{t.dashboard.logout}</span>
                   </button>
                 </div>
               </div>
@@ -418,66 +429,49 @@ export const Header: React.FC<HeaderProps> = ({
       {((domains && onSelectDomain) || onSelectPeriod) && (
         <div className="lg:hidden flex items-center justify-between gap-2 px-3 py-2 bg-brand-surface/50 border-b border-brand-border/60 overflow-x-auto shrink-0 text-xs font-mono">
           {domains && onSelectDomain && (
-            <div className="relative shrink-0">
-              <button
-                onClick={() => setDomainDropdown(!domainDropdown)}
-                className="flex items-center space-x-1.5 bg-brand-surface hover:bg-brand-hover border border-brand-border px-2.5 py-1 rounded-lg text-[11px] text-brand-white"
-              >
-                <span className="truncate max-w-[130px]">{selectedDomain}</span>
-                <ChevronDown className="w-3 h-3 text-brand-secondary" />
-              </button>
-
-              {domainDropdown && (
-                <div className="absolute left-0 mt-1.5 w-60 bg-brand-surface border border-brand-border rounded-xl shadow-glow py-1 z-50 text-[11px]">
-                  {domains.map((dom) => (
-                    <button
-                      key={dom}
-                      onClick={() => {
-                        onSelectDomain(dom);
-                        setDomainDropdown(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 hover:bg-brand-hover transition flex items-center justify-between ${
-                        selectedDomain === dom ? "text-brand-white font-bold" : "text-brand-secondary"
-                      }`}
-                    >
-                      <span className="truncate">{dom}</span>
-                      {selectedDomain === dom && <CheckCircle2 className="w-3.5 h-3.5 text-brand-white" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <select
+              value={selectedDomain}
+              onChange={(e) => onSelectDomain(e.target.value)}
+              className="bg-brand-surface border border-brand-border rounded-lg px-2.5 py-1 text-brand-white text-xs font-mono focus:outline-none"
+              aria-label="Selecionar Domínio"
+            >
+              {domains.map((dom) => (
+                <option key={dom} value={dom} className="bg-brand-black text-white">
+                  {dom}
+                </option>
+              ))}
+            </select>
           )}
 
           {onSelectPeriod && (
-            <div className="flex items-center bg-brand-surface border border-brand-border rounded-lg p-0.5 text-[11px] shrink-0">
-              {["24h", "7d", "30d"].map((p) => (
+            <div className="flex items-center space-x-1">
+              {[
+                { key: "24h", label: t.dashboard.period24h },
+                { key: "7d", label: t.dashboard.period7d },
+                { key: "30d", label: t.dashboard.period30d },
+              ].map((p) => (
                 <button
-                  key={p}
-                  onClick={() => onSelectPeriod(p)}
-                  className={`px-2 py-0.5 rounded-md transition ${
-                    selectedPeriod === p
+                  key={p.key}
+                  onClick={() => onSelectPeriod(p.key)}
+                  className={`px-2 py-1 rounded-md text-[11px] transition ${
+                    selectedPeriod === p.key
                       ? "bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold"
-                      : "text-brand-secondary"
+                      : "text-brand-secondary hover:text-white"
                   }`}
                 >
-                  {p}
+                  {p.label}
                 </button>
               ))}
             </div>
           )}
-
-          <div className="flex items-center space-x-1 text-[10px] text-brand-muted shrink-0 pl-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>&lt; 18ms</span>
-          </div>
         </div>
       )}
 
-      {/* Upgrade Plan Modal */}
+      {/* Modal de Upgrade de Plano */}
       <UpgradePlanModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
+        currentPlan={currentPlan}
       />
     </>
   );

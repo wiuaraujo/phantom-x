@@ -1,41 +1,49 @@
 import { User } from "@/types";
+import { Language } from "./i18n";
 
 export interface DashboardGreetingInfo {
-  dayOfWeek: string; // e.g. "Quinta-feira"
+  dayOfWeek: string; // e.g. "Quinta-feira" / "Thursday" / "Jueves"
   time: string; // e.g. "14:00"
   dayAndTime: string; // e.g. "Quinta-feira 14:00"
-  salutation: string; // e.g. "Olá"
+  salutation: string; // e.g. "Olá" / "Hello" / "Hola"
   displayName: string; // e.g. "Will"
-  fullGreeting: string; // e.g. "Quinta-feira 14:00, Olá, Will"
+  fullGreeting: string; // e.g. "Quinta-feira 14:00, Olá, Will!"
   timezone: string; // e.g. "America/Sao_Paulo"
   periodGreeting: string; // e.g. "Boa tarde"
 }
 
-export function getDashboardGreeting(user?: User | null): DashboardGreetingInfo {
+export function getDashboardGreeting(user?: User | null, lang: Language = "pt"): DashboardGreetingInfo {
   const timezone = user?.timezone || "America/Sao_Paulo";
   const rawDisplayName = user?.nickname?.trim() || (user?.name ? user.name.trim().split(" ")[0] : "Operador");
   const displayName = rawDisplayName.charAt(0).toUpperCase() + rawDisplayName.slice(1);
 
   const now = new Date();
 
-  // 1. Dia da Semana (pt-BR com fuso-horário do usuário)
-  let dayOfWeek = "Quinta-feira";
+  const localeMap: Record<Language, string> = {
+    pt: "pt-BR",
+    en: "en-US",
+    es: "es-ES",
+  };
+  const activeLocale = localeMap[lang] || "pt-BR";
+
+  // 1. Dia da Semana com fuso-horário do usuário e idioma ativo
+  let dayOfWeek = "Hoje";
   try {
-    const dayFormatter = new Intl.DateTimeFormat("pt-BR", {
+    const dayFormatter = new Intl.DateTimeFormat(activeLocale, {
       timeZone: timezone,
       weekday: "long",
     });
     const rawDay = dayFormatter.format(now);
     dayOfWeek = rawDay.charAt(0).toUpperCase() + rawDay.slice(1);
   } catch {
-    dayOfWeek = "Hoje";
+    dayOfWeek = lang === "en" ? "Today" : lang === "es" ? "Hoy" : "Hoje";
   }
 
   // 2. Horário HH:mm
   let time = "14:00";
   let hour = 14;
   try {
-    const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
+    const timeFormatter = new Intl.DateTimeFormat(activeLocale, {
       timeZone: timezone,
       hour: "2-digit",
       minute: "2-digit",
@@ -54,24 +62,51 @@ export function getDashboardGreeting(user?: User | null): DashboardGreetingInfo 
     hour = now.getHours();
   }
 
-  // 3. Saudação baseada no horário
+  // 3. Saudação baseada no horário e idioma
   let periodGreeting = "Olá";
-  if (hour >= 5 && hour < 12) {
-    periodGreeting = "Bom dia";
-  } else if (hour >= 12 && hour < 18) {
-    periodGreeting = "Boa tarde";
+  let salutation = "Olá";
+
+  if (lang === "en") {
+    salutation = "Hello";
+    if (hour >= 5 && hour < 12) {
+      periodGreeting = "Good morning";
+    } else if (hour >= 12 && hour < 18) {
+      periodGreeting = "Good afternoon";
+    } else {
+      periodGreeting = "Good evening";
+    }
+  } else if (lang === "es") {
+    salutation = "Hola";
+    if (hour >= 5 && hour < 12) {
+      periodGreeting = "Buenos días";
+    } else if (hour >= 12 && hour < 18) {
+      periodGreeting = "Buenas tardes";
+    } else {
+      periodGreeting = "Buenas noches";
+    }
   } else {
-    periodGreeting = "Boa noite";
+    // pt
+    salutation = "Olá";
+    if (hour >= 5 && hour < 12) {
+      periodGreeting = "Bom dia";
+    } else if (hour >= 12 && hour < 18) {
+      periodGreeting = "Boa tarde";
+    } else {
+      periodGreeting = "Boa noite";
+    }
   }
 
   const dayAndTime = `${dayOfWeek} ${time}`;
-  const fullGreeting = `${dayAndTime}, Olá, ${displayName}!`;
+  const fullGreeting =
+    lang === "es"
+      ? `${dayAndTime}, ¡Hola, ${displayName}!`
+      : `${dayAndTime}, ${salutation}, ${displayName}!`;
 
   return {
     dayOfWeek,
     time,
     dayAndTime,
-    salutation: "Olá",
+    salutation,
     periodGreeting,
     displayName,
     fullGreeting,

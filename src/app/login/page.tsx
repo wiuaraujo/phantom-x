@@ -9,6 +9,7 @@ import { Logo } from "@/components/ui/Logo";
 import { RotatingGlobe } from "@/components/ui/RotatingGlobe";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { useLanguage } from "@/lib/i18n";
 import {
   Eye,
   EyeOff,
@@ -28,6 +29,7 @@ import { EmailVerificationModal } from "@/components/auth/EmailVerificationModal
 function LoginFormInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -42,7 +44,6 @@ function LoginFormInner() {
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [unverifiedUser, setUnverifiedUser] = useState<{ id: string; name: string; email: string } | null>(null);
   const [expiresAt, setExpiresAt] = useState(0);
-  const [verificationLoading, setVerificationLoading] = useState(false);
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
@@ -61,12 +62,12 @@ function LoginFormInner() {
 
     const cleanId = identifier.trim();
     if (!cleanId || !password) {
-      setError("Por favor, preencha todos os campos obrigatórios.");
+      setError(t.auth.fillRequired);
       return;
     }
 
     if (password.length < 6) {
-      setError("A senha deve conter no mínimo 6 caracteres.");
+      setError(t.auth.passwordMinLength);
       return;
     }
 
@@ -93,7 +94,7 @@ function LoginFormInner() {
             });
             const data = await res.json();
             if (!data.success) {
-              setError(data.error || "Falha ao enviar e-mail de confirmação.");
+              setError(data.error || t.auth.resendError);
               setLoading(false);
               return;
             }
@@ -105,7 +106,7 @@ function LoginFormInner() {
           return;
         }
 
-        setError(result.error || "Credenciais inválidas. Verifique os dados e tente novamente.");
+        setError(result.error || t.auth.invalidCredentials);
         if (result.accountNotFound) {
           setAccountNotFound(true);
         }
@@ -116,28 +117,8 @@ function LoginFormInner() {
       const redirectTarget = searchParams.get("redirect") || "/dashboard";
       router.push(redirectTarget);
     } catch {
-      setError("Ocorreu um erro no terminal de autenticação. Tente novamente.");
+      setError(t.auth.authError);
       setLoading(false);
-    }
-  };
-
-  const handleConfirmVerification = async (inputCode: string) => {
-    if (!unverifiedUser) return;
-    setVerificationLoading(true);
-
-    try {
-      const res = await auth.confirmEmailAndLogin(unverifiedUser.id, inputCode, rememberMe);
-      if (!res.success) {
-        setVerificationLoading(false);
-        throw new Error(res.error || "Código de verificação incorreto ou expirado.");
-      }
-
-      setShowVerificationModal(false);
-      const redirectTarget = searchParams.get("redirect") || "/dashboard";
-      router.push(redirectTarget);
-    } catch (err: any) {
-      setVerificationLoading(false);
-      throw err;
     }
   };
 
@@ -154,7 +135,7 @@ function LoginFormInner() {
     });
     const data = await res.json();
     if (!data.success) {
-      throw new Error(data.error || "Falha ao reenviar código. Aguarde alguns instantes.");
+      throw new Error(data.error || t.auth.resendError);
     }
     setExpiresAt(data.expiresAt || (Date.now() + 5 * 60 * 1000));
   };
@@ -167,10 +148,10 @@ function LoginFormInner() {
           <RotatingGlobe size={150} />
         </div>
         <h2 className="text-lg font-bold text-brand-white font-poppins">
-          Centro de Comando Phantom-X
+          {t.auth.commandCenter}
         </h2>
         <p className="text-[11px] text-brand-secondary mt-0.5">
-          Roteamento em borda e telemetria de tráfego em tempo real
+          {t.auth.commandCenterDesc}
         </p>
       </div>
 
@@ -186,11 +167,11 @@ function LoginFormInner() {
           </div>
 
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white font-poppins flex items-center space-x-2">
-            <span>Entrar no</span>
-            <span className="font-poppins font-extrabold tracking-tight">PHANTOM-X</span>
+            <span>{t.auth.loginTitlePrefix}</span>
+            <span className="font-poppins font-extrabold tracking-tight">{t.auth.loginTitleBrand}</span>
           </h1>
           <p className="text-xs text-brand-secondary mt-1">
-            Terminal seguro de controle de tráfego e regras de borda.
+            {t.auth.loginSubtitle}
           </p>
         </div>
 
@@ -199,10 +180,10 @@ function LoginFormInner() {
           <div className="mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-xl bg-gradient-to-b from-white/[0.08] via-neutral-950 to-black border border-white/15 text-xs text-neutral-300 font-sans shadow-lg shadow-black/50 ring-1 ring-white/5 animate-in fade-in duration-300">
             <div className="space-y-0.5">
               <span className="font-semibold block text-white text-xs tracking-tight">
-                Autenticação Requerida
+                {t.auth.authRequiredTitle}
               </span>
               <p className="text-[11px] text-neutral-400 leading-normal">
-                Acesso restrito. Identifique-se com sua conta ou cadastre-se primeiro.
+                {t.auth.authRequiredDesc}
               </p>
             </div>
           </div>
@@ -215,10 +196,10 @@ function LoginFormInner() {
               <ShieldAlert className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <p className="font-bold text-red-200 text-xs tracking-tight">
-                  CONTA NÃO CADASTRADA NO SISTEMA
+                  {t.auth.accountNotFoundTitle}
                 </p>
                 <p className="text-neutral-300 text-[11px] leading-relaxed">
-                  O e-mail ou usuário <span className="font-mono text-white font-semibold">"{identifier}"</span> não possui cadastro. É obrigatório registrar-se antes de entrar.
+                  {t.auth.accountNotFoundDescPre} <span className="font-mono text-white font-semibold">"{identifier}"</span> {t.auth.accountNotFoundDescPost}
                 </p>
               </div>
             </div>
@@ -228,7 +209,7 @@ function LoginFormInner() {
               className="inline-flex items-center justify-center space-x-2 w-full py-2.5 px-3 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-sm"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>Criar Minha Conta Agora</span>
+              <span>{t.auth.createAccountNow}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -244,7 +225,7 @@ function LoginFormInner() {
             <button
               onClick={() => setError(null)}
               className="text-brand-muted hover:text-white ml-2 text-sm shrink-0"
-              title="Fechar"
+              title={t.auth.close}
             >
               ✕
             </button>
@@ -255,7 +236,7 @@ function LoginFormInner() {
           {/* Email ou Nome de Usuário */}
           <div>
             <label className="block text-xs font-mono text-brand-secondary mb-1.5 font-medium">
-              E-MAIL OU NOME DE USUÁRIO
+              {t.auth.emailOrUsername}
             </label>
             <div className="relative">
               <User className="w-4 h-4 text-brand-muted absolute left-3 top-3" />
@@ -266,7 +247,7 @@ function LoginFormInner() {
                   setIdentifier(e.target.value);
                   if (accountNotFound) setAccountNotFound(false);
                 }}
-                placeholder="seu.email@exemplo.com"
+                placeholder={t.auth.emailPlaceholder}
                 required
                 autoComplete="username"
                 className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs sm:text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
@@ -278,13 +259,13 @@ function LoginFormInner() {
           <div>
             <div className="flex justify-between items-center mb-1.5">
               <label className="text-xs font-mono text-brand-secondary font-medium">
-                SENHA
+                {t.auth.password}
               </label>
               <Link
                 href="/forgot-password"
                 className="text-[11px] font-mono text-brand-muted hover:text-brand-white transition"
               >
-                Esqueceu?
+                {t.auth.forgotPassword}
               </Link>
             </div>
             <div className="relative">
@@ -293,7 +274,7 @@ function LoginFormInner() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
+                placeholder={t.auth.passwordPlaceholder}
                 required
                 autoComplete="current-password"
                 className="w-full pl-9 pr-9 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs sm:text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
@@ -301,8 +282,8 @@ function LoginFormInner() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-brand-muted hover:text-brand-white p-0.5"
-                title={showPassword ? "Ocultar senha" : "Exibir senha"}
+                className="absolute right-3 top-3 text-brand-muted hover:text-brand-white p-0.5 cursor-pointer"
+                title={showPassword ? t.auth.hidePassword : t.auth.showPassword}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -318,7 +299,7 @@ function LoginFormInner() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="rounded border-brand-border bg-brand-surface text-brand-white focus:ring-0"
               />
-              <span className="text-[11px]">Manter sessão ativa neste terminal (7 dias)</span>
+              <span className="text-[11px]">{t.auth.rememberMe}</span>
             </label>
           </div>
 
@@ -326,16 +307,16 @@ function LoginFormInner() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-3 sm:mt-4 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
+            className="w-full mt-3 sm:mt-4 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <span className="font-mono text-xs animate-pulse flex items-center space-x-2">
                 <KeyRound className="w-3.5 h-3.5 animate-spin" />
-                <span>Autenticando sessão criptografada...</span>
+                <span>{t.auth.signingIn}</span>
               </span>
             ) : (
               <>
-                <span>Acessar Console Phantom-X</span>
+                <span>{t.auth.signInBtn}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -344,12 +325,12 @@ function LoginFormInner() {
 
         {/* Alternar para Cadastro */}
         <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-brand-border text-center text-xs text-brand-secondary font-mono">
-          Não possui uma conta?{" "}
+          {t.auth.noAccount}{" "}
           <Link
             href={identifier ? `/signup?email=${encodeURIComponent(identifier)}` : "/signup"}
-            className="text-brand-white font-semibold underline hover:text-brand-secondary"
+            className="text-brand-white font-semibold underline hover:text-brand-secondary ml-1"
           >
-            Criar conta de operador
+            {t.auth.createAccountLink}
           </Link>
         </div>
       </div>
@@ -358,23 +339,23 @@ function LoginFormInner() {
       <div className="lg:hidden grid grid-cols-3 gap-2 pt-1 text-center">
         <div className="p-2 rounded-xl bg-brand-surface/60 border border-brand-border">
           <Zap className="w-3.5 h-3.5 text-brand-white mx-auto mb-1" />
-          <div className="text-[10px] font-semibold text-brand-white">&lt; 18ms</div>
-          <div className="text-[9px] text-brand-muted">Borda Global</div>
+          <div className="text-[10px] font-semibold text-brand-white">{t.auth.edgeBadgeSpeed}</div>
+          <div className="text-[9px] text-brand-muted">{t.auth.edgeBadgeSpeedSub}</div>
         </div>
         <div className="p-2 rounded-xl bg-brand-surface/60 border border-brand-border">
           <ShieldCheck className="w-3.5 h-3.5 text-brand-white mx-auto mb-1" />
-          <div className="text-[10px] font-semibold text-brand-white">Anti-Bot</div>
-          <div className="text-[9px] text-brand-muted">Filtragem Ativa</div>
+          <div className="text-[10px] font-semibold text-brand-white">{t.auth.edgeBadgeBot}</div>
+          <div className="text-[9px] text-brand-muted">{t.auth.edgeBadgeBotSub}</div>
         </div>
         <div className="p-2 rounded-xl bg-brand-surface/60 border border-brand-border">
           <Activity className="w-3.5 h-3.5 text-brand-white mx-auto mb-1" />
-          <div className="text-[10px] font-semibold text-brand-white">SHA-256</div>
-          <div className="text-[9px] text-brand-muted">Cofre Seguro</div>
+          <div className="text-[10px] font-semibold text-brand-white">{t.auth.edgeBadgeVault}</div>
+          <div className="text-[9px] text-brand-muted">{t.auth.edgeBadgeVaultSub}</div>
         </div>
       </div>
 
       <div className="text-center text-[10px] sm:text-[11px] font-mono text-brand-muted">
-        Terminal protegido por SHA-256 com Salting e Detecção de Força Bruta
+        {t.auth.securityFooter}
       </div>
 
       {/* Modal de Confirmação de Conta via Gmail */}
@@ -390,6 +371,8 @@ function LoginFormInner() {
 }
 
 export default function LoginPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen w-full bg-brand-black text-brand-white flex flex-col lg:flex-row font-sans selection:bg-white selection:text-black">
       {/* 
@@ -420,7 +403,7 @@ export default function LoginPage() {
         <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-white/[0.03] rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 right-10 w-60 h-60 bg-white/[0.02] rounded-full blur-2xl pointer-events-none" />
 
-        {/* Top Header Logo & Theme Toggle */}
+        {/* Top Header Logo & Theme / Language Toggles */}
         <div className="relative z-10 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group">
             <Logo size={40} className="group-hover:scale-105 transition-transform shrink-0" />
@@ -447,10 +430,10 @@ export default function LoginPage() {
 
           <div className="max-w-md mx-auto space-y-3">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white leading-tight font-poppins">
-              Acesso ao Centro de Comando Phantom-X.
+              {t.auth.showcaseTitle}
             </h2>
             <p className="text-xs sm:text-sm text-brand-secondary font-sans leading-relaxed">
-              Monitore fluxos de tráfego em tempo real, configure regras determinísticas de borda e proteja suas ofertas com latência submilisegundo.
+              {t.auth.showcaseSubtitle}
             </p>
           </div>
 
@@ -459,30 +442,30 @@ export default function LoginPage() {
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
               <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
                 <Zap className="w-3.5 h-3.5 text-brand-white" />
-                <span>Roteamento Borda</span>
+                <span>{t.auth.edgeRoutingTitle}</span>
               </div>
               <p className="text-[11px] text-brand-muted">
-                Execução local distribuída em mais de 14 data centers.
+                {t.auth.edgeRoutingDesc}
               </p>
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
               <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
                 <ShieldCheck className="w-3.5 h-3.5 text-brand-white" />
-                <span>Filtragem Ativa</span>
+                <span>{t.auth.activeFilteringTitle}</span>
               </div>
               <p className="text-[11px] text-brand-muted">
-                Heurísticas de inspeção contra bots de ad networks.
+                {t.auth.activeFilteringDesc}
               </p>
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
               <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
                 <Activity className="w-3.5 h-3.5 text-brand-white" />
-                <span>Telemetria Real</span>
+                <span>{t.auth.realTelemetryTitle}</span>
               </div>
               <p className="text-[11px] text-brand-muted">
-                Métricas precisas de cliques, IPs e decisões de tráfego.
+                {t.auth.realTelemetryDesc}
               </p>
             </div>
           </div>
@@ -490,7 +473,7 @@ export default function LoginPage() {
 
         {/* Bottom Slogan / Footer Indicator */}
         <div className="relative z-10 pt-4 flex flex-wrap items-center justify-between text-[11px] font-mono text-brand-muted border-t border-white/10 gap-2">
-          <span>Sessão Criptografada • TLS 1.3</span>
+          <span>{t.auth.encryptedSessionTls}</span>
           <span>phantom-x.pro</span>
         </div>
       </div>
@@ -504,7 +487,7 @@ export default function LoginPage() {
         <Suspense fallback={
           <div className="w-full max-w-md my-auto flex flex-col items-center justify-center p-12 text-center">
             <div className="w-8 h-8 rounded-full border-2 border-white border-t-transparent animate-spin mb-4" />
-            <p className="text-xs font-mono text-brand-muted">Carregando console seguro...</p>
+            <p className="text-xs font-mono text-brand-muted">{t.auth.loadingConsole}</p>
           </div>
         }>
           <LoginFormInner />

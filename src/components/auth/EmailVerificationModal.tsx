@@ -11,6 +11,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { useLanguage } from "@/lib/i18n";
 
 interface EmailVerificationModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
   email,
   onResend,
 }) => {
+  const { t } = useLanguage();
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +52,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
       setResendSuccess(true);
       setTimeout(() => setResendSuccess(false), 5000);
     } catch (err: any) {
-      setError(err?.message || "Falha ao reenviar e-mail de confirmação. Aguarde alguns instantes.");
+      setError(err?.message || t.auth.resendError);
     } finally {
       setResending(false);
     }
@@ -62,8 +64,8 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
         {/* Botão Fechar Modal */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-1.5 text-brand-muted hover:text-white rounded-lg hover:bg-white/5 transition"
-          title="Fechar"
+          className="absolute right-4 top-4 p-1.5 text-brand-muted hover:text-white rounded-lg hover:bg-white/5 transition cursor-pointer"
+          title={t.auth.close}
         >
           <X className="w-4 h-4" />
         </button>
@@ -75,15 +77,15 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           </div>
 
           <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-brand-secondary mb-2 tracking-wider">
-            <span>CONFIRMAÇÃO DE CONTA</span>
+            <span>{t.auth.confirmAccountBadge}</span>
           </div>
 
           <h2 className="text-lg sm:text-xl font-bold text-brand-white font-poppins">
-            Confirme o seu E-mail
+            {t.auth.confirmEmailTitle}
           </h2>
 
           <p className="text-xs text-brand-secondary mt-1 max-w-sm">
-            Enviamos a confirmação de acesso para o seu endereço de e-mail:
+            {t.auth.confirmEmailSubtitle}
           </p>
 
           <div className="mt-2.5 px-3 py-1 bg-brand-surface border border-brand-border rounded-lg text-xs font-mono text-brand-white font-semibold flex items-center space-x-2 shadow-inner">
@@ -97,13 +99,13 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           <Mail className="w-4 h-4 text-white/90 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <p className="font-semibold text-white text-xs">
-              Acesse o seu aplicativo ou navegador do <strong>Gmail</strong>.
+              {t.auth.gmailCardTitle}
             </p>
             <p className="text-neutral-300 leading-normal">
-              Abra o e-mail de verificação que acabamos de enviar e confirme o seu acesso para ativar sua conta na plataforma.
+              {t.auth.gmailCardDesc}
             </p>
             <span className="block text-[10px] text-neutral-400 pt-1 font-mono">
-              (Caso não veja na caixa de entrada principal, verifique também a pasta de <em>Spam / Lixo Eletrônico</em>).
+              {t.auth.spamNotice}
             </span>
           </div>
         </div>
@@ -120,7 +122,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
         {resendSuccess && (
           <div className="mb-4 p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-300 font-mono flex items-center space-x-2 animate-in fade-in">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Nova confirmação enviada com sucesso para o seu e-mail!</span>
+            <span>{t.auth.resendSuccess}</span>
           </div>
         )}
 
@@ -131,7 +133,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
             onClick={handleOpenGmail}
             className="w-full py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 cursor-pointer"
           >
-            <span>Abrir o Meu Gmail</span>
+            <span>{t.auth.openGmailBtn}</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </button>
 
@@ -145,7 +147,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
                 className="text-[11px] text-neutral-400 hover:text-white flex items-center space-x-1.5 transition cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw className={`w-3 h-3 ${resending ? "animate-spin" : ""}`} />
-                <span>{resending ? "Reenviando..." : "Não recebeu? Reenviar"}</span>
+                <span>{resending ? t.auth.resending : t.auth.resendPrompt}</span>
               </button>
             )}
 
@@ -154,14 +156,14 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
               onClick={onClose}
               className="text-[11px] text-white font-semibold hover:underline flex items-center space-x-1 ml-auto cursor-pointer"
             >
-              <span>Ir para Login</span>
+              <span>{t.auth.goToLogin}</span>
               <ArrowRight className="w-3 h-3" />
             </button>
           </div>
         </div>
 
         <div className="mt-5 pt-3.5 border-t border-brand-border/60 text-center text-[10px] font-mono text-brand-muted">
-          Terminal protegido por infraestrutura Phantom-X Edge • Ativação Segura
+          {t.auth.secureActivationFooter}
         </div>
       </div>
     </div>

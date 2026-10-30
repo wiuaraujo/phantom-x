@@ -9,6 +9,7 @@ import { Logo } from "@/components/ui/Logo";
 import { RotatingGlobe } from "@/components/ui/RotatingGlobe";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { useLanguage } from "@/lib/i18n";
 import { TIMEZONE_REGIONS, DEFAULT_TIMEZONE } from "@/lib/timezones";
 import {
   COUNTRY_CALLING_CODES,
@@ -36,6 +37,7 @@ import {
 function SignupFormInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -50,10 +52,9 @@ function SignupFormInner() {
   const [error, setError] = useState<string | null>(null);
   const [isExistingUser, setIsExistingUser] = useState(false);
 
-  // Email Verification OTP State (Código de 6 Números com expiração de 5 min)
+  // Email Verification Modal State
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [expiresAt, setExpiresAt] = useState(0);
-  const [verificationLoading, setVerificationLoading] = useState(false);
 
   const [paidBanner, setPaidBanner] = useState<string | null>(null);
 
@@ -77,7 +78,7 @@ function SignupFormInner() {
     setIsExistingUser(false);
 
     if (!name || !email || !phone || !password || !confirmPassword) {
-      setError("Preencha todos os campos obrigatórios.");
+      setError(t.signup.fillAllFields);
       return;
     }
 
@@ -87,31 +88,29 @@ function SignupFormInner() {
     // Validação preventiva: verifica se a conta já existe
     const existingUsers = auth.getUsers();
     if (existingUsers.some((u) => u.email.toLowerCase() === cleanEmail)) {
-      setError("Já existe uma conta registrada com este e-mail. Por favor, faça login ou use outro e-mail.");
+      setError(t.signup.existingAccountError);
       setIsExistingUser(true);
       return;
     }
 
     const rawPhoneDigits = phone.replace(/\D/g, "");
     if (rawPhoneDigits.length < selectedCountry.minDigits) {
-      setError(
-        `Por favor, informe um número de telefone válido com DDD (${selectedCountry.minDigits} a ${selectedCountry.maxDigits} dígitos).`
-      );
+      setError(t.signup.invalidPhone);
       return;
     }
 
-    if (password.length < 8) {
-      setError("A senha deve conter no mínimo 8 caracteres para garantir segurança em nível militar.");
+    if (password.length < 6) {
+      setError(t.auth.passwordMinLength);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("As senhas informadas não coincidem.");
+      setError(t.signup.passwordMismatch);
       return;
     }
 
     if (!termsAccepted) {
-      setError("Você deve concordar com os Termos de Uso e Política de Privacidade.");
+      setError(t.signup.acceptTermsRequired);
       return;
     }
 
@@ -128,7 +127,7 @@ function SignupFormInner() {
       });
 
       if (!result.success) {
-        setError(result.error || "Falha ao provisionar a conta de operador.");
+        setError(result.error || t.auth.authError);
         setLoading(false);
         return;
       }
@@ -144,16 +143,10 @@ function SignupFormInner() {
 
       setShowVerificationModal(true);
     } catch {
-      setError("Erro de conexão ao criar conta. Verifique sua rede e tente novamente.");
+      setError(t.auth.authError);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleConfirmVerification = async () => {
-    setShowVerificationModal(false);
-    const planParam = searchParams.get("plan");
-    router.push(planParam ? `/login?plan=${planParam}&email=${encodeURIComponent(email)}` : `/login?email=${encodeURIComponent(email)}`);
   };
 
   const handleResendVerification = async (): Promise<void> => {
@@ -167,7 +160,7 @@ function SignupFormInner() {
     });
     const data = await res.json();
     if (!data.success) {
-      throw new Error(data.error || "Falha ao reenviar código. Aguarde alguns instantes.");
+      throw new Error(data.error || t.auth.resendError);
     }
     setExpiresAt(data.expiresAt || (Date.now() + 5 * 60 * 1000));
   };
@@ -180,10 +173,10 @@ function SignupFormInner() {
           <RotatingGlobe size={150} />
         </div>
         <h2 className="text-lg font-bold text-brand-white font-poppins">
-          Provisionamento de Cluster Phantom-X
+          {t.auth.commandCenter}
         </h2>
         <p className="text-[11px] text-brand-secondary mt-0.5">
-          Cadastre seu acesso de operador com fuso horário e telemetria
+          {t.auth.commandCenterDesc}
         </p>
       </div>
 
@@ -199,10 +192,10 @@ function SignupFormInner() {
           </div>
 
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white font-poppins">
-            Crie sua conta
+            {t.signup.signupTitle}
           </h1>
           <p className="text-xs text-brand-secondary mt-1 max-w-xs">
-            Configure seu acesso de operador e tenha visibilidade total sobre seu tráfego.
+            {t.signup.signupSubtitle}
           </p>
         </div>
 
@@ -223,6 +216,7 @@ function SignupFormInner() {
               <button
                 onClick={() => setError(null)}
                 className="text-brand-muted hover:text-white ml-2 text-sm shrink-0"
+                title={t.auth.close}
               >
                 ✕
               </button>
@@ -234,7 +228,7 @@ function SignupFormInner() {
                   className="inline-flex items-center space-x-1.5 text-xs text-brand-white font-semibold underline hover:text-brand-secondary"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
-                  <span>Acessar tela de login com este e-mail</span>
+                  <span>{t.signup.signInLink}</span>
                 </Link>
               </div>
             )}
@@ -245,7 +239,7 @@ function SignupFormInner() {
           {/* Nome */}
           <div>
             <label className="block text-xs font-mono text-brand-secondary mb-1.5 font-medium">
-              NOME DO OPERADOR
+              {t.signup.fullName}
             </label>
             <div className="relative">
               <User className="w-4 h-4 text-brand-muted absolute left-3 top-3" />
@@ -253,7 +247,7 @@ function SignupFormInner() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Seu nome ou apelido operacional"
+                placeholder={t.signup.fullNamePlaceholder}
                 required
                 autoComplete="name"
                 className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
@@ -264,7 +258,7 @@ function SignupFormInner() {
           {/* Email */}
           <div>
             <label className="block text-xs font-mono text-brand-secondary mb-1.5 font-medium">
-              E-MAIL PROFISSIONAL
+              {t.signup.email}
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-brand-muted absolute left-3 top-3" />
@@ -275,7 +269,7 @@ function SignupFormInner() {
                   setEmail(e.target.value);
                   if (isExistingUser) setIsExistingUser(false);
                 }}
-                placeholder="seu.email@exemplo.com"
+                placeholder={t.signup.emailPlaceholder}
                 required
                 autoComplete="email"
                 className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
@@ -287,10 +281,10 @@ function SignupFormInner() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-mono text-brand-secondary font-medium">
-                NÚMERO DE TELEFONE (WHATSAPP)
+                {t.signup.phone}
               </label>
               <span className="text-[10px] font-mono text-brand-muted">
-                DDD Obrigatório
+                {t.signup.phonePlaceholder}
               </span>
             </div>
             <div className="flex items-center space-x-2">
@@ -344,10 +338,10 @@ function SignupFormInner() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-mono text-brand-secondary font-medium">
-                FUSO HORÁRIO (TIMEZONE)
+                {t.signup.timezone}
               </label>
               <span className="text-[10px] font-mono text-brand-muted">
-                Horário da operação
+                UTC / Region
               </span>
             </div>
             <div className="relative">
@@ -380,7 +374,7 @@ function SignupFormInner() {
           {/* Senha */}
           <div>
             <label className="block text-xs font-mono text-brand-secondary mb-1.5 font-medium">
-              SENHA (MÍNIMO 8 CARACTERES)
+              {t.signup.password}
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-brand-muted absolute left-3 top-3" />
@@ -388,7 +382,7 @@ function SignupFormInner() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
+                placeholder={t.auth.passwordPlaceholder}
                 required
                 autoComplete="new-password"
                 className="w-full pl-9 pr-9 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
@@ -396,8 +390,8 @@ function SignupFormInner() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-brand-muted hover:text-brand-white p-0.5"
-                title={showPassword ? "Ocultar senha" : "Exibir senha"}
+                className="absolute right-3 top-3 text-brand-muted hover:text-brand-white p-0.5 cursor-pointer"
+                title={showPassword ? t.auth.hidePassword : t.auth.showPassword}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -407,7 +401,7 @@ function SignupFormInner() {
           {/* Confirmar Senha */}
           <div>
             <label className="block text-xs font-mono text-brand-secondary mb-1.5 font-medium">
-              CONFIRMAR SENHA
+              {t.signup.confirmPassword}
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-brand-muted absolute left-3 top-3" />
@@ -415,7 +409,7 @@ function SignupFormInner() {
                 type={showPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••••••"
+                placeholder={t.auth.passwordPlaceholder}
                 required
                 autoComplete="new-password"
                 className="w-full pl-9 pr-3 py-2.5 bg-brand-surface border border-brand-border rounded-xl text-xs text-brand-white placeholder-brand-muted focus:outline-none focus:border-brand-borderHighlight transition font-mono"
@@ -433,13 +427,13 @@ function SignupFormInner() {
                 className="rounded border-brand-border bg-brand-surface text-brand-white focus:ring-0 mt-0.5"
               />
               <span className="text-[11px] leading-tight">
-                Concordo com os{" "}
+                {t.signup.termsAgreePre}{" "}
                 <Link href="/terms" className="text-brand-white underline hover:text-brand-secondary">
-                  Termos de Serviço
+                  {t.signup.termsAgreeTerms}
                 </Link>{" "}
-                e com a{" "}
+                {t.signup.termsAgreeAnd}{" "}
                 <Link href="/privacy" className="text-brand-white underline hover:text-brand-secondary">
-                  Política de Privacidade
+                  {t.signup.termsAgreePrivacy}
                 </Link>
                 .
               </span>
@@ -450,15 +444,15 @@ function SignupFormInner() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-3 sm:mt-4 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
+            className="w-full mt-3 sm:mt-4 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:bg-neutral-800 dark:hover:bg-neutral-200 transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <span className="font-mono text-xs animate-pulse">
-                Provisionando credenciais criptografadas...
+                {t.signup.creatingAccount}
               </span>
             ) : (
               <>
-                <span>Criar Minha Conta</span>
+                <span>{t.signup.createAccountBtn}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -467,9 +461,9 @@ function SignupFormInner() {
 
         {/* Alternar para Login */}
         <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-brand-border text-center text-xs text-brand-secondary font-mono">
-          Já possui uma conta ativa?{" "}
-          <Link href="/login" className="text-brand-white font-semibold underline hover:text-brand-secondary">
-            Acessar console
+          {t.signup.hasAccount}{" "}
+          <Link href="/login" className="text-brand-white font-semibold underline hover:text-brand-secondary ml-1">
+            {t.signup.signInLink}
           </Link>
         </div>
       </div>
@@ -478,23 +472,23 @@ function SignupFormInner() {
       <div className="lg:hidden grid grid-cols-3 gap-2 pt-1 text-center">
         <div className="p-2 rounded-xl bg-brand-surface/60 border border-brand-border">
           <Zap className="w-3.5 h-3.5 text-brand-white mx-auto mb-1" />
-          <div className="text-[10px] font-semibold text-brand-white">&lt; 18ms</div>
-          <div className="text-[9px] text-brand-muted">Borda Global</div>
+          <div className="text-[10px] font-semibold text-brand-white">{t.signup.badgeSpeed}</div>
+          <div className="text-[9px] text-brand-muted">{t.signup.badgeSpeedSub}</div>
         </div>
         <div className="p-2 rounded-xl bg-brand-surface/60 border border-brand-border">
           <ShieldCheck className="w-3.5 h-3.5 text-brand-white mx-auto mb-1" />
-          <div className="text-[10px] font-semibold text-brand-white">Zero Footprint</div>
-          <div className="text-[9px] text-brand-muted">Assinatura Estéril</div>
+          <div className="text-[10px] font-semibold text-brand-white">{t.signup.badgeShield}</div>
+          <div className="text-[9px] text-brand-muted">{t.signup.badgeShieldSub}</div>
         </div>
         <div className="p-2 rounded-xl bg-brand-surface/60 border border-brand-border">
           <Activity className="w-3.5 h-3.5 text-brand-white mx-auto mb-1" />
-          <div className="text-[10px] font-semibold text-brand-white">Click ID</div>
-          <div className="text-[9px] text-brand-muted">Atribuição Real</div>
+          <div className="text-[10px] font-semibold text-brand-white">{t.signup.badgeSafe}</div>
+          <div className="text-[9px] text-brand-muted">{t.signup.badgeSafeSub}</div>
         </div>
       </div>
 
       <div className="text-center text-[10px] sm:text-[11px] font-mono text-brand-muted">
-        Protegido por infraestrutura Phantom-X Edge • Criptografia SHA-256 + Salt
+        {t.auth.securityFooter}
       </div>
 
       {/* Pop-up Modal de Confirmação de Conta via Gmail */}
@@ -518,6 +512,8 @@ function SignupFormInner() {
 }
 
 export default function SignupPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen w-full bg-brand-black text-brand-white flex flex-col lg:flex-row font-sans selection:bg-white selection:text-black">
       {/* 
@@ -548,7 +544,7 @@ export default function SignupPage() {
         <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-white/[0.03] rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 right-10 w-60 h-60 bg-white/[0.02] rounded-full blur-2xl pointer-events-none" />
 
-        {/* Top Header Logo & Theme Toggle */}
+        {/* Top Header Logo & Theme / Language Toggles */}
         <div className="relative z-10 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group">
             <Logo size={40} className="group-hover:scale-105 transition-transform shrink-0" />
@@ -575,10 +571,10 @@ export default function SignupPage() {
 
           <div className="max-w-md mx-auto space-y-3">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-white leading-tight font-poppins">
-              Infraestrutura de Tráfego Invisível em Escala Global.
+              {t.signup.showcaseTitle}
             </h2>
             <p className="text-xs sm:text-sm text-brand-secondary font-sans leading-relaxed">
-              Roteamento de precisão determinístico em borda com filtragem de bots em tempo real, proteção contra inspeção e preservação de atribuição.
+              {t.signup.showcaseSubtitle}
             </p>
           </div>
 
@@ -587,30 +583,30 @@ export default function SignupPage() {
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
               <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
                 <Zap className="w-3.5 h-3.5 text-brand-white" />
-                <span>&lt; 18ms Latência</span>
+                <span>{t.auth.edgeRoutingTitle}</span>
               </div>
               <p className="text-[11px] text-brand-muted">
-                Execução na borda sem intermediários ou redirects lentos.
+                {t.auth.edgeRoutingDesc}
               </p>
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
               <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
                 <ShieldCheck className="w-3.5 h-3.5 text-brand-white" />
-                <span>Zero Footprint</span>
+                <span>{t.auth.activeFilteringTitle}</span>
               </div>
               <p className="text-[11px] text-brand-muted">
-                Assinatura estéril indetectável por crawlers e verificadores.
+                {t.auth.activeFilteringDesc}
               </p>
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm space-y-1">
               <div className="flex items-center space-x-1.5 text-xs font-semibold text-brand-white">
                 <Activity className="w-3.5 h-3.5 text-brand-white" />
-                <span>Click ID Único</span>
+                <span>{t.auth.realTelemetryTitle}</span>
               </div>
               <p className="text-[11px] text-brand-muted">
-                Atribuição idempotente e preservação estrita de UTMs.
+                {t.auth.realTelemetryDesc}
               </p>
             </div>
           </div>
@@ -618,7 +614,7 @@ export default function SignupPage() {
 
         {/* Bottom Slogan / Footer Indicator */}
         <div className="relative z-10 pt-4 flex flex-wrap items-center justify-between text-[11px] font-mono text-brand-muted border-t border-white/10 gap-2">
-          <span>SLA 99.99% • Criptografia Ponta a Ponta</span>
+          <span>{t.auth.encryptedSessionTls}</span>
           <span>phantom-x.pro</span>
         </div>
       </div>
@@ -632,7 +628,7 @@ export default function SignupPage() {
         <Suspense fallback={
           <div className="w-full max-w-md my-auto flex flex-col items-center justify-center p-12 text-center">
             <div className="w-8 h-8 rounded-full border-2 border-white border-t-transparent animate-spin mb-4" />
-            <p className="text-xs font-mono text-brand-muted">Inicializando provisionador...</p>
+            <p className="text-xs font-mono text-brand-muted">{t.auth.loadingConsole}</p>
           </div>
         }>
           <SignupFormInner />

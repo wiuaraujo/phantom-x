@@ -25,10 +25,12 @@ import {
 import { auth } from "@/lib/auth";
 import { getPlanDefinition, PlanId } from "@/lib/plans";
 import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
+import { useLanguage } from "@/lib/i18n";
 
 function SidebarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
   const [collapsed, setCollapsed] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const session = auth.getSession();
@@ -62,16 +64,16 @@ function SidebarContent() {
   const isAdmin = session?.user?.role === "admin" || session?.user?.email?.toLowerCase() === "wiuaraujo@gmail.com";
 
   const navItems = [
-    { label: "Visão Geral & Matriz", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Auditoria Ao Vivo", href: "/dashboard/live", icon: Radio, pulse: true },
-    { label: "Globo 360º", href: "/dashboard/map", icon: Globe },
-    { label: "Campanhas", href: "/dashboard/campaigns", icon: Layers },
-    { label: "Domínios", href: "/dashboard/domains", icon: Globe2 },
-    { label: "Eventos", href: "/dashboard/events", icon: ListFilter },
-    { label: "Cloudflare Worker", href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
-    { label: "Configurações do Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
-    { label: "Configurações do Perfil", href: "/dashboard/settings?tab=profile", icon: User },
-    ...(isAdmin ? [{ label: "Painel Admin", href: "/admin", icon: ShieldCheck, badge: "Master" }] : []),
+    { label: t.dashboard.overview, href: "/dashboard", icon: LayoutDashboard },
+    { label: t.dashboard.liveAudit, href: "/dashboard/live", icon: Radio, pulse: true },
+    { label: t.dashboard.globe360, href: "/dashboard/map", icon: Globe },
+    { label: t.dashboard.campaigns, href: "/dashboard/campaigns", icon: Layers },
+    { label: t.dashboard.domains, href: "/dashboard/domains", icon: Globe2 },
+    { label: t.dashboard.events, href: "/dashboard/events", icon: ListFilter },
+    { label: t.dashboard.cloudflareWorker, href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
+    { label: t.dashboard.cloakerSettings, href: "/dashboard/settings?tab=cloaker", icon: Sliders },
+    { label: t.dashboard.profileSettings, href: "/dashboard/settings?tab=profile", icon: User },
+    ...(isAdmin ? [{ label: t.dashboard.adminPanel, href: "/admin", icon: ShieldCheck, badge: "Master" }] : []),
   ];
 
   return (
@@ -107,7 +109,7 @@ function SidebarContent() {
           {/* Minimize / Expand Toggle Button */}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className={`transition shrink-0 ${
+            className={`transition shrink-0 cursor-pointer ${
               collapsed
                 ? "absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-brand-surface border border-brand-border flex items-center justify-center text-brand-secondary hover:text-brand-white shadow-md z-40 hover:scale-110"
                 : "p-1.5 rounded-lg hover:bg-brand-surface text-brand-secondary hover:text-brand-white"
@@ -219,14 +221,14 @@ function SidebarContent() {
                     : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
                 }`}
               >
-                {currentPlan === "free" ? "Plano Trial" : planDef.name}
+                {currentPlan === "free" ? t.dashboard.trialPlan : planDef.name}
               </span>
               <button
                 type="button"
                 onClick={() => setShowUpgradeModal(true)}
                 className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md bg-white text-black hover:bg-neutral-200 transition shadow-sm cursor-pointer"
               >
-                Ver Planos
+                {t.dashboard.viewPlans}
               </button>
             </div>
           ) : (
@@ -234,7 +236,7 @@ function SidebarContent() {
               type="button"
               onClick={() => setShowUpgradeModal(true)}
               className="w-full py-1 rounded bg-amber-500/20 text-amber-400 text-[9px] font-mono font-bold flex items-center justify-center border border-amber-500/30 cursor-pointer"
-              title="Ver Planos"
+              title={t.dashboard.viewPlans}
             >
               Planos
             </button>
@@ -260,11 +262,11 @@ function SidebarContent() {
           }}
           className={`w-full flex items-center ${
             collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
-          } rounded-xl text-xs text-rose-500 hover:text-white hover:bg-rose-600 transition group font-medium`}
-          title="Sair do Sistema / Desconectar"
+          } rounded-xl text-xs text-rose-500 hover:text-white hover:bg-rose-600 transition group font-medium cursor-pointer`}
+          title={t.dashboard.logout}
         >
           <LogOut className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
-          {!collapsed && <span className="ml-3 font-semibold">Sair do Sistema</span>}
+          {!collapsed && <span className="ml-3 font-semibold">{t.dashboard.logout}</span>}
         </button>
       </div>
 

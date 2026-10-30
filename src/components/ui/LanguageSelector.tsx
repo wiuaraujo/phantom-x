@@ -2,10 +2,10 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useLanguage, Language } from "@/lib/i18n";
-import { ChevronLeft } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 // Crisp SVG Flags matching the reference design
-const FlagBR: React.FC<{ className?: string }> = ({ className = "w-5 h-3.5" }) => (
+export const FlagBR: React.FC<{ className?: string }> = ({ className = "w-5 h-3.5" }) => (
   <svg viewBox="0 0 32 22" className={`${className} rounded-sm overflow-hidden shrink-0 shadow-sm`}>
     <rect width="32" height="22" fill="#009b3a" />
     <polygon points="16,2.5 30,11 16,19.5 2,11" fill="#fedf00" />
@@ -19,7 +19,7 @@ const FlagBR: React.FC<{ className?: string }> = ({ className = "w-5 h-3.5" }) =
   </svg>
 );
 
-const FlagUS: React.FC<{ className?: string }> = ({ className = "w-5 h-3.5" }) => (
+export const FlagUS: React.FC<{ className?: string }> = ({ className = "w-5 h-3.5" }) => (
   <svg viewBox="0 0 32 22" className={`${className} rounded-sm overflow-hidden shrink-0 shadow-sm`}>
     <rect width="32" height="22" fill="#b22234" />
     <line x1="0" y1="3.38" x2="32" y2="3.38" stroke="#ffffff" strokeWidth="1.69" />
@@ -40,7 +40,7 @@ const FlagUS: React.FC<{ className?: string }> = ({ className = "w-5 h-3.5" }) =
   </svg>
 );
 
-const FlagES: React.FC<{ className?: string }> = ({ className = "w-5 h-3.5" }) => (
+export const FlagES: React.FC<{ className?: string }> = ({ className = "w-5 h-3.5" }) => (
   <svg viewBox="0 0 32 22" className={`${className} rounded-sm overflow-hidden shrink-0 shadow-sm`}>
     <rect width="32" height="5.5" fill="#aa151b" />
     <rect y="5.5" width="32" height="11" fill="#f1bf00" />
@@ -49,10 +49,16 @@ const FlagES: React.FC<{ className?: string }> = ({ className = "w-5 h-3.5" }) =
   </svg>
 );
 
-const LANGUAGES: { code: Language; label: string; Flag: React.FC<{ className?: string }> }[] = [
-  { code: "pt", label: "Português", Flag: FlagBR },
-  { code: "en", label: "English", Flag: FlagUS },
-  { code: "es", label: "Español", Flag: FlagES },
+export const AVAILABLE_LANGUAGES: {
+  code: Language;
+  label: string;
+  nativeLabel: string;
+  country: string;
+  Flag: React.FC<{ className?: string }>;
+}[] = [
+  { code: "pt", label: "Português", nativeLabel: "Português (Brasil)", country: "Brasil", Flag: FlagBR },
+  { code: "en", label: "English", nativeLabel: "English (US)", country: "United States", Flag: FlagUS },
+  { code: "es", label: "Español", nativeLabel: "Español (España)", country: "España", Flag: FlagES },
 ];
 
 export const LanguageSelector: React.FC<{ className?: string }> = ({ className = "" }) => {
@@ -60,7 +66,7 @@ export const LanguageSelector: React.FC<{ className?: string }> = ({ className =
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const current = LANGUAGES.find((l) => l.code === language) || LANGUAGES[0];
+  const current = AVAILABLE_LANGUAGES.find((l) => l.code === language) || AVAILABLE_LANGUAGES[0];
   const CurrentFlag = current.Flag;
 
   // Close when clicking outside
@@ -87,35 +93,35 @@ export const LanguageSelector: React.FC<{ className?: string }> = ({ className =
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`h-8 px-2.5 rounded-xl border flex items-center space-x-1.5 transition-all duration-200 ${
+          className={`h-8 px-2.5 rounded-xl border flex items-center space-x-1.5 transition-all duration-200 cursor-pointer ${
             isOpen
-              ? "bg-brand-surface border-white/40 shadow-glow-sm"
+              ? "bg-brand-surface border-sky-400/90 ring-2 ring-sky-400/40 shadow-glow-sm"
               : "bg-brand-black hover:bg-brand-surface border-brand-border hover:border-neutral-700"
           }`}
-          title={`Idioma atual: ${current.label} (Clique para alterar)`}
+          title={`Idioma atual: ${current.nativeLabel} (Clique para alterar)`}
           aria-label="Selecionar idioma"
           aria-expanded={isOpen}
         >
-          <ChevronLeft
-            className={`w-3 h-3 text-brand-secondary transition-transform duration-200 ${
-              isOpen ? "rotate-90" : "rotate-0"
-            }`}
-          />
+          {isOpen ? (
+            <ChevronUp className="w-3 h-3 text-neutral-300" />
+          ) : (
+            <ChevronDown className="w-3 h-3 text-brand-secondary" />
+          )}
           <CurrentFlag className="w-5 h-3.5" />
         </button>
 
         {/* Expanded Options: Reveals other flags side-by-side cleanly */}
         {isOpen && (
-          <div className="flex items-center space-x-1.5 animate-fadeIn">
-            {LANGUAGES.filter((l) => l.code !== language).map((item) => {
+          <div className="flex items-center space-x-1.5 animate-in fade-in zoom-in-95 duration-150">
+            {AVAILABLE_LANGUAGES.filter((l) => l.code !== language).map((item) => {
               const ItemFlag = item.Flag;
               return (
                 <button
                   key={item.code}
                   type="button"
                   onClick={() => handleSelect(item.code)}
-                  className="h-8 px-2 rounded-xl bg-brand-surface hover:bg-brand-hover border border-brand-border hover:border-neutral-600 transition-all flex items-center justify-center hover:scale-105 active:scale-95"
-                  title={item.label}
+                  className="h-8 px-2 rounded-xl bg-brand-surface hover:bg-brand-hover border border-brand-border hover:border-neutral-500 transition-all flex items-center justify-center hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
+                  title={`${item.nativeLabel} (${item.country})`}
                   aria-label={item.label}
                 >
                   <ItemFlag className="w-5 h-3.5" />
