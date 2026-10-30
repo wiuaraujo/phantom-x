@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { siteConfig } from "@/config/site";
@@ -18,6 +18,8 @@ import {
   formatPhoneNumber,
 } from "@/lib/countryCodes";
 import { EmailVerificationModal } from "@/components/auth/EmailVerificationModal";
+import { validatePasswordSecurity } from "@/lib/passwordValidator";
+import { arePhoneNumbersEqual } from "@/lib/phoneValidator";
 import {
   Lock,
   Mail,
@@ -32,6 +34,8 @@ import {
   Activity,
   AlertTriangle,
   UserCheck,
+  Check,
+  X,
 } from "lucide-react";
 
 function SignupFormInner() {
@@ -57,6 +61,9 @@ function SignupFormInner() {
   const [expiresAt, setExpiresAt] = useState(0);
 
   const [paidBanner, setPaidBanner] = useState<string | null>(null);
+
+  // Análise em tempo real dos critérios de segurança da senha
+  const pwdValidation = useMemo(() => validatePasswordSecurity(password), [password]);
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
@@ -85,10 +92,17 @@ function SignupFormInner() {
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = name.trim();
 
-    // Validação preventiva: verifica se a conta já existe
+    // 1. Validação preventiva de e-mail já existente
     const existingUsers = auth.getUsers();
     if (existingUsers.some((u) => u.email.toLowerCase() === cleanEmail)) {
       setError(t.signup.existingAccountError);
+      setIsExistingUser(true);
+      return;
+    }
+
+    // 2. Validação preventiva de telefone já cadastrado no cofre
+    if (existingUsers.some((u) => u.phone && arePhoneNumbersEqual(u.phone, u.phoneCountryCode, phone, selectedCountry.code))) {
+      setError(t.signup.phoneAlreadyRegistered);
       setIsExistingUser(true);
       return;
     }
@@ -99,8 +113,9 @@ function SignupFormInner() {
       return;
     }
 
-    if (password.length < 6) {
-      setError(t.auth.passwordMinLength);
+    // 3. Validação Estrita de Complexidade da Senha (A-Z, a-z, 0-9, símbolos, bloqueio só números)
+    if (!pwdValidation.isValid) {
+      setError(pwdValidation.errors[0] || t.auth.passwordMinLength);
       return;
     }
 
@@ -114,7 +129,7 @@ function SignupFormInner() {
       return;
     }
 
-    // Provisiona a conta do operador e envia confirmação para o Gmail
+    // Provisiona a conta do operador no backend e cofre local
     setLoading(true);
     try {
       const result = await auth.signup({
@@ -128,18 +143,17 @@ function SignupFormInner() {
 
       if (!result.success) {
         setError(result.error || t.auth.authError);
+        if (
+          result.error &&
+          (result.error.toLowerCase().includes("telefone") ||
+            result.error.toLowerCase().includes("e-mail") ||
+            result.error.toLowerCase().includes("cadastrado"))
+        ) {
+          setIsExistingUser(true);
+        }
         setLoading(false);
         return;
       }
-
-      // Envia e-mail de confirmação de conta para o Gmail
-      try {
-        await fetch("/api/v1/auth/send-verification", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: cleanEmail, name: cleanName }),
-        });
-      } catch {}
 
       setShowVerificationModal(true);
     } catch {
@@ -396,6 +410,131 @@ function SignupFormInner() {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+
+            {/* HUD Interativo de Segurança da Senha (Padrão Corporativo) */}
+            {password.length > 0 && (
+              <div className="mt-2.5 p-3 rounded-xl bg-brand-surface/80 border border-brand-border space-y-2 text-xs font-mono animate-in fade-in duration-200">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-brand-secondary">{t.signup.passwordSecurityTitle}:</span>
+                  <span
+                    className={`font-semibold ${
+                      pwdValidation.strengthLabel === "blindada"
+                        ? "text-emerald-400"
+                        : pwdValidation.strengthLabel === "forte"
+                        ? "text-teal-300"
+                        : pwdValidation.strengthLabel === "moderada"
+                        ? "text-amber-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {pwdValidation.strengthLabel === "blindada"
+                      ? t.signup.pwdStrengthFortified
+                      : pwdValidation.strengthLabel === "forte"
+                      ? t.signup.pwdStrengthStrong
+                      : pwdValidation.strengthLabel === "moderada"
+                      ? t.signup.pwdStrengthMedium
+                      : t.signup.pwdStrengthWeak}{" "}
+                    ({pwdValidation.score}%)
+                  </span>
+                </div>
+
+                <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-300 ${
+                      pwdValidation.strengthLabel === "blindada"
+                        ? "bg-emerald-500"
+                        : pwdValidation.strengthLabel === "forte"
+                        ? "bg-teal-400"
+                        : pwdValidation.strengthLabel === "moderada"
+                        ? "bg-amber-400"
+                        : "bg-red-500"
+                    }`}
+                    style={{ width: `${Math.max(10, pwdValidation.score)}%` }}
+                  />
+                </div>
+
+                {/* Checklist Dinâmico de Requisitos de Segurança */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 text-[10px]">
+                  <div
+                    className={`flex items-center space-x-1.5 ${
+                      pwdValidation.checks.minLength ? "text-emerald-400 font-semibold" : "text-brand-muted"
+                    }`}
+                  >
+                    {pwdValidation.checks.minLength ? (
+                      <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                    ) : (
+                      <X className="w-3 h-3 text-brand-muted shrink-0" />
+                    )}
+                    <span>{t.signup.pwdReqLength}</span>
+                  </div>
+
+                  <div
+                    className={`flex items-center space-x-1.5 ${
+                      pwdValidation.checks.hasUpper ? "text-emerald-400 font-semibold" : "text-brand-muted"
+                    }`}
+                  >
+                    {pwdValidation.checks.hasUpper ? (
+                      <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                    ) : (
+                      <X className="w-3 h-3 text-brand-muted shrink-0" />
+                    )}
+                    <span>{t.signup.pwdReqUpper}</span>
+                  </div>
+
+                  <div
+                    className={`flex items-center space-x-1.5 ${
+                      pwdValidation.checks.hasLower ? "text-emerald-400 font-semibold" : "text-brand-muted"
+                    }`}
+                  >
+                    {pwdValidation.checks.hasLower ? (
+                      <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                    ) : (
+                      <X className="w-3 h-3 text-brand-muted shrink-0" />
+                    )}
+                    <span>{t.signup.pwdReqLower}</span>
+                  </div>
+
+                  <div
+                    className={`flex items-center space-x-1.5 ${
+                      pwdValidation.checks.hasNumber ? "text-emerald-400 font-semibold" : "text-brand-muted"
+                    }`}
+                  >
+                    {pwdValidation.checks.hasNumber ? (
+                      <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                    ) : (
+                      <X className="w-3 h-3 text-brand-muted shrink-0" />
+                    )}
+                    <span>{t.signup.pwdReqNumber}</span>
+                  </div>
+
+                  <div
+                    className={`flex items-center space-x-1.5 ${
+                      pwdValidation.checks.hasSpecial ? "text-emerald-400 font-semibold" : "text-brand-muted"
+                    }`}
+                  >
+                    {pwdValidation.checks.hasSpecial ? (
+                      <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                    ) : (
+                      <X className="w-3 h-3 text-brand-muted shrink-0" />
+                    )}
+                    <span>{t.signup.pwdReqSpecial}</span>
+                  </div>
+
+                  <div
+                    className={`flex items-center space-x-1.5 ${
+                      pwdValidation.checks.notOnlyNumbers ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold"
+                    }`}
+                  >
+                    {pwdValidation.checks.notOnlyNumbers ? (
+                      <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                    ) : (
+                      <X className="w-3 h-3 text-red-400 shrink-0" />
+                    )}
+                    <span>{t.signup.pwdReqNotNumbersOnly}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Confirmar Senha */}

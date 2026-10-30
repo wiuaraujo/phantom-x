@@ -1,4 +1,6 @@
 import { User, PlanId } from "@/types";
+import { validatePasswordSecurity } from "./passwordValidator";
+import { normalizePhoneNumber, arePhoneNumbersEqual } from "./phoneValidator";
 
 export interface RegisteredUser {
   id: string;
@@ -431,29 +433,75 @@ export const auth = {
       return { success: false, error: "Por favor, insira um endereço de e-mail válido." };
     }
 
-    const phoneDigits = cleanPhone.replace(/\D/g, "");
-    if (!cleanPhone || phoneDigits.length < 8) {
+    const normPhone = normalizePhoneNumber(cleanPhone, phoneCountryCode);
+    if (!cleanPhone || normPhone.digits.length < 8) {
       return {
         success: false,
         error: "Por favor, informe um número de telefone válido com DDD.",
       };
     }
 
-    if (!password || password.length < 8) {
+    // 1. Validação Estrita de Complexidade de Senha
+    const pwdValidation = validatePasswordSecurity(password);
+    if (!pwdValidation.isValid) {
       return {
         success: false,
-        error: "A senha deve conter no mínimo 8 caracteres para garantir a segurança da infraestrutura.",
+        error: pwdValidation.errors[0] || "A senha fornecida não atende aos requisitos de segurança do sistema.",
       };
     }
 
     const users = this.getUsers();
 
-    // Verifica se já existe conta com este e-mail
+    // 2. Verificação Preventiva Local de Telefone
+    const isPhoneTaken = users.some((u) => {
+      if (!u.phone) return false;
+      return arePhoneNumbersEqual(u.phone, u.phoneCountryCode, cleanPhone, phoneCountryCode);
+    });
+
+    if (isPhoneTaken) {
+      return {
+        success: false,
+        error: "Este número de telefone já está cadastrado no sistema. Por favor, utilize outro número ou faça login na sua conta existente.",
+      };
+    }
+
+    // 3. Verifica se já existe conta com este e-mail
     if (users.some((u) => u.email.toLowerCase() === cleanEmail)) {
       return {
         success: false,
         error: "Já existe uma conta registrada com este e-mail. Por favor, faça login ou use outro e-mail.",
       };
+    }
+
+    // 4. Provisionamento Oficial no Cluster Backend (Supabase Auth + Database)
+    let backendUserId: string | null = null;
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch("/api/v1/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: cleanName,
+            email: cleanEmail,
+            phone: cleanPhone,
+            phoneCountryCode,
+            password,
+            timezone,
+          }),
+        });
+        const backendData = await res.json();
+        if (!backendData.success) {
+          return {
+            success: false,
+            error: backendData.error || "Erro ao processar criação de conta no cluster.",
+          };
+        }
+        if (backendData.user?.id) {
+          backendUserId = backendData.user.id;
+        }
+      } catch (err: any) {
+        console.warn("[Auth Signup] Conexão com cluster backend realizada em modo híbrido:", err);
+      }
     }
 
     // Deriva username único a partir do e-mail
@@ -468,7 +516,7 @@ export const auth = {
     // Gera salting criptográfico exclusivo e hash
     const salt = generateRandomSalt();
     const passwordHash = await hashPassword(password, salt);
-    const userId = `usr_px_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
+    const userId = backendUserId || `usr_px_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
 
     const newUser: RegisteredUser = {
       id: userId,
@@ -626,7 +674,23 @@ export const auth = {
       user.timezone = data.timezone;
     }
     if (data.phone !== undefined) {
-      user.phone = data.phone.trim();
+      const cleanNewPhone = data.phone.trim();
+      const newCountryCode = data.phoneCountryCode || user.phoneCountryCode || "+55";
+      if (cleanNewPhone) {
+        const conflict = users.some(
+          (u) =>
+            u.id !== user.id &&
+            u.phone &&
+            arePhoneNumbersEqual(u.phone, u.phoneCountryCode, cleanNewPhone, newCountryCode)
+        );
+        if (conflict) {
+          return {
+            success: false,
+            error: "Este número de telefone já está cadastrado em outra conta de operador.",
+          };
+        }
+      }
+      user.phone = cleanNewPhone;
     }
     if (data.phoneCountryCode !== undefined) {
       user.phoneCountryCode = data.phoneCountryCode;

@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
         email: u.email || "",
         name: profile?.name || u.user_metadata?.name || email.split("@")[0],
         nickname: profile?.nickname || u.user_metadata?.nickname || profile?.name?.split(" ")[0] || "Operador",
-        phone: profile?.phone || u.user_metadata?.phone || u.phone || "—",
+        phone: profile?.phone || u.user_metadata?.phone || u.user_metadata?.phoneRaw || u.phone || "—",
         phoneCountryCode: profile?.phone_country_code || u.user_metadata?.phoneCountryCode || "+55",
         role: profile?.role || u.user_metadata?.role || "operator",
         timezone: profile?.timezone || u.user_metadata?.timezone || "America/Sao_Paulo",
@@ -284,6 +284,19 @@ export async function POST(req: NextRequest) {
       // 5. EXCLUI O USUÁRIO DO SISTEMA (100% LIMPO EM TODAS AS CAMADAS)
       case "delete": {
         let deletedSuccessfully = false;
+
+        // Se targetUserId não for UUID, busca o usuário correspondente no Supabase Auth por e-mail ou id
+        if (!targetUserId || !targetUserId.includes("-")) {
+          try {
+            const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
+            const match = userList?.users?.find(
+              (u) =>
+                (cleanEmail && u.email?.toLowerCase() === cleanEmail) ||
+                (userId && (u.id === userId || u.user_metadata?.id === userId))
+            );
+            if (match) targetUserId = match.id;
+          } catch {}
+        }
 
         if (targetUserId) {
           try {

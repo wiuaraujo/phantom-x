@@ -122,6 +122,18 @@ export interface Translations {
     signInLink: string;
     passwordMismatch: string;
     existingAccountError: string;
+    phoneAlreadyRegistered: string;
+    passwordSecurityTitle: string;
+    pwdReqLength: string;
+    pwdReqUpper: string;
+    pwdReqLower: string;
+    pwdReqNumber: string;
+    pwdReqSpecial: string;
+    pwdReqNotNumbersOnly: string;
+    pwdStrengthWeak: string;
+    pwdStrengthMedium: string;
+    pwdStrengthStrong: string;
+    pwdStrengthFortified: string;
     invalidPhone: string;
     fillAllFields: string;
     acceptTermsRequired: string;
@@ -306,6 +318,18 @@ const translations: Record<Language, Translations> = {
       signInLink: "Acessar console existente",
       passwordMismatch: "As senhas não coincidem. Digite novamente.",
       existingAccountError: "Já existe uma conta registrada com este e-mail. Por favor, faça login ou use outro e-mail.",
+      phoneAlreadyRegistered: "Este número de telefone já está cadastrado no sistema. Por favor, utilize outro número ou faça login na sua conta.",
+      passwordSecurityTitle: "Segurança da Senha",
+      pwdReqLength: "Mínimo 8 caracteres",
+      pwdReqUpper: "Ao menos 1 letra maiúscula (A-Z)",
+      pwdReqLower: "Ao menos 1 letra minúscula (a-z)",
+      pwdReqNumber: "Ao menos 1 número (0-9)",
+      pwdReqSpecial: "Ao menos 1 caractere especial (!@#$...)",
+      pwdReqNotNumbersOnly: "Não permitido apenas números",
+      pwdStrengthWeak: "Fraca",
+      pwdStrengthMedium: "Moderada",
+      pwdStrengthStrong: "Forte",
+      pwdStrengthFortified: "Blindada",
       invalidPhone: "Por favor, informe um número de telefone válido com DDD.",
       fillAllFields: "Preencha todos os campos obrigatórios.",
       acceptTermsRequired: "É necessário concordar com os Termos de Serviço para continuar.",
@@ -488,6 +512,18 @@ const translations: Record<Language, Translations> = {
       signInLink: "Sign in to existing console",
       passwordMismatch: "Passwords do not match. Please try again.",
       existingAccountError: "An account with this email already exists. Please sign in or use another email.",
+      phoneAlreadyRegistered: "This phone number is already registered in the system. Please use another number or sign in to your account.",
+      passwordSecurityTitle: "Password Security",
+      pwdReqLength: "Minimum 8 characters",
+      pwdReqUpper: "At least 1 uppercase letter (A-Z)",
+      pwdReqLower: "At least 1 lowercase letter (a-z)",
+      pwdReqNumber: "At least 1 number (0-9)",
+      pwdReqSpecial: "At least 1 special character (!@#$...)",
+      pwdReqNotNumbersOnly: "Cannot be only numbers",
+      pwdStrengthWeak: "Weak",
+      pwdStrengthMedium: "Moderate",
+      pwdStrengthStrong: "Strong",
+      pwdStrengthFortified: "Hardened",
       invalidPhone: "Please provide a valid phone number with area code.",
       fillAllFields: "Please fill in all required fields.",
       acceptTermsRequired: "You must accept the Terms of Service to continue.",
@@ -669,7 +705,19 @@ const translations: Record<Language, Translations> = {
       hasAccount: "¿Ya tienes una cuenta activa?",
       signInLink: "Acceder a consola existente",
       passwordMismatch: "Las contraseñas no coinciden. Inténtelo de nuevo.",
-      existingAccountError: "Ya existe una cuenta registrada con este correo. Por favor inicie sesión o use otro correo.",
+      existingAccountError: "Ya existe una cuenta registrada con este correo. Por favor inicie sesión o use outro correo.",
+      phoneAlreadyRegistered: "Este número de teléfono ya está registrado en el sistema. Por favor use otro número o inicie sesión.",
+      passwordSecurityTitle: "Seguridad de la Contraseña",
+      pwdReqLength: "Mínimo 8 caracteres",
+      pwdReqUpper: "Al menos 1 letra mayúscula (A-Z)",
+      pwdReqLower: "Al menos 1 letra minúscula (a-z)",
+      pwdReqNumber: "Al menos 1 número (0-9)",
+      pwdReqSpecial: "Al menos 1 carácter especial (!@#$...)",
+      pwdReqNotNumbersOnly: "No se permite solo números",
+      pwdStrengthWeak: "Débil",
+      pwdStrengthMedium: "Moderada",
+      pwdStrengthStrong: "Fuerte",
+      pwdStrengthFortified: "Blindada",
       invalidPhone: "Por favor, ingrese un número de teléfono válido con código de área.",
       fillAllFields: "Complete todos los campos obligatorios.",
       acceptTermsRequired: "Debe aceptar los Términos de Servicio para continuar.",
