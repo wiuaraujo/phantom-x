@@ -81,7 +81,7 @@ export function verifyOtpCode(inputCode: string, email?: string): { success: boo
   if (now > record.expiresAt) {
     return {
       success: false,
-      error: "Este código de verificação expirou (limite de 5 minutos). Clique em 'Reenviar código' para receber um novo token.",
+      error: "Este link de verificação expirou. Clique em reenviar para receber uma nova confirmação.",
     };
   }
 
@@ -97,28 +97,29 @@ export function verifyOtpCode(inputCode: string, email?: string): { success: boo
   if (cleanInput !== record.code) {
     return {
       success: false,
-      error: "Código incorreto. Por favor, verifique os 6 números recebidos no seu e-mail.",
+      error: "Código incorreto. Por favor, verifique os números recebidos no seu e-mail.",
     };
-  }
-
-  // Sucesso: remove o token usado
-  if (typeof window !== "undefined") {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {}
   }
 
   return { success: true };
 }
 
 /**
- * Renderiza o template HTML oficial do e-mail de verificação Phantom-X
- * Especificação do usuário:
- * - "Olá, [nome da pessoa]"
- * - "Seu token de verificação de conta é:"
- * - Quadrado preto com degradê branco leve com o código de 6 dígitos em destaque
- * - "Insira o seu código no campo de verificação para confirmar a sua conta. Se você não solicitou este código, por favor, ignore este e-mail."
- * - "Um abraço, Equipe Phantom-X."
+ * Limpa a verificação pendente após confirmação bem sucedida
+ */
+export function clearPendingVerification(): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+  }
+}
+
+/**
+ * Template Oficial do E-mail de Verificação Phantom-X
+ * - Logotipo minimalista da Phantom
+ * - Saudação com nome do operador
+ * - Botão direto de "Confirmar e Ativar Minha Conta" sem exibir caixa de código
  */
 export function renderVerificationEmailHtml(name: string, code: string, origin?: string, email?: string): string {
   const cleanName = name || "Operador";
@@ -132,7 +133,7 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Seu Token de Verificação Phantom-X</title>
+  <title>Confirme sua conta no Phantom-X</title>
   <style>
     body {
       margin: 0;
@@ -157,18 +158,7 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
       padding: 36px 30px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.8);
     }
-    .logo-badge {
-      display: inline-block;
-      padding: 6px 14px;
-      background: #18181b;
-      border: 1px solid #3f3f46;
-      border-radius: 10px;
-      font-size: 12px;
-      font-family: monospace;
-      color: #ffffff;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+    .logo-container {
       margin-bottom: 24px;
     }
     .greeting {
@@ -181,42 +171,36 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
     .subtext {
       font-size: 14px;
       color: #a1a1aa;
-      margin: 0 0 24px 0;
+      margin: 0 0 20px 0;
       line-height: 1.5;
-    }
-    /* Quadrado preto no padrão do sistema com degradê branco leve */
-    .otp-box {
-      background: linear-gradient(145deg, #18181b 0%, #27272a 45%, #18181b 100%);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 16px;
-      padding: 26px 20px;
-      text-align: center;
-      margin: 24px 0;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.25);
-    }
-    .otp-code {
-      font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
-      font-size: 36px;
-      font-weight: 800;
-      letter-spacing: 10px;
-      color: #ffffff;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
-      margin: 0;
-      padding-left: 10px;
-    }
-    .otp-expiry {
-      font-size: 11px;
-      color: #71717a;
-      font-family: monospace;
-      margin-top: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
     }
     .instruction {
       font-size: 13px;
       color: #a1a1aa;
       line-height: 1.6;
-      margin: 24px 0 30px 0;
+      margin: 0 0 28px 0;
+    }
+    .btn-container {
+      text-align: center;
+      margin: 32px 0 34px 0;
+    }
+    .btn-confirm {
+      display: inline-block;
+      background-color: #ffffff;
+      color: #000000 !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 14px 34px;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
+    }
+    .ignore-text {
+      font-size: 12px;
+      color: #71717a;
+      line-height: 1.5;
+      margin: 24px 0 28px 0;
     }
     .closing {
       font-size: 14px;
@@ -236,28 +220,26 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
 <body>
   <div class="wrapper">
     <div class="container">
-      <div class="logo-badge">🛡️ PHANTOM-X CLOAKER</div>
+      <!-- Logotipo Minimalista Pequeno da Phantom -->
+      <div class="logo-container">
+        <img src="${baseUrl}/logo.png" alt="Phantom-X" width="36" height="36" style="display: block; width: 36px; height: 36px; object-fit: contain;" />
+      </div>
+
       <h1 class="greeting">Olá, ${cleanName}</h1>
       <p class="subtext">Sua conta na plataforma Phantom-X foi criada com sucesso.</p>
 
-      <p class="instruction" style="margin-top: 0;">
-        Para ativar o seu acesso de operador e iniciar seus testes no Plano Trial, confirme o seu e-mail clicando no botão abaixo:
+      <p class="instruction">
+        Para ativar o seu acesso de operador e começar a utilizar a plataforma, confirme o seu e-mail clicando no botão abaixo:
       </p>
 
-      <!-- Botão Oficial de Ativação de Conta -->
-      <div style="text-align: center; margin: 28px 0;">
-        <a href="${confirmationUrl}" style="display: inline-block; background-color: #ffffff; color: #000000; font-family: -apple-system, sans-serif; font-weight: 700; font-size: 14px; padding: 14px 32px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);">
+      <!-- Botão Oficial de Ativação de Conta (Sem caixa de código) -->
+      <div class="btn-container">
+        <a href="${confirmationUrl}" class="btn-confirm" target="_blank" rel="noopener noreferrer">
           Confirmar e Ativar Minha Conta &rarr;
         </a>
       </div>
 
-      <!-- Quadrado preto com degradê branco leve com Token Opcional -->
-      <div class="otp-box">
-        <div class="otp-code">${code}</div>
-        <div class="otp-expiry">⏳ Código de Ativação do Operador</div>
-      </div>
-
-      <p class="instruction">
+      <p class="ignore-text">
         Se você não solicitou este cadastro, por favor, ignore esta mensagem.
       </p>
 
@@ -283,10 +265,8 @@ export function renderVerificationEmailText(name: string, code: string, origin?:
 
 Sua conta na plataforma Phantom-X foi criada com sucesso!
 
-Para confirmar o seu e-mail e ativar sua conta, acesse o link:
+Para confirmar o seu e-mail e ativar sua conta, clique no link abaixo:
 ${confirmationUrl}
-
-Código de ativação: [ ${code} ]
 
 Se você não solicitou este cadastro, por favor ignore este e-mail.
 

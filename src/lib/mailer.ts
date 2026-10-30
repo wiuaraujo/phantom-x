@@ -71,7 +71,7 @@ export async function dispatchVerificationEmail(params: {
 
   const html = renderVerificationEmailHtml(cleanName, code, resolvedOrigin, cleanEmail);
   const text = renderVerificationEmailText(cleanName, code, resolvedOrigin, cleanEmail);
-  const subject = `🛡️ [Phantom-X] Confirme sua conta de Operador (${code})`;
+  const subject = "🛡️ [Phantom-X] Confirme sua conta de Operador";
 
   const resendKey = apiKey?.trim() || process.env.RESEND_API_KEY?.trim();
 
