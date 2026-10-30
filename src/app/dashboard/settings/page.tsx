@@ -43,7 +43,6 @@ import {
   Radio,
   FileCode,
   CreditCard,
-  Crown,
   ExternalLink,
   Zap,
 } from "lucide-react";
@@ -1203,7 +1202,7 @@ function SettingsPageContent() {
                   onClick={() => setShowUpgradeModal(true)}
                   className="px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition shadow-sm flex items-center space-x-2 cursor-pointer"
                 >
-                  <Crown className="w-3.5 h-3.5" />
+                  <Zap className="w-3.5 h-3.5" />
                   <span>{userPlan === "free" ? "Ver Planos & Fazer Upgrade" : "Mudar / Fazer Upgrade de Plano"}</span>
                 </button>
 

@@ -34,7 +34,7 @@ import {
   Clock,
   Mail,
   Phone,
-  Crown,
+  CreditCard,
   Zap,
   TrendingUp,
   DollarSign,
@@ -784,16 +784,16 @@ export default function AdminPortalPage() {
           </div>
 
           {/* Card 3: Operadores Liberados por Admin (Cortesia / MRR Zero) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-amber-500/30 backdrop-blur-md shadow-lg">
+          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-neutral-700/60 backdrop-blur-md shadow-lg">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
               <span>LIBERADOS ADMIN</span>
-              <Crown className="w-4 h-4 text-amber-400" />
+              <ShieldCheck className="w-4 h-4 text-neutral-400" />
             </div>
-            <div className="text-2xl sm:text-3xl font-poppins font-bold text-amber-300">
+            <div className="text-2xl sm:text-3xl font-poppins font-bold text-white">
               {liveMetrics.adminCount}
             </div>
             <div className="mt-2 text-[10px] font-mono text-neutral-400 truncate flex items-center space-x-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
               <span>Cortesia ativa • R$ 0 MRR</span>
             </div>
           </div>
@@ -860,7 +860,7 @@ export default function AdminPortalPage() {
                 activeTab === "plans" ? "bg-white text-black font-bold shadow-md" : "text-neutral-400 hover:text-white"
               }`}
             >
-              <Crown className="w-3.5 h-3.5 text-amber-400" />
+              <CreditCard className="w-3.5 h-3.5" />
               <span>Planos &amp; Markup</span>
             </button>
 
@@ -1118,10 +1118,10 @@ export default function AdminPortalPage() {
                                     setTargetPlan((user.plan as PlanId) || "growth");
                                     setTargetPlanStatus((user.planStatus as any) || "active");
                                   }}
-                                  className="px-2 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-bold text-[10px] transition border border-amber-500/30 flex items-center space-x-1 cursor-pointer"
+                                  className="px-2 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-medium text-[10px] transition border border-neutral-700 flex items-center space-x-1 cursor-pointer"
                                   title="Liberar ou Alterar Plano deste Operador"
                                 >
-                                  <Crown className="w-3 h-3 text-amber-400" />
+                                  <CreditCard className="w-3 h-3 text-neutral-300" />
                                   <span>Plano</span>
                                 </button>
 
@@ -1183,8 +1183,8 @@ export default function AdminPortalPage() {
             <div className="p-6 rounded-2xl bg-neutral-900/80 border border-white/10 backdrop-blur-md">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-300 font-bold mb-2">
-                    <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-neutral-300 font-medium mb-2">
+                    <CreditCard className="w-3.5 h-3.5 text-neutral-400" />
                     <span>POSICIONAMENTO COMPETITIVO &amp; ALTO MARKUP</span>
                   </div>
                   <h3 className="text-xl font-bold text-white font-poppins">
@@ -1325,12 +1325,12 @@ export default function AdminPortalPage() {
                   <button
                     onClick={handleSaveUserPlan}
                     disabled={!selectedUserForPlan || savingPlan}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs font-mono uppercase tracking-wider transition shadow-lg disabled:opacity-40 cursor-pointer flex items-center justify-center space-x-1.5"
+                    className="w-full py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold text-xs font-mono uppercase tracking-wider transition shadow-lg disabled:opacity-40 cursor-pointer flex items-center justify-center space-x-1.5"
                   >
                     {savingPlan ? (
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                     ) : (
-                      <Crown className="w-3.5 h-3.5" />
+                      <CreditCard className="w-3.5 h-3.5" />
                     )}
                     <span>{targetPlanStatus === "canceled" ? "Desativar Plano" : "Liberar Plano"}</span>
                   </button>
@@ -1751,7 +1751,7 @@ export default function AdminPortalPage() {
           <div className="w-full max-w-xl bg-neutral-950 border border-white/20 rounded-2xl p-6 shadow-2xl font-mono text-xs">
             <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
               <div className="flex items-center space-x-2">
-                <Crown className="w-5 h-5 text-amber-400" />
+                <CreditCard className="w-5 h-5 text-neutral-300" />
                 <h3 className="text-base font-bold text-white font-poppins">Liberar / Alterar Plano de Assinatura</h3>
               </div>
               <button

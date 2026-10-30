@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   Check,
   Zap,
-  Crown,
   Sparkles,
   ArrowRight,
   Lock,
@@ -117,8 +116,8 @@ export const UpgradePlanModal: React.FC<UpgradePlanModalProps> = ({
 
         {/* Header HUD */}
         <div className="text-center max-w-2xl mx-auto mb-8">
-          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-300 mb-3 uppercase tracking-wider font-bold">
-            <Lock className="w-3.5 h-3.5 text-amber-400" />
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-neutral-300 mb-3 uppercase tracking-wider font-semibold">
+            <Lock className="w-3.5 h-3.5 text-neutral-400" />
             <span>UPGRADE DE INFRAESTRUTURA & ARBITRAGEM</span>
           </div>
 

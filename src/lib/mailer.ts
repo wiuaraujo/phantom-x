@@ -69,8 +69,8 @@ export async function dispatchVerificationEmail(params: {
       ? origin
       : process.env.NEXT_PUBLIC_APP_URL || "https://phantom-x.pro";
 
-  const html = renderVerificationEmailHtml(cleanName, code, resolvedOrigin);
-  const text = renderVerificationEmailText(cleanName, code, resolvedOrigin);
+  const html = renderVerificationEmailHtml(cleanName, code, resolvedOrigin, cleanEmail);
+  const text = renderVerificationEmailText(cleanName, code, resolvedOrigin, cleanEmail);
   const subject = `🛡️ [Phantom-X] Confirme sua conta de Operador (${code})`;
 
   const resendKey = apiKey?.trim() || process.env.RESEND_API_KEY?.trim();

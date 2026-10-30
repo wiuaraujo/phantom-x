@@ -254,8 +254,8 @@ export const auth = {
       };
     }
 
-    // 3.5. VALIDAÇÃO OBRIGATÓRIA: E-MAIL NÃO CONFIRMADO VIA OTP (EXIGE OTP 6 NÚMEROS)
-    if (user.emailOtpVerified !== true) {
+    // 3.5. VALIDAÇÃO OBRIGATÓRIA: E-MAIL NÃO CONFIRMADO (PROIBIDO ACESSO SEM CONFIRMAR)
+    if (user.emailOtpVerified !== true || user.emailVerified !== true) {
       return {
         success: false,
         requiresEmailVerification: true,
@@ -266,7 +266,7 @@ export const auth = {
           phone: user.phone,
           phoneCountryCode: user.phoneCountryCode,
         },
-        error: "Confirmação de e-mail obrigatória. Insira o token de 6 números enviado para o seu e-mail.",
+        error: "Esta conta ainda não foi ativada. Você precisa confirmar o seu e-mail antes de acessar o sistema.",
       };
     }
 
@@ -478,9 +478,9 @@ export const auth = {
       email: cleanEmail,
       phone: cleanPhone,
       phoneCountryCode,
-      emailVerified: true,
-      emailOtpVerified: true,
-      emailConfirmedAt: new Date().toISOString(),
+      emailVerified: false, // E-MAIL NÃO VERIFICADO: PROIBIDO ACESSO SEM CONFIRMAR
+      emailOtpVerified: false,
+      emailConfirmedAt: undefined,
       plan: "free",
       planStatus: "trial",
       planActivatedAt: new Date().toISOString(),
@@ -494,7 +494,7 @@ export const auth = {
       failedAttempts: 0,
       lockoutUntil: null,
       createdAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
+      lastLoginAt: null,
     };
 
     users.push(newUser);
@@ -509,39 +509,34 @@ export const auth = {
       } catch {}
     }
 
-    // Cria sessão autenticada para o novo usuário registrado
-    const expiresAt = new Date(Date.now() + 7 * 86400000).toISOString();
-    const token = generateSecureToken();
-
-    const session: AuthSession = {
-      user: {
+    // NUNCA CRIA SESSÃO OU COOKIE ANTES DA CONFIRMAÇÃO DO E-MAIL!
+    return {
+      success: true,
+      requiresEmailVerification: true,
+      unverifiedUser: {
         id: newUser.id,
         name: newUser.name,
-        nickname: newUser.nickname,
         email: newUser.email,
         phone: newUser.phone,
         phoneCountryCode: newUser.phoneCountryCode,
-        role: "member",
-        timezone: newUser.timezone,
-        emailVerified: true,
-        plan: "free",
-        planStatus: "trial",
-        planActivatedAt: newUser.planActivatedAt,
-        planExpiresAt: null,
-        organizationId: newUser.organizationId,
-        organizationName: newUser.organizationName,
-        createdAt: newUser.createdAt,
       },
-      token,
-      expiresAt,
     };
+  },
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
-      document.cookie = `phantom_token=${token}; path=/; max-age=604800; SameSite=Strict`;
-    }
+  /**
+   * Marca o e-mail de um usuário como confirmado permanentemente
+   */
+  markUserEmailVerified(email: string): boolean {
+    const clean = email.trim().toLowerCase();
+    const users = this.getUsers();
+    const userIndex = users.findIndex((u) => u.email.toLowerCase() === clean);
+    if (userIndex === -1) return false;
 
-    return { success: true, session };
+    users[userIndex].emailVerified = true;
+    users[userIndex].emailOtpVerified = true;
+    users[userIndex].emailConfirmedAt = new Date().toISOString();
+    this.saveUsers(users);
+    return true;
   },
 
   /**

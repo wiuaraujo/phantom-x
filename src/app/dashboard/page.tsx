@@ -26,7 +26,6 @@ import {
   Sliders,
   Clock,
   RotateCcw,
-  Crown,
 } from "lucide-react";
 import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
 import { getPlanDefinition } from "@/lib/plans";
@@ -187,67 +186,6 @@ export default function DashboardOverview() {
           </div>
         )}
 
-        {/* Banner de Quota Operacional Fiel ao Plano */}
-        <div className={`p-3.5 sm:p-4 rounded-2xl border text-xs font-mono flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md ${
-          userPlan === "scale"
-            ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-200"
-            : userPlan === "growth"
-            ? "bg-purple-950/20 border-purple-500/30 text-purple-200"
-            : userPlan === "starter"
-            ? "bg-neutral-900 border-neutral-700 text-neutral-200"
-            : "bg-neutral-900/90 border-amber-500/30 text-amber-200"
-        }`}>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className={`w-2 h-2 rounded-full shrink-0 ${
-              userPlan === "scale"
-                ? "bg-emerald-400"
-                : userPlan === "growth"
-                ? "bg-purple-400"
-                : userPlan === "starter"
-                ? "bg-blue-400"
-                : "bg-amber-400 animate-pulse"
-            }`} />
-            <div>
-              <span className="font-bold text-white uppercase tracking-wider">
-                Plano {planDef.name}
-              </span>
-              <span className="text-neutral-400 ml-2">
-                Eventos analisados:{" "}
-                <strong className={
-                  planDef.limits.maxEventsMonthly !== -1 && metrics.totalEvents >= planDef.limits.maxEventsMonthly
-                    ? "text-red-400 font-bold"
-                    : "text-white"
-                }>
-                  {metrics.totalEvents.toLocaleString("pt-BR")}
-                </strong>{" "}
-                / {planDef.limits.maxEventsMonthly === -1 ? "Ilimitados" : `${planDef.limits.maxEventsMonthly.toLocaleString("pt-BR")} no mês`}
-              </span>
-              <span className="text-neutral-500 ml-2">•</span>
-              <span className="text-neutral-300 ml-2">
-                Região: <strong className="text-white">{planDef.region}</strong> {planDef.flags}
-              </span>
-            </div>
-          </div>
-
-          {userPlan !== "scale" && (
-            <button
-              onClick={() => {
-                setUpgradeReason(
-                  userPlan === "free"
-                    ? "Sua conta gratuita está restrita a 100 eventos, 1 domínio e 1 cloaker. Ative o plano Starter (R$ 149), Growth (R$ 389) ou Scale (R$ 529) para desbloquear seu tráfego."
-                    : userPlan === "starter"
-                    ? "Faça upgrade para o plano Growth (R$ 389) ou Scale (R$ 529) para desbloquear 100.000 cliques, América Latina e telemetria de GPU."
-                    : "Faça upgrade para o plano Scale (R$ 529) para ter cliques 100% ilimitados, cobertura global de 247 países e Kill-Switch de emergência."
-                );
-                setShowUpgradeModal(true);
-              }}
-              className="px-3.5 py-1.5 rounded-xl bg-white text-black hover:bg-neutral-200 font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center space-x-1.5 shrink-0 cursor-pointer"
-            >
-              <Crown className="w-3.5 h-3.5" />
-              <span>{userPlan === "free" ? "Ativar Plano Comercial" : "Expandir Capacidade"}</span>
-            </button>
-          )}
-        </div>
         {/* Revert / Test Feedback Notice */}
         {revertNotice && (
           <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs font-mono text-white animate-in fade-in slide-in-from-top-1">

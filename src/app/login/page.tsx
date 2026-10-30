@@ -39,6 +39,7 @@ function LoginFormInner() {
   const [error, setError] = useState<string | null>(null);
   const [accountNotFound, setAccountNotFound] = useState(false);
   const [authRequiredNotice, setAuthRequiredNotice] = useState(false);
+  const [accountActivatedNotice, setAccountActivatedNotice] = useState(false);
 
   // Email Verification OTP Modal State
   const [showVerificationModal, setShowVerificationModal] = useState(false);
@@ -52,6 +53,12 @@ function LoginFormInner() {
     }
     if (searchParams.get("auth_required") === "1") {
       setAuthRequiredNotice(true);
+    }
+    if (searchParams.get("verified") === "1" || searchParams.get("confirmed") === "1") {
+      setAccountActivatedNotice(true);
+      if (emailParam) {
+        auth.markUserEmailVerified(emailParam);
+      }
     }
   }, [searchParams]);
 
@@ -174,6 +181,21 @@ function LoginFormInner() {
             {t.auth.loginSubtitle}
           </p>
         </div>
+
+        {/* Notificação de Conta Ativada com Sucesso */}
+        {accountActivatedNotice && (
+          <div className="mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-200 font-sans shadow-lg shadow-black/50 ring-1 ring-emerald-500/20 animate-in fade-in duration-300 flex items-start space-x-2.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <span className="font-semibold block text-emerald-300 text-xs tracking-tight">
+                E-mail confirmado com sucesso!
+              </span>
+              <p className="text-[11px] text-emerald-200/90 leading-normal">
+                Sua conta de operador foi ativada. Digite sua senha abaixo para acessar o centro de comando.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Notificação de Sessão Requerida */}
         {authRequiredNotice && !error && (

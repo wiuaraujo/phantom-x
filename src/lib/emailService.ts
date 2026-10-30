@@ -120,10 +120,12 @@ export function verifyOtpCode(inputCode: string, email?: string): { success: boo
  * - "Insira o seu código no campo de verificação para confirmar a sua conta. Se você não solicitou este código, por favor, ignore este e-mail."
  * - "Um abraço, Equipe Phantom-X."
  */
-export function renderVerificationEmailHtml(name: string, code: string, origin?: string): string {
+export function renderVerificationEmailHtml(name: string, code: string, origin?: string, email?: string): string {
   const cleanName = name || "Operador";
   const baseUrl = origin && origin.startsWith("http") ? origin : (process.env.NEXT_PUBLIC_APP_URL || "https://phantom-x.pro");
-  const confirmationUrl = `${baseUrl}/login?confirmed=1`;
+  const confirmationUrl = email
+    ? `${baseUrl}/api/v1/auth/confirm?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`
+    : `${baseUrl}/login?confirmed=1`;
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -270,10 +272,12 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
 /**
  * Renderiza o e-mail em formato texto simples
  */
-export function renderVerificationEmailText(name: string, code: string, origin?: string): string {
+export function renderVerificationEmailText(name: string, code: string, origin?: string, email?: string): string {
   const cleanName = name || "Operador";
   const baseUrl = origin && origin.startsWith("http") ? origin : (process.env.NEXT_PUBLIC_APP_URL || "https://phantom-x.pro");
-  const confirmationUrl = `${baseUrl}/login?confirmed=1`;
+  const confirmationUrl = email
+    ? `${baseUrl}/api/v1/auth/confirm?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`
+    : `${baseUrl}/login?confirmed=1`;
 
   return `Olá, ${cleanName}
 
