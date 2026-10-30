@@ -1,9 +1,10 @@
 import nodemailer from "nodemailer";
 import { renderVerificationEmailHtml, renderVerificationEmailText } from "./emailService";
+import { sendEmailViaResend } from "./resend";
 
 export interface SendEmailResult {
   success: boolean;
-  provider: "smtp" | "supabase" | "resend" | "none";
+  provider: "resend" | "smtp" | "supabase" | "none";
   error?: string;
   messageId?: string;
 }
@@ -29,7 +30,7 @@ function getSmtpTransporter() {
     });
   }
 
-  // Suporte direto para Resend SMTP se a chave RESEND_API_KEY estiver configurada
+  // Suporte para Resend SMTP se configurado
   const resendKey = process.env.RESEND_API_KEY;
   if (resendKey) {
     return nodemailer.createTransport({
@@ -48,21 +49,57 @@ function getSmtpTransporter() {
 
 /**
  * Dispara o e-mail de verificação oficial Phantom-X
+ * 1. Prioridade Máxima: API HTTP Oficial da Resend (rápida, segura e compatível com Vercel/Cloudflare)
+ * 2. Fallback: Servidor SMTP / Nodemailer
+ * 3. Fallback: Supabase Auth OTP
  */
 export async function dispatchVerificationEmail(params: {
   to: string;
   name: string;
   code: string;
+  origin?: string;
 }): Promise<SendEmailResult> {
-  const { to, name, code } = params;
+  const { to, name, code, origin } = params;
   const cleanEmail = to.trim().toLowerCase();
   const cleanName = name.trim() || "Operador";
 
-  const html = renderVerificationEmailHtml(cleanName, code);
-  const text = renderVerificationEmailText(cleanName, code);
-  const subject = `🛡️ [Phantom-X] Seu Token de Verificação: ${code}`;
+  const resolvedOrigin =
+    origin && origin.startsWith("http")
+      ? origin
+      : process.env.NEXT_PUBLIC_APP_URL || "https://phantom-x.pro";
 
-  // 1. Tenta envio direto via SMTP / Resend se configurado
+  const html = renderVerificationEmailHtml(cleanName, code, resolvedOrigin);
+  const text = renderVerificationEmailText(cleanName, code, resolvedOrigin);
+  const subject = `🛡️ [Phantom-X] Confirme sua conta de Operador (${code})`;
+
+  // 1. TENTA PRIMEIRO VIA API REST DA RESEND (Se RESEND_API_KEY estiver configurada)
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resendResult = await sendEmailViaResend({
+        to: cleanEmail,
+        subject,
+        html,
+        text,
+        from: process.env.RESEND_FROM || "Phantom-X <contato@phantom-x.pro>",
+        replyTo: "suporte@phantom-x.pro",
+      });
+
+      if (resendResult.success) {
+        console.log(`[Phantom-X Mailer] E-mail enviado com SUCESSO via Resend para ${cleanEmail} (ID: ${resendResult.messageId})`);
+        return {
+          success: true,
+          provider: "resend",
+          messageId: resendResult.messageId,
+        };
+      } else {
+        console.warn(`[Phantom-X Mailer] Resend falhou: ${resendResult.error}. Tentando transporte SMTP...`);
+      }
+    } catch (err: any) {
+      console.warn(`[Phantom-X Mailer] Falha no provedor Resend: ${err?.message}`);
+    }
+  }
+
+  // 2. TENTA VIA TRANSPORTE SMTP
   const transporter = getSmtpTransporter();
   if (transporter) {
     try {
@@ -86,10 +123,10 @@ export async function dispatchVerificationEmail(params: {
     }
   }
 
-  // 2. Se não houver SMTP configurado, o Supabase Auth será o canal principal
+  // 3. Fallback: Supabase Auth OTP
   return {
     success: false,
     provider: "none",
-    error: "Nenhum provedor SMTP ativo no momento. Disparo delegado ao Supabase Auth.",
+    error: "Nenhum provedor de e-mail ativo no momento. Disparo delegado ao Supabase Auth.",
   };
 }

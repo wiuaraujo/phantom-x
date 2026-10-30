@@ -64,10 +64,13 @@ function resolveAppUrl(customOrigin?: string): string {
   if (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("localhost")) {
     return process.env.NEXT_PUBLIC_APP_URL;
   }
+  if (process.env.NODE_ENV === "production") {
+    return "https://phantom-x.pro";
+  }
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  return process.env.NEXT_PUBLIC_APP_URL || "https://phantom-x.pro";
 }
 
 /**

@@ -41,6 +41,7 @@ import {
   ArrowUpRight,
   Award,
   ArrowLeft,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
@@ -150,6 +151,11 @@ export default function AdminPortalPage() {
 
   // Kill-Switch Global
   const [killSwitchActive, setKillSwitchActive] = useState(false);
+
+  // Teste de Envio de E-mails (Resend)
+  const [testEmailTarget, setTestEmailTarget] = useState("wiuaraujo@gmail.com");
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // 1. Verifica se já existe sessão administrativa válida ou usuário admin logado na plataforma
   useEffect(() => {
@@ -429,6 +435,34 @@ export default function AdminPortalPage() {
         setTimeout(() => setActionNotice(null), 6000);
       }
     } catch {}
+  };
+
+  const handleSendTestEmail = async () => {
+    if (!testEmailTarget) return;
+    setTestingEmail(true);
+    setEmailTestResult(null);
+    try {
+      const res = await fetch("/api/v1/admin/system", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "test_email",
+          to: testEmailTarget,
+        }),
+      });
+      const data = await res.json();
+      setEmailTestResult({
+        success: data.success,
+        message: data.message || (data.success ? "E-mail enviado com sucesso!" : "Erro ao enviar e-mail."),
+      });
+    } catch (err: any) {
+      setEmailTestResult({
+        success: false,
+        message: err?.message || "Erro de rede ao disparar e-mail de teste.",
+      });
+    } finally {
+      setTestingEmail(false);
+    }
   };
 
   const copyToClipboard = (text: string, userId: string) => {
@@ -1576,6 +1610,92 @@ export default function AdminPortalPage() {
                   <span className="px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/40 text-purple-300 font-bold text-[10px]">
                     v2.4 ONLINE
                   </span>
+                </div>
+
+                {/* Domínios Oficiais e Rotas (Vercel + Cloudflare) */}
+                <div className="p-4 rounded-xl bg-black/50 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center space-x-3">
+                    <Globe className="w-5 h-5 text-blue-400" />
+                    <div>
+                      <div className="font-bold text-white flex items-center space-x-2">
+                        <span>Domínios de Produção Ativos</span>
+                        <span className="text-[10px] text-blue-400 bg-blue-950/60 border border-blue-500/40 px-2 py-0.5 rounded-full font-mono">
+                          Vercel + Cloudflare
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-neutral-400 mt-0.5">
+                        <strong className="text-white">phantom-x.pro</strong> e <strong className="text-white">www.phantom-x.pro</strong> (SSL / TLS 1.3 Ativo)
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <a
+                      href="https://phantom-x.pro"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-white/10 text-xs flex items-center space-x-1 transition"
+                    >
+                      <span>Abrir Domínio</span>
+                      <ExternalLink className="w-3 h-3 text-neutral-400" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* Resend Email Integration & Live Test */}
+                <div className="p-4 rounded-xl bg-black/50 border border-white/10 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center space-x-3">
+                      <Mail className="w-5 h-5 text-emerald-400" />
+                      <div>
+                        <div className="font-bold text-white flex items-center space-x-2">
+                          <span>Serviço de Envio de E-mails (Resend API)</span>
+                          <span className="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full font-mono font-bold">
+                            RESEND ATIVO
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-neutral-400 mt-0.5">
+                          Remetente Oficial: <strong className="text-white">Phantom-X &lt;contato@phantom-x.pro&gt;</strong> (Transacional REST)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Test Box */}
+                  <div className="pt-2 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <input
+                      type="email"
+                      value={testEmailTarget}
+                      onChange={(e) => setTestEmailTarget(e.target.value)}
+                      placeholder="seu.email@gmail.com para teste"
+                      className="px-3 py-1.5 rounded-lg bg-neutral-900 border border-white/10 text-white placeholder-neutral-500 text-xs font-mono focus:outline-none focus:border-emerald-500 flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSendTestEmail}
+                      disabled={testingEmail}
+                      className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition cursor-pointer disabled:opacity-50 shrink-0"
+                    >
+                      <Send className={`w-3.5 h-3.5 ${testingEmail ? "animate-spin" : ""}`} />
+                      <span>{testingEmail ? "Disparando..." : "Testar Envio no Gmail"}</span>
+                    </button>
+                  </div>
+
+                  {emailTestResult && (
+                    <div
+                      className={`p-2.5 rounded-lg text-xs font-mono flex items-center space-x-2 animate-in fade-in ${
+                        emailTestResult.success
+                          ? "bg-emerald-950/60 border border-emerald-500/40 text-emerald-300"
+                          : "bg-red-950/60 border border-red-500/40 text-red-300"
+                      }`}
+                    >
+                      {emailTestResult.success ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                      )}
+                      <span>{emailTestResult.message}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Kill Switch Global */}

@@ -120,8 +120,10 @@ export function verifyOtpCode(inputCode: string, email?: string): { success: boo
  * - "Insira o seu código no campo de verificação para confirmar a sua conta. Se você não solicitou este código, por favor, ignore este e-mail."
  * - "Um abraço, Equipe Phantom-X."
  */
-export function renderVerificationEmailHtml(name: string, code: string): string {
+export function renderVerificationEmailHtml(name: string, code: string, origin?: string): string {
   const cleanName = name || "Operador";
+  const baseUrl = origin && origin.startsWith("http") ? origin : (process.env.NEXT_PUBLIC_APP_URL || "https://phantom-x.pro");
+  const confirmationUrl = `${baseUrl}/login?confirmed=1`;
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -242,7 +244,7 @@ export function renderVerificationEmailHtml(name: string, code: string): string 
 
       <!-- Botão Oficial de Ativação de Conta -->
       <div style="text-align: center; margin: 28px 0;">
-        <a href="https://phantom-x-two.vercel.app/login?confirmed=1" style="display: inline-block; background-color: #ffffff; color: #000000; font-family: -apple-system, sans-serif; font-weight: 700; font-size: 14px; padding: 14px 32px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);">
+        <a href="${confirmationUrl}" style="display: inline-block; background-color: #ffffff; color: #000000; font-family: -apple-system, sans-serif; font-weight: 700; font-size: 14px; padding: 14px 32px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);">
           Confirmar e Ativar Minha Conta &rarr;
         </a>
       </div>
@@ -268,14 +270,17 @@ export function renderVerificationEmailHtml(name: string, code: string): string 
 /**
  * Renderiza o e-mail em formato texto simples
  */
-export function renderVerificationEmailText(name: string, code: string): string {
+export function renderVerificationEmailText(name: string, code: string, origin?: string): string {
   const cleanName = name || "Operador";
+  const baseUrl = origin && origin.startsWith("http") ? origin : (process.env.NEXT_PUBLIC_APP_URL || "https://phantom-x.pro");
+  const confirmationUrl = `${baseUrl}/login?confirmed=1`;
+
   return `Olá, ${cleanName}
 
 Sua conta na plataforma Phantom-X foi criada com sucesso!
 
 Para confirmar o seu e-mail e ativar sua conta, acesse o link:
-https://phantom-x-two.vercel.app/login?confirmed=1
+${confirmationUrl}
 
 Código de ativação: [ ${code} ]
 

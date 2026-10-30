@@ -121,7 +121,7 @@ async function autoDeploy() {
 
     console.log('🎉 Push concluído com sucesso no GitHub!');
     console.log(`🔗 Repositório: https://github.com/${REPO_OWNER}/${REPO_NAME}/commits/main`);
-    console.log('⚡ Deploy automático disparado na Vercel (https://phantom-x-two.vercel.app)');
+    console.log('⚡ Deploy automático disparado na Vercel (https://phantom-x.pro / https://phantom-x-two.vercel.app)');
     return { success: true, commitSha, pushResult };
   } catch (err) {
     console.error('❌ Falha ao realizar push para o GitHub:', err);

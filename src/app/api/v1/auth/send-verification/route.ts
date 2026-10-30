@@ -28,18 +28,23 @@ export async function POST(req: NextRequest) {
     let supabaseDispatched = false;
     let errorMessage: string | null = null;
 
-    // 2. Disparo direto via SMTP / Resend se configurado
+    // 2. Disparo direto via Resend / SMTP se configurado
+    const origin = req.headers.get("origin") || req.nextUrl.origin || undefined;
+    let emailProviderUsed: string = "none";
+
     try {
-      const smtpRes = await dispatchVerificationEmail({
+      const emailRes = await dispatchVerificationEmail({
         to: cleanEmail,
         name: cleanName,
         code: record.code,
+        origin,
       });
-      if (smtpRes.success) {
+      if (emailRes.success) {
         emailSentViaSmtp = true;
+        emailProviderUsed = emailRes.provider;
       }
     } catch (e: any) {
-      console.warn(`[Send Verification] Erro no SMTP: ${e?.message}`);
+      console.warn(`[Send Verification] Erro no Resend/SMTP: ${e?.message}`);
     }
 
     // 3. Disparo via Supabase Auth OTP (para entregar na caixa de entrada do Gmail)

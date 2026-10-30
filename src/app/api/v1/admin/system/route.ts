@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { dispatchVerificationEmail } from "@/lib/mailer";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,9 @@ export async function GET(req: NextRequest) {
     } catch {}
   }
 
+  const hasResend = Boolean(process.env.RESEND_API_KEY);
+  const resendFrom = process.env.RESEND_FROM || "Phantom-X <contato@phantom-x.pro>";
+
   return NextResponse.json({
     success: true,
     isOperatorAdmin,
@@ -38,6 +42,12 @@ export async function GET(req: NextRequest) {
       edgeEngineVersion: "Phantom-X Edge Core v2.4",
       cloakerMode: globalKillSwitchActive ? "EMERGENCY_SAFE_ALL" : "ACTIVE_FILTERING",
       timestamp: new Date().toISOString(),
+      emailService: {
+        provider: hasResend ? "resend" : "smtp_or_supabase",
+        resendConfigured: hasResend,
+        fromAddress: resendFrom,
+        domain: "phantom-x.pro",
+      },
     },
   });
 }
@@ -153,6 +163,29 @@ export async function POST(req: NextRequest) {
         message: globalKillSwitchActive
           ? "KILL-SWITCH DE EMERGÊNCIA ATIVADO: Todo o tráfego do cluster agora é forçado 100% para a Safe Page."
           : "KILL-SWITCH DESATIVADO: Tráfego normalizado com filtragem heurística de borda ativa.",
+      });
+    }
+
+    // 3. TESTE DE DISPARO DE E-MAIL (RESEND / SMTP)
+    if (action === "test_email") {
+      const targetEmail = body.to || email || "wiuaraujo@gmail.com";
+      const origin = req.headers.get("origin") || req.nextUrl.origin || "https://phantom-x.pro";
+
+      const res = await dispatchVerificationEmail({
+        to: targetEmail,
+        name: "Administrador Master",
+        code: Math.floor(100000 + Math.random() * 900000).toString(),
+        origin,
+      });
+
+      return NextResponse.json({
+        success: res.success,
+        provider: res.provider,
+        messageId: res.messageId,
+        error: res.error,
+        message: res.success
+          ? `E-mail de teste enviado com sucesso via ${res.provider.toUpperCase()} para ${targetEmail}!`
+          : `Falha ao enviar e-mail: ${res.error || "Provedor indisponível"}`,
       });
     }
 
