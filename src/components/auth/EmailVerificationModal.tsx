@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  ShieldCheck,
   RefreshCw,
   ArrowRight,
   Mail,
@@ -75,8 +74,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
             <Logo size={36} />
           </div>
 
-          <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-brand-secondary mb-2">
-            <ShieldCheck className="w-3 h-3 text-emerald-400" />
+          <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-brand-secondary mb-2 tracking-wider">
             <span>CONFIRMAÇÃO DE CONTA</span>
           </div>
 
