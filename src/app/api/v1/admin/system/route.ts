@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { dispatchVerificationEmail } from "@/lib/mailer";
+import { resolveResendApiKey } from "@/lib/resend";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,8 @@ export async function GET(req: NextRequest) {
     } catch {}
   }
 
-  const hasResend = Boolean(process.env.RESEND_API_KEY);
+  const resolvedKey = resolveResendApiKey();
+  const hasResend = Boolean(resolvedKey);
   const resendFrom = process.env.RESEND_FROM || "Phantom-X <contato@phantom-x.pro>";
 
   return NextResponse.json({
@@ -43,10 +45,11 @@ export async function GET(req: NextRequest) {
       cloakerMode: globalKillSwitchActive ? "EMERGENCY_SAFE_ALL" : "ACTIVE_FILTERING",
       timestamp: new Date().toISOString(),
       emailService: {
-        provider: hasResend ? "resend" : "smtp_or_supabase",
+        provider: "resend",
         resendConfigured: hasResend,
         fromAddress: resendFrom,
         domain: "phantom-x.pro",
+        methods: ["http_rest", "smtp_relay"],
       },
     },
   });

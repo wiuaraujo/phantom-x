@@ -20,17 +20,16 @@ export async function POST(req: NextRequest) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = (name || "Operador").trim();
 
-    // 1. Gera código de 6 números no backend com expiração de 5 minutos
+    // 1. Gera código OTP de 6 números no backend com expiração de 5 minutos
     const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const record = setServerOtp(cleanEmail, cleanName, randomOtp);
 
-    let emailSentViaSmtp = false;
-    let supabaseDispatched = false;
-    let errorMessage: string | null = null;
+    let emailSent = false;
+    let emailProviderUsed = "resend";
+    let emailError: string | null = null;
 
-    // 2. Disparo direto via Resend / SMTP se configurado
+    // 2. Disparo Oficial via Resend (com fallback automático: API REST Nativa + Resend SMTP Relay)
     const origin = req.headers.get("origin") || req.nextUrl.origin || undefined;
-    let emailProviderUsed: string = "none";
 
     try {
       const emailRes = await dispatchVerificationEmail({
@@ -39,35 +38,38 @@ export async function POST(req: NextRequest) {
         code: record.code,
         origin,
       });
+
       if (emailRes.success) {
-        emailSentViaSmtp = true;
+        emailSent = true;
         emailProviderUsed = emailRes.provider;
-      }
-    } catch (e: any) {
-      console.warn(`[Send Verification] Erro no Resend/SMTP: ${e?.message}`);
-    }
-
-    // 3. Disparo via Supabase Auth OTP (para entregar na caixa de entrada do Gmail)
-    try {
-      const { error: sbErr } = await supabase.auth.signInWithOtp({
-        email: cleanEmail,
-        options: {
-          shouldCreateUser: true,
-        },
-      });
-
-      if (!sbErr) {
-        supabaseDispatched = true;
       } else {
-        errorMessage = sbErr.message;
-        console.warn(`[Supabase Auth Mailer] Erro ao enviar OTP para ${cleanEmail}: ${sbErr.message}`);
+        emailError = emailRes.error || null;
       }
     } catch (e: any) {
-      errorMessage = e?.message || "Falha de rede ao conectar com Supabase Auth.";
-      console.warn(`[Supabase Auth Mailer] Exceção para ${cleanEmail}: ${e?.message}`);
+      console.warn(`[Send Verification] Erro no dispatchVerificationEmail: ${e?.message}`);
+      emailError = e?.message;
     }
 
-    // 4. Atualiza metadata no Supabase se usuário já existir
+    // 3. Fallback adicional de contingência via Supabase Auth caso o Resend tenha falhado
+    if (!emailSent) {
+      try {
+        const { error: sbErr } = await supabase.auth.signInWithOtp({
+          email: cleanEmail,
+          options: {
+            shouldCreateUser: true,
+          },
+        });
+
+        if (!sbErr) {
+          emailSent = true;
+          emailProviderUsed = "supabase";
+        }
+      } catch (e: any) {
+        console.warn(`[Supabase Auth Fallback] Exceção: ${e?.message}`);
+      }
+    }
+
+    // 4. Atualiza metadata no Supabase se o usuário já existir
     try {
       const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
       const existing = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
@@ -84,54 +86,28 @@ export async function POST(req: NextRequest) {
       console.warn(`[Supabase Admin Metadata] Aviso: ${e?.message}`);
     }
 
-    // Se nenhum canal de e-mail conseguiu disparar e houve erro de rate limit do Supabase
-    if (!emailSentViaSmtp && !supabaseDispatched) {
-      if (errorMessage && errorMessage.includes("60 seconds")) {
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              "Um código de verificação já foi enviado recentemente. Por favor, aguarde 60 segundos antes de solicitar um novo token.",
-          },
-          { status: 429 }
-        );
-      }
-
-      if (errorMessage && errorMessage.includes("rate limit")) {
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              "Limite de envios de e-mail atingido temporariamente. Por favor, aguarde alguns minutos ou verifique a sua caixa de entrada e Spam do Gmail.",
-          },
-          { status: 429 }
-        );
-      }
-
+    if (!emailSent) {
       return NextResponse.json(
         {
           success: false,
           error:
-            errorMessage ||
-            "Não foi possível enviar o e-mail de verificação no momento. Verifique sua conexão e tente novamente.",
+            emailError ||
+            "Não foi possível enviar o e-mail de confirmação. Por favor, tente novamente em alguns instantes.",
         },
         { status: 500 }
       );
     }
 
-    console.log(
-      `[Phantom-X Mailer] Token gerado para ${cleanEmail} (Expira em 5 min | SMTP: ${emailSentViaSmtp} | Supabase: ${supabaseDispatched})`
-    );
-
-    // Retorna APENAS confirmação e timestamp de expiração (NUNCA O TOKEN!)
     return NextResponse.json({
       success: true,
-      message: "Token de verificação enviado para o seu e-mail com sucesso.",
+      message: `E-mail de confirmação enviado com sucesso via ${emailProviderUsed.toUpperCase()}! Verifique sua caixa de entrada no Gmail.`,
+      provider: emailProviderUsed,
       expiresAt: record.expiresAt,
     });
   } catch (error: any) {
+    console.error("[Send Verification] Erro inesperado:", error);
     return NextResponse.json(
-      { success: false, error: error?.message || "Erro interno ao gerar token de verificação." },
+      { success: false, error: error?.message || "Erro interno ao processar envio de verificação." },
       { status: 500 }
     );
   }

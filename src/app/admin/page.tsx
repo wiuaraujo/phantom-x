@@ -1656,7 +1656,7 @@ export default function AdminPortalPage() {
                           </span>
                         </div>
                         <div className="text-[11px] text-neutral-400 mt-0.5">
-                          Remetente Oficial: <strong className="text-white">Phantom-X &lt;contato@phantom-x.pro&gt;</strong> (Transacional REST)
+                          Remetente: <strong className="text-white">Phantom-X &lt;contato@phantom-x.pro&gt;</strong> • Motor Duplo: <span className="text-emerald-400 font-semibold">REST API + Resend SMTP Relay</span>
                         </div>
                       </div>
                     </div>
