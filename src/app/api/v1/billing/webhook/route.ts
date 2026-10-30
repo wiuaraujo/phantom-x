@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { supabaseAdmin, supabase } from "@/lib/supabase";
+import { setServerUserPlan } from "@/lib/serverPlanStore";
 
 export const dynamic = "force-dynamic";
 
@@ -57,14 +58,22 @@ export async function POST(req: NextRequest) {
                   plan_activated_at: new Date().toISOString(),
                   stripe_customer_id: customerId,
                   stripe_subscription_id: subscriptionId,
+                  plan_source: "stripe",
+                  granted_by: "stripe",
+                  is_paid: true,
                 },
               });
 
               await supabase.from("profiles").update({
                 plan: planId,
                 plan_status: "active",
+                plan_source: "stripe",
+                granted_by: "stripe",
+                is_paid: true,
                 updated_at: new Date().toISOString(),
               }).eq("id", userId);
+
+              await setServerUserPlan(userId, customerEmail || "", planId, "active", null, "stripe", "stripe");
             } catch (err) {
               console.warn("[Stripe Webhook] Falha ao atualizar perfil no Supabase:", err);
             }
@@ -82,8 +91,13 @@ export async function POST(req: NextRequest) {
                     plan_activated_at: new Date().toISOString(),
                     stripe_customer_id: customerId,
                     stripe_subscription_id: subscriptionId,
+                    plan_source: "stripe",
+                    granted_by: "stripe",
+                    is_paid: true,
                   },
                 });
+
+                await setServerUserPlan(match.id, customerEmail, planId, "active", null, "stripe", "stripe");
               }
             } catch {}
           }

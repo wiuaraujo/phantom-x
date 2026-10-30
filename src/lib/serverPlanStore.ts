@@ -10,6 +10,8 @@ export interface UserPlanRecord {
   planExpiresAt?: string | null;
   updatedAt: string;
   updatedBy?: string;
+  planSource: "stripe" | "admin" | "free";
+  isPaid: boolean;
 }
 
 // Cache global em memória no processo Node.js
@@ -25,6 +27,17 @@ export function getServerUserPlanSync(userIdOrEmail?: string | null): UserPlanRe
 }
 
 /**
+ * Remove usuário do cache em memória do servidor
+ */
+export function removeServerUserPlan(userIdOrEmail?: string | null): boolean {
+  if (!userIdOrEmail) return false;
+  const key = userIdOrEmail.trim().toLowerCase();
+  const deletedById = serverPlanMap.delete(userIdOrEmail);
+  const deletedByKey = serverPlanMap.delete(key);
+  return deletedById || deletedByKey;
+}
+
+/**
  * Registra ou atualiza o plano do usuário no servidor
  */
 export async function setServerUserPlan(
@@ -33,11 +46,18 @@ export async function setServerUserPlan(
   plan: PlanId,
   planStatus: "active" | "trial" | "expired" | "canceled" = "active",
   expiresAt?: string | null,
-  updatedBy: string = "admin"
+  updatedBy: string = "admin",
+  planSourceParam?: "stripe" | "admin" | "free"
 ): Promise<UserPlanRecord> {
   const cleanId = userId.trim();
   const cleanEmail = email.trim().toLowerCase();
   const now = new Date().toISOString();
+
+  // Define fonte do plano e se é assinante pagante real
+  const planSource: "stripe" | "admin" | "free" =
+    planSourceParam ||
+    (plan === "free" ? "free" : updatedBy === "stripe" ? "stripe" : "admin");
+  const isPaid = planSource === "stripe" && plan !== "free" && planStatus === "active";
 
   const record: UserPlanRecord = {
     userId: cleanId,
@@ -48,10 +68,14 @@ export async function setServerUserPlan(
     planExpiresAt: expiresAt ?? null,
     updatedAt: now,
     updatedBy,
+    planSource,
+    isPaid,
   };
 
   // Salva no mapa em memória por ID e por e-mail
-  serverPlanMap.set(cleanId, record);
+  if (cleanId) {
+    serverPlanMap.set(cleanId, record);
+  }
   if (cleanEmail) {
     serverPlanMap.set(cleanEmail, record);
   }
@@ -65,6 +89,9 @@ export async function setServerUserPlan(
           plan_status: planStatus,
           plan_activated_at: now,
           plan_expires_at: expiresAt ?? null,
+          plan_source: planSource,
+          granted_by: updatedBy,
+          is_paid: isPaid,
         },
       });
 
@@ -75,6 +102,9 @@ export async function setServerUserPlan(
         plan_status: planStatus,
         plan_activated_at: now,
         plan_expires_at: expiresAt ?? null,
+        plan_source: planSource,
+        granted_by: updatedBy,
+        is_paid: isPaid,
         updated_at: now,
       });
     }
@@ -99,6 +129,8 @@ export async function getServerUserPlan(
     planActivatedAt: new Date().toISOString(),
     planExpiresAt: null,
     updatedAt: new Date().toISOString(),
+    planSource: "free",
+    isPaid: false,
   };
 
   if (!userIdOrEmail) return defaultFree;
@@ -123,6 +155,11 @@ export async function getServerUserPlan(
         const meta = u.user_metadata || {};
         const plan = (meta.plan as PlanId) || "free";
         const status = (meta.plan_status as any) || "trial";
+        const planSource: "stripe" | "admin" | "free" =
+          meta.plan_source ||
+          (meta.stripe_subscription_id ? "stripe" : meta.granted_by === "admin" ? "admin" : "free");
+        const isPaid = planSource === "stripe" && plan !== "free" && status === "active";
+
         const record: UserPlanRecord = {
           userId: u.id,
           email: u.email || "",
@@ -131,6 +168,9 @@ export async function getServerUserPlan(
           planActivatedAt: meta.plan_activated_at || u.created_at,
           planExpiresAt: meta.plan_expires_at || null,
           updatedAt: new Date().toISOString(),
+          updatedBy: meta.granted_by || (planSource === "stripe" ? "stripe" : "admin"),
+          planSource,
+          isPaid,
         };
         serverPlanMap.set(u.id, record);
         if (u.email) serverPlanMap.set(u.email.toLowerCase(), record);
@@ -143,6 +183,11 @@ export async function getServerUserPlan(
         const meta = match.user_metadata || {};
         const plan = (meta.plan as PlanId) || "free";
         const status = (meta.plan_status as any) || "trial";
+        const planSource: "stripe" | "admin" | "free" =
+          meta.plan_source ||
+          (meta.stripe_subscription_id ? "stripe" : meta.granted_by === "admin" ? "admin" : "free");
+        const isPaid = planSource === "stripe" && plan !== "free" && status === "active";
+
         const record: UserPlanRecord = {
           userId: match.id,
           email: match.email || "",
@@ -151,6 +196,9 @@ export async function getServerUserPlan(
           planActivatedAt: meta.plan_activated_at || match.created_at,
           planExpiresAt: meta.plan_expires_at || null,
           updatedAt: new Date().toISOString(),
+          updatedBy: meta.granted_by || (planSource === "stripe" ? "stripe" : "admin"),
+          planSource,
+          isPaid,
         };
         serverPlanMap.set(match.id, record);
         serverPlanMap.set(key, record);

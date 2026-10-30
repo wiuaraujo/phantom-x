@@ -62,6 +62,10 @@ interface OperatorUser {
   lastSignInAt: string | null;
   plan?: PlanId;
   planStatus?: string;
+  planSource?: "stripe" | "admin" | "free";
+  isPaid?: boolean;
+  grantedBy?: string;
+  stripeSubscriptionId?: string | null;
   planActivatedAt?: string;
   planExpiresAt?: string;
   activeOtp?: {
@@ -102,6 +106,7 @@ interface SystemOverviewData {
     trafficProcessedMB: number;
     mrr?: number;
     totalPaidSubscriptions?: number;
+    adminGrantedUsers?: number;
     planBreakdown?: {
       free: number;
       starter: number;
@@ -203,13 +208,67 @@ export default function AdminPortalPage() {
     loadDashboardData();
   }, [isAdminAuth]);
 
+  // Métricas computadas dinamicamente a partir da lista viva de operadores (Single Source of Truth)
+  const liveMetrics = useMemo(() => {
+    const totalUsers = operators.length;
+    const confirmedUsers = operators.filter((u) => u.emailVerified).length;
+    const pendingUsers = operators.filter((u) => !u.emailVerified).length;
+
+    // Assinantes reais pagantes (Apenas pagamentos reais via Stripe)
+    const paidSubscribers = operators.filter(
+      (u) =>
+        u.planStatus === "active" &&
+        u.plan &&
+        u.plan !== "free" &&
+        (u.planSource === "stripe" || Boolean(u.stripeSubscriptionId) || u.isPaid)
+    );
+
+    // Operadores cujo plano foi concedido/liberado pelo admin (Cortesia • MRR = 0)
+    const adminGranted = operators.filter(
+      (u) =>
+        u.planStatus === "active" &&
+        u.plan &&
+        u.plan !== "free" &&
+        (u.planSource === "admin" || u.grantedBy === "admin") &&
+        !u.stripeSubscriptionId &&
+        !u.isPaid
+    );
+
+    // MRR calculado SOMENTE sobre assinantes pagantes reais (Stripe)
+    const mrr = paidSubscribers.reduce((acc, u) => {
+      if (u.plan === "starter") return acc + 149;
+      if (u.plan === "growth" || u.plan === "pro") return acc + 389;
+      if (u.plan === "scale" || u.plan === "global") return acc + 529;
+      return acc;
+    }, 0);
+
+    return {
+      totalUsers,
+      confirmedUsers,
+      pendingUsers,
+      paidCount: paidSubscribers.length,
+      adminCount: adminGranted.length,
+      mrr,
+    };
+  }, [operators]);
+
   const loadDashboardData = async () => {
     setLoadingData(true);
     try {
+      const timestamp = Date.now();
       const [overviewRes, usersRes, sysRes] = await Promise.all([
-        fetch("/api/v1/admin/overview"),
-        fetch("/api/v1/admin/users"),
-        fetch("/api/v1/admin/system"),
+        fetch(`/api/v1/admin/overview?_t=${timestamp}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+        }),
+        fetch(`/api/v1/admin/users?_t=${timestamp}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+        }),
+        fetch(`/api/v1/admin/system?_t=${timestamp}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+        }),
       ]);
 
       const [overviewData, usersData, sysData] = await Promise.all([
@@ -278,6 +337,17 @@ export default function AdminPortalPage() {
     setActionLoadingId(`${action}-${user.id}`);
     setActionNotice(null);
 
+    // Otimista: se for delete, remove imediatamente da UI para atualização instantânea
+    if (action === "delete") {
+      setOperators((prev) =>
+        prev.filter((u) => u.id !== user.id && u.email?.toLowerCase() !== user.email?.toLowerCase())
+      );
+      if (typeof window !== "undefined") {
+        auth.deleteUser(user.id);
+        if (user.email) auth.deleteUser(user.email);
+      }
+    }
+
     try {
       const res = await fetch("/api/v1/admin/users", {
         method: "POST",
@@ -294,6 +364,7 @@ export default function AdminPortalPage() {
 
       if (!data.success) {
         setActionNotice({ type: "error", message: data.error || "Falha ao executar ação." });
+        await loadDashboardData();
         return;
       }
 
@@ -301,6 +372,7 @@ export default function AdminPortalPage() {
       await loadDashboardData();
     } catch (e: any) {
       setActionNotice({ type: "error", message: e?.message || "Erro na comunicação com o servidor." });
+      await loadDashboardData();
     } finally {
       setActionLoadingId(null);
       setTimeout(() => setActionNotice(null), 5000);
@@ -310,6 +382,24 @@ export default function AdminPortalPage() {
   const handleSaveUserPlan = async () => {
     if (!selectedUserForPlan) return;
     setSavingPlan(true);
+
+    const userToUpdate = selectedUserForPlan;
+    // Otimista: atualiza localmente para feedback instantâneo
+    setOperators((prev) =>
+      prev.map((u) =>
+        u.id === userToUpdate.id
+          ? {
+              ...u,
+              plan: targetPlan,
+              planStatus: targetPlanStatus,
+              planSource: targetPlan === "free" ? "free" : "admin",
+              isPaid: false,
+              grantedBy: "admin",
+            }
+          : u
+      )
+    );
+
     await handleUserAction("update_plan", selectedUserForPlan, {
       plan: targetPlan,
       planStatus: targetPlanStatus,
@@ -620,7 +710,7 @@ export default function AdminPortalPage() {
         )}
 
         {/* KPI Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           {/* Card 1: Total Operadores */}
           <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
@@ -628,35 +718,51 @@ export default function AdminPortalPage() {
               <Users className="w-4 h-4 text-blue-400" />
             </div>
             <div className="text-2xl sm:text-3xl font-poppins font-bold text-white">
-              {overview?.metrics?.totalUsers ?? operators.length}
+              {liveMetrics.totalUsers}
             </div>
             <div className="mt-2 flex items-center space-x-2 text-[10px] font-mono">
               <span className="text-emerald-400 flex items-center space-x-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>{overview?.metrics?.confirmedUsers ?? operators.filter((u) => u.emailVerified).length} Ativos</span>
+                <span>{liveMetrics.confirmedUsers} Ativos</span>
               </span>
               <span className="text-amber-400 flex items-center space-x-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                <span>{overview?.metrics?.pendingUsers ?? operators.filter((u) => !u.emailVerified).length} Pendentes</span>
+                <span>{liveMetrics.pendingUsers} Pendentes</span>
               </span>
             </div>
           </div>
 
-          {/* Card 2: Receita Recorrente (MRR) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-amber-500/20 backdrop-blur-md shadow-lg">
+          {/* Card 2: Receita Recorrente (MRR Estimado - Assinantes Reais) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-emerald-500/30 backdrop-blur-md shadow-lg">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
               <span>MRR ESTIMADO</span>
-              <DollarSign className="w-4 h-4 text-amber-400" />
+              <DollarSign className="w-4 h-4 text-emerald-400" />
             </div>
-            <div className="text-2xl sm:text-3xl font-poppins font-bold text-amber-300">
-              R$ {(overview?.metrics?.mrr || 0).toLocaleString("pt-BR")}
+            <div className="text-2xl sm:text-3xl font-poppins font-bold text-emerald-300">
+              R$ {liveMetrics.mrr.toLocaleString("pt-BR")}
             </div>
-            <div className="mt-2 text-[10px] font-mono text-neutral-400 truncate">
-              {overview?.metrics?.totalPaidSubscriptions || 0} assinantes ativos
+            <div className="mt-2 text-[10px] font-mono text-neutral-400 truncate flex items-center space-x-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span>{liveMetrics.paidCount} assinantes reais (Stripe)</span>
             </div>
           </div>
 
-          {/* Card 3: Domínios Registrados */}
+          {/* Card 3: Operadores Liberados por Admin (Cortesia / MRR Zero) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-amber-500/30 backdrop-blur-md shadow-lg">
+            <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
+              <span>LIBERADOS ADMIN</span>
+              <Crown className="w-4 h-4 text-amber-400" />
+            </div>
+            <div className="text-2xl sm:text-3xl font-poppins font-bold text-amber-300">
+              {liveMetrics.adminCount}
+            </div>
+            <div className="mt-2 text-[10px] font-mono text-neutral-400 truncate flex items-center space-x-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span>Cortesia ativa • R$ 0 MRR</span>
+            </div>
+          </div>
+
+          {/* Card 4: Domínios Registrados */}
           <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
               <span>DOMÍNIOS DE BORDA</span>
@@ -670,7 +776,7 @@ export default function AdminPortalPage() {
             </div>
           </div>
 
-          {/* Card 4: Campanhas Ativas */}
+          {/* Card 5: Campanhas Ativas */}
           <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
               <span>CAMPANHAS</span>
@@ -684,8 +790,8 @@ export default function AdminPortalPage() {
             </div>
           </div>
 
-          {/* Card 5: Bots & Reviewers Bloqueados */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg col-span-2 lg:col-span-1">
+          {/* Card 6: Bots & Reviewers Bloqueados */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/70 border border-white/10 backdrop-blur-md shadow-lg col-span-2 sm:col-span-1">
             <div className="flex items-center justify-between text-neutral-400 text-xs font-mono mb-2">
               <span>REVIEWERS BARRADOS</span>
               <ShieldCheck className="w-4 h-4 text-rose-400" />
@@ -866,19 +972,41 @@ export default function AdminPortalPage() {
 
                             {/* Plano Atual */}
                             <td className="py-3 px-4">
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                                  user.plan === "scale" || user.plan === "global"
-                                    ? "bg-emerald-950/70 border-emerald-500/50 text-emerald-300"
-                                    : user.plan === "growth" || user.plan === "pro"
-                                    ? "bg-purple-950/70 border-purple-500/50 text-purple-300"
-                                    : user.plan === "starter"
-                                    ? "bg-blue-950/70 border-blue-500/50 text-blue-300"
-                                    : "bg-neutral-800 border-neutral-700 text-neutral-400"
-                                }`}
-                              >
-                                {user.plan ? (user.plan === "pro" ? "GROWTH" : user.plan === "global" ? "SCALE" : user.plan.toUpperCase()) : "FREE"}
-                              </span>
+                              <div className="flex flex-col items-start gap-1">
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                                    user.plan === "scale" || user.plan === "global"
+                                      ? "bg-emerald-950/70 border-emerald-500/50 text-emerald-300"
+                                      : user.plan === "growth" || user.plan === "pro"
+                                      ? "bg-purple-950/70 border-purple-500/50 text-purple-300"
+                                      : user.plan === "starter"
+                                      ? "bg-blue-950/70 border-blue-500/50 text-blue-300"
+                                      : "bg-neutral-800 border-neutral-700 text-neutral-400"
+                                  }`}
+                                >
+                                  {user.plan && user.plan !== "free"
+                                    ? (user.plan === "pro" ? "GROWTH" : user.plan === "global" ? "SCALE" : user.plan.toUpperCase())
+                                    : "PLANO TRIAL"}
+                                </span>
+
+                                {user.plan && user.plan !== "free" && user.planStatus === "active" ? (
+                                  user.planSource === "stripe" || user.isPaid || Boolean(user.stripeSubscriptionId) ? (
+                                    <span className="inline-flex items-center space-x-1 text-[9px] font-mono text-emerald-400 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                                      <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                                      <span>Assinante Stripe (Real)</span>
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center space-x-1 text-[9px] font-mono text-amber-300 bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-500/30">
+                                      <span className="w-1 h-1 rounded-full bg-amber-400" />
+                                      <span>Liberado por Admin (Cortesia)</span>
+                                    </span>
+                                  )
+                                ) : (
+                                  <span className="text-[9px] text-neutral-500 font-mono">
+                                    Free Sandbox (100 Evs)
+                                  </span>
+                                )}
+                              </div>
                             </td>
 
                             {/* Status de E-mail */}
@@ -1032,14 +1160,23 @@ export default function AdminPortalPage() {
                 </div>
 
                 <div className="flex items-center space-x-3 shrink-0">
-                  <div className="px-4 py-3 rounded-xl bg-black/60 border border-white/10 text-right">
-                    <div className="text-[10px] text-neutral-400 font-mono uppercase">MRR Projetado</div>
-                    <div className="text-lg font-bold text-emerald-400 font-mono">
-                      R$ {(
-                        operators.filter((u) => u.plan === "starter").length * 149 +
-                        operators.filter((u) => u.plan === "growth" || u.plan === "pro").length * 389 +
-                        operators.filter((u) => u.plan === "scale" || u.plan === "global").length * 529
-                      ).toLocaleString("pt-BR")},00
+                  <div className="px-4 py-3 rounded-xl bg-black/60 border border-emerald-500/30 text-right">
+                    <div className="text-[10px] text-emerald-400 font-mono uppercase font-bold">MRR Real (Assinantes Stripe)</div>
+                    <div className="text-lg font-bold text-emerald-300 font-mono">
+                      R$ {liveMetrics.mrr.toLocaleString("pt-BR")},00
+                    </div>
+                    <div className="text-[9px] text-neutral-400 font-mono">
+                      {liveMetrics.paidCount} pagantes reais ativos
+                    </div>
+                  </div>
+
+                  <div className="px-4 py-3 rounded-xl bg-black/60 border border-amber-500/30 text-right">
+                    <div className="text-[10px] text-amber-400 font-mono uppercase font-bold">Liberados por Admin</div>
+                    <div className="text-lg font-bold text-amber-300 font-mono">
+                      {liveMetrics.adminCount} operadores
+                    </div>
+                    <div className="text-[9px] text-neutral-400 font-mono">
+                      Planos cortesia • MRR: R$ 0
                     </div>
                   </div>
                 </div>
@@ -1061,7 +1198,9 @@ export default function AdminPortalPage() {
                 <div className="text-2xl font-bold text-blue-200 mt-1">
                   {operators.filter((u) => u.plan === "starter").length}
                 </div>
-                <div className="text-[10px] text-blue-400 mt-1">3 Domínios • Somente Brasil 🇧🇷</div>
+                <div className="text-[10px] text-neutral-400 mt-1">
+                  {operators.filter((u) => u.plan === "starter" && (u.planSource === "stripe" || u.isPaid)).length} Pagantes • {operators.filter((u) => u.plan === "starter" && (u.planSource === "admin" || (!u.isPaid && !u.stripeSubscriptionId))).length} Liberados Admin
+                </div>
               </div>
 
               <div className="p-4 rounded-xl bg-purple-950/30 border border-purple-500/30">
@@ -1069,7 +1208,9 @@ export default function AdminPortalPage() {
                 <div className="text-2xl font-bold text-purple-200 mt-1">
                   {operators.filter((u) => u.plan === "growth" || u.plan === "pro").length}
                 </div>
-                <div className="text-[10px] text-purple-400 mt-1">12 Domínios • Latam &amp; Tier 1 🌎</div>
+                <div className="text-[10px] text-neutral-400 mt-1">
+                  {operators.filter((u) => (u.plan === "growth" || u.plan === "pro") && (u.planSource === "stripe" || u.isPaid)).length} Pagantes • {operators.filter((u) => (u.plan === "growth" || u.plan === "pro") && (u.planSource === "admin" || (!u.isPaid && !u.stripeSubscriptionId))).length} Liberados Admin
+                </div>
               </div>
 
               <div className="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30">
@@ -1077,7 +1218,9 @@ export default function AdminPortalPage() {
                 <div className="text-2xl font-bold text-emerald-200 mt-1">
                   {operators.filter((u) => u.plan === "scale" || u.plan === "global").length}
                 </div>
-                <div className="text-[10px] text-emerald-400 mt-1">60 Domínios • 247 Países 🌐</div>
+                <div className="text-[10px] text-neutral-400 mt-1">
+                  {operators.filter((u) => (u.plan === "scale" || u.plan === "global") && (u.planSource === "stripe" || u.isPaid)).length} Pagantes • {operators.filter((u) => (u.plan === "scale" || u.plan === "global") && (u.planSource === "admin" || (!u.isPaid && !u.stripeSubscriptionId))).length} Liberados Admin
+                </div>
               </div>
             </div>
 

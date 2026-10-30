@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
-import { getServerOtp, setServerOtp } from "@/lib/serverOtpStore";
-import { setServerUserPlan, getServerUserPlanSync } from "@/lib/serverPlanStore";
+import { getServerOtp, setServerOtp, clearServerOtp } from "@/lib/serverOtpStore";
+import { setServerUserPlan, getServerUserPlanSync, removeServerUserPlan } from "@/lib/serverPlanStore";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
   try {
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
       }
     } catch {}
 
-    // 3. Monta lista unificada de operadores com status de OTP
+    // 3. Monta lista unificada de operadores com status de OTP, plano e fonte do plano
     const users = (userListData?.users || []).map((u) => {
       const email = u.email?.toLowerCase() || "";
       const profile = profilesMap.get(u.id) || profilesMap.get(email);
@@ -35,6 +36,37 @@ export async function GET(req: NextRequest) {
         Boolean(u.email_confirmed_at) ||
         u.user_metadata?.email_verified === true ||
         profile?.email_verified === true;
+
+      const cachedPlan = getServerUserPlanSync(u.id) || (email ? getServerUserPlanSync(email) : null);
+      const currentPlan =
+        cachedPlan?.plan ||
+        profile?.plan ||
+        u.user_metadata?.plan ||
+        "free";
+
+      const currentPlanStatus =
+        cachedPlan?.planStatus ||
+        profile?.plan_status ||
+        u.user_metadata?.plan_status ||
+        "trial";
+
+      // Fonte da assinatura: "stripe" (paga real), "admin" (liberada por admin / cortesia) ou "free"
+      const planSource: "stripe" | "admin" | "free" =
+        cachedPlan?.planSource ||
+        profile?.plan_source ||
+        u.user_metadata?.plan_source ||
+        (u.user_metadata?.stripe_subscription_id ? "stripe" : (cachedPlan?.updatedBy === "admin" || u.user_metadata?.granted_by === "admin") ? "admin" : "free");
+
+      const isPaid =
+        currentPlan !== "free" &&
+        currentPlanStatus === "active" &&
+        (planSource === "stripe" || Boolean(u.user_metadata?.stripe_subscription_id));
+
+      const grantedBy =
+        cachedPlan?.updatedBy ||
+        profile?.granted_by ||
+        u.user_metadata?.granted_by ||
+        (planSource === "admin" ? "admin" : "system");
 
       return {
         id: u.id,
@@ -47,25 +79,19 @@ export async function GET(req: NextRequest) {
         timezone: profile?.timezone || u.user_metadata?.timezone || "America/Sao_Paulo",
         emailVerified: isEmailVerified,
         emailConfirmedAt: u.email_confirmed_at || u.user_metadata?.verified_at || null,
-        plan:
-          getServerUserPlanSync(u.id)?.plan ||
-          (email ? getServerUserPlanSync(email)?.plan : null) ||
-          profile?.plan ||
-          u.user_metadata?.plan ||
-          "free",
-        planStatus:
-          getServerUserPlanSync(u.id)?.planStatus ||
-          (email ? getServerUserPlanSync(email)?.planStatus : null) ||
-          profile?.plan_status ||
-          u.user_metadata?.plan_status ||
-          "trial",
+        plan: currentPlan,
+        planStatus: currentPlanStatus,
+        planSource,
+        isPaid,
+        grantedBy,
+        stripeSubscriptionId: u.user_metadata?.stripe_subscription_id || null,
         planActivatedAt:
-          getServerUserPlanSync(u.id)?.planActivatedAt ||
+          cachedPlan?.planActivatedAt ||
           profile?.plan_activated_at ||
           u.user_metadata?.plan_activated_at ||
           u.created_at,
         planExpiresAt:
-          getServerUserPlanSync(u.id)?.planExpiresAt ||
+          cachedPlan?.planExpiresAt ||
           profile?.plan_expires_at ||
           u.user_metadata?.plan_expires_at ||
           null,
@@ -82,11 +108,20 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json({
-      success: true,
-      count: users.length,
-      users,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        count: users.length,
+        users,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { success: false, error: err?.message || "Falha ao listar operadores." },
@@ -108,11 +143,16 @@ export async function POST(req: NextRequest) {
     }
 
     let targetUserId = userId;
+    const cleanEmail = email ? email.trim().toLowerCase() : "";
 
-    // Se passou apenas e-mail, descobre o userId
-    if (!targetUserId && email) {
+    // Se passou apenas e-mail ou se o targetUserId não é UUID válido, descobre o userId no Supabase Auth
+    if (!targetUserId || !targetUserId.includes("-")) {
       const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
-      const match = userList?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+      const match = userList?.users?.find(
+        (u) =>
+          (cleanEmail && u.email?.toLowerCase() === cleanEmail) ||
+          (targetUserId && u.id === targetUserId)
+      );
       if (match) targetUserId = match.id;
     }
 
@@ -141,11 +181,18 @@ export async function POST(req: NextRequest) {
           await supabase.from("profiles").update({ updated_at: new Date().toISOString() }).eq("id", targetUserId);
         } catch {}
 
-        return NextResponse.json({
-          success: true,
-          message: "Conta e e-mail do operador confirmados manualmente com sucesso!",
-          user: updated.user,
-        });
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Conta e e-mail do operador confirmados manualmente com sucesso!",
+            user: updated.user,
+          },
+          {
+            headers: {
+              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            },
+          }
+        );
       }
 
       // 2. DESCONFIRMA O E-MAIL DO OPERADOR
@@ -165,10 +212,17 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ success: false, error: uvErr.message }, { status: 500 });
         }
 
-        return NextResponse.json({
-          success: true,
-          message: "Confirmação de e-mail do operador revogada.",
-        });
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Confirmação de e-mail do operador revogada.",
+          },
+          {
+            headers: {
+              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            },
+          }
+        );
       }
 
       // 3. ALTERA O CARGO DO OPERADOR (admin ou operator)
@@ -187,15 +241,21 @@ export async function POST(req: NextRequest) {
           await supabase.from("profiles").update({ role: newRole }).eq("id", targetUserId);
         } catch {}
 
-        return NextResponse.json({
-          success: true,
-          message: `Cargo do operador alterado para '${newRole}'.`,
-        });
+        return NextResponse.json(
+          {
+            success: true,
+            message: `Cargo do operador alterado para '${newRole}'.`,
+          },
+          {
+            headers: {
+              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            },
+          }
+        );
       }
 
       // 4. GERA UM TOKEN OTP DE 6 DÍGITOS PARA O OPERADOR DIRETAMENTE PELO PAINEL
       case "generate_otp": {
-        const cleanEmail = email?.trim().toLowerCase();
         if (!cleanEmail) {
           return NextResponse.json({ success: false, error: "E-mail é obrigatório para gerar token." }, { status: 400 });
         }
@@ -203,66 +263,105 @@ export async function POST(req: NextRequest) {
         const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
         const record = setServerOtp(cleanEmail, "Operador", randomOtp);
 
-        return NextResponse.json({
-          success: true,
-          message: "Novo token OTP gerado com sucesso para este operador.",
-          otp: {
-            code: record.code,
-            expiresAt: record.expiresAt,
-            expiresInMinutes: 5,
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Novo token OTP gerado com sucesso para este operador.",
+            otp: {
+              code: record.code,
+              expiresAt: record.expiresAt,
+              expiresInMinutes: 5,
+            },
           },
-        });
+          {
+            headers: {
+              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            },
+          }
+        );
       }
 
-      // 5. EXCLUI O USUÁRIO DO SISTEMA
+      // 5. EXCLUI O USUÁRIO DO SISTEMA (100% LIMPO EM TODAS AS CAMADAS)
       case "delete": {
-        if (!targetUserId) {
-          return NextResponse.json({ success: false, error: "Usuário não localizado." }, { status: 404 });
+        let deletedSuccessfully = false;
+
+        if (targetUserId) {
+          try {
+            const { error: dErr } = await supabaseAdmin.auth.admin.deleteUser(targetUserId);
+            if (!dErr) deletedSuccessfully = true;
+          } catch (e) {
+            console.warn("[Admin deleteUser] Aviso Supabase Auth:", e);
+          }
+
+          try {
+            await supabase.from("profiles").delete().eq("id", targetUserId);
+          } catch {}
+
+          removeServerUserPlan(targetUserId);
         }
 
-        const { error: dErr } = await supabaseAdmin.auth.admin.deleteUser(targetUserId);
-        if (dErr) {
-          return NextResponse.json({ success: false, error: dErr.message }, { status: 500 });
+        if (cleanEmail) {
+          try {
+            await supabase.from("profiles").delete().eq("email", cleanEmail);
+          } catch {}
+
+          clearServerOtp(cleanEmail);
+          removeServerUserPlan(cleanEmail);
         }
 
-        try {
-          await supabase.from("profiles").delete().eq("id", targetUserId);
-        } catch {}
+        if (userId && userId !== targetUserId) {
+          removeServerUserPlan(userId);
+        }
 
-        return NextResponse.json({
-          success: true,
-          message: "Usuário excluído permanentemente do cluster.",
-        });
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Usuário excluído permanentemente do cluster e da base de dados.",
+          },
+          {
+            headers: {
+              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            },
+          }
+        );
       }
 
       // 6. LIBERAÇÃO OU ALTERAÇÃO DE PLANO DE ASSINATURA PELO MASTER ADMIN
       case "update_plan": {
-        if (!targetUserId) {
-          return NextResponse.json({ success: false, error: "Usuário não localizado." }, { status: 404 });
+        if (!targetUserId && !cleanEmail) {
+          return NextResponse.json({ success: false, error: "Identificador do usuário não localizado." }, { status: 404 });
         }
 
         const targetPlan = body.plan || "free";
         const targetStatus = body.planStatus || body.status || "active";
         const expiresAt = body.planExpiresAt || null;
 
-        // Atualiza 100% no backend (Memória + Supabase Auth + Profiles)
+        // Atualiza 100% no backend marcado como LIBERADO POR ADMIN (Cortesia - Não contabiliza no MRR)
         const record = await setServerUserPlan(
-          targetUserId,
-          email || body.email || "",
+          targetUserId || cleanEmail,
+          cleanEmail || body.email || "",
           targetPlan,
           targetStatus,
           expiresAt,
-          "admin_master"
+          "admin",
+          targetPlan === "free" ? "free" : "admin"
         );
 
-        return NextResponse.json({
-          success: true,
-          message:
-            targetStatus === "canceled"
-              ? `Plano suspenso com sucesso. Acesso e limites do operador retornados para Free Trial.`
-              : `Plano '${targetPlan.toUpperCase()}' ativado com sucesso para o operador com 100% de efeito no backend!`,
-          planRecord: record,
-        });
+        return NextResponse.json(
+          {
+            success: true,
+            message:
+              targetStatus === "canceled"
+                ? `Plano suspenso com sucesso. Operador retornado para o Plano Trial gratuito.`
+                : `Plano '${targetPlan.toUpperCase()}' liberado com sucesso pelo Administrador (Plano cortesia/não-faturável no MRR).`,
+            planRecord: record,
+          },
+          {
+            headers: {
+              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            },
+          }
+        );
       }
 
       default:

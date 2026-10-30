@@ -4,6 +4,7 @@ import { store } from "@/lib/store";
 import { getServerUserPlanSync } from "@/lib/serverPlanStore";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,6 +15,9 @@ export async function GET(req: NextRequest) {
     let pendingUsersCount = 0;
     let domainsCount = 0;
     let campaignsCount = 0;
+    let realPaidSubscribers = 0;
+    let adminGrantedUsers = 0;
+    let totalMrr = 0;
     const planCounts = { free: 0, starter: 0, growth: 0, scale: 0 };
 
     // 1. Testa conectividade e busca dados no Supabase
@@ -29,9 +33,30 @@ export async function GET(req: NextRequest) {
         pendingUsersCount = usersCount - confirmedUsersCount;
 
         userList.users.forEach((u) => {
-          const cached = getServerUserPlanSync(u.id) || (u.email ? getServerUserPlanSync(u.email) : null);
+          const email = u.email?.toLowerCase() || "";
+          const cached = getServerUserPlanSync(u.id) || (email ? getServerUserPlanSync(email) : null);
           const plan = cached?.plan || (u.user_metadata?.plan as string) || "free";
           const status = cached?.planStatus || (u.user_metadata?.plan_status as string) || "trial";
+          const planSource =
+            cached?.planSource ||
+            u.user_metadata?.plan_source ||
+            (u.user_metadata?.stripe_subscription_id ? "stripe" : (cached?.updatedBy === "admin" || u.user_metadata?.granted_by === "admin") ? "admin" : "free");
+
+          const isActive = status === "active";
+          const isRealPaid = isActive && plan !== "free" && planSource === "stripe";
+          const isAdminConcession = isActive && plan !== "free" && planSource === "admin";
+
+          // Somente assinantes reais com pagamento efetivado via Stripe contam para o MRR
+          if (isRealPaid) {
+            realPaidSubscribers++;
+            if (plan === "starter") totalMrr += 149;
+            else if (plan === "growth" || plan === "pro") totalMrr += 389;
+            else if (plan === "scale" || plan === "global") totalMrr += 529;
+          } else if (isAdminConcession) {
+            // Planos liberados por administrador contam como operadores cortesia (MRR R$ 0)
+            adminGrantedUsers++;
+          }
+
           if (status === "canceled" || status === "expired") {
             planCounts.free++;
           } else if (plan === "starter") {
@@ -60,9 +85,6 @@ export async function GET(req: NextRequest) {
     domainsCount = Math.max(domainsCount, localDomains);
     campaignsCount = Math.max(campaignsCount, localCampaigns);
 
-    const mrr = planCounts.starter * 149 + planCounts.growth * 389 + planCounts.scale * 529;
-    const totalPaidSubscriptions = planCounts.starter + planCounts.growth + planCounts.scale;
-
     // 3. Status de Infraestrutura Edge Phantom-X
     const edgeEngine = {
       version: "Phantom-X Edge Core v2.4",
@@ -73,37 +95,47 @@ export async function GET(req: NextRequest) {
       encryption: "TLS 1.3 / SHA-256",
     };
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        system: {
-          uptime: process.uptime(),
-          nodeVersion: process.version,
-          platform: process.platform,
-          memoryUsage: process.memoryUsage(),
-          timestamp: new Date().toISOString(),
-        },
-        supabase: {
-          status: supabaseStatus,
-          latencyMs: supabaseLatencyMs,
-          url: process.env.NEXT_PUBLIC_SUPABASE_URL || "configured",
-          rlsEnabled: true,
-        },
-        edgeEngine,
-        metrics: {
-          totalUsers: usersCount,
-          confirmedUsers: confirmedUsersCount,
-          pendingUsers: pendingUsersCount,
-          totalDomains: domainsCount,
-          totalCampaigns: campaignsCount,
-          blockedReviewersToday: 142,
-          trafficProcessedMB: 840,
-          mrr,
-          totalPaidSubscriptions,
-          planBreakdown: planCounts,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          system: {
+            uptime: process.uptime(),
+            nodeVersion: process.version,
+            platform: process.platform,
+            memoryUsage: process.memoryUsage(),
+            timestamp: new Date().toISOString(),
+          },
+          supabase: {
+            status: supabaseStatus,
+            latencyMs: supabaseLatencyMs,
+            url: process.env.NEXT_PUBLIC_SUPABASE_URL || "configured",
+            rlsEnabled: true,
+          },
+          edgeEngine,
+          metrics: {
+            totalUsers: usersCount,
+            confirmedUsers: confirmedUsersCount,
+            pendingUsers: pendingUsersCount,
+            totalDomains: domainsCount,
+            totalCampaigns: campaignsCount,
+            blockedReviewersToday: 142,
+            trafficProcessedMB: 840,
+            mrr: totalMrr,
+            totalPaidSubscriptions: realPaidSubscribers,
+            adminGrantedUsers,
+            planBreakdown: planCounts,
+          },
         },
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { success: false, error: err?.message || "Erro ao carregar telemetria admin." },

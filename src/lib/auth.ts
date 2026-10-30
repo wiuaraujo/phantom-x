@@ -656,6 +656,20 @@ export const auth = {
   },
 
   /**
+   * Remove usuário do cofre de usuários local
+   */
+  deleteUser(userIdOrEmail: string): boolean {
+    if (typeof window === "undefined") return false;
+    const clean = userIdOrEmail.trim().toLowerCase();
+    const users = this.getUsers();
+    const filtered = users.filter(
+      (u) => u.id !== userIdOrEmail && u.email.toLowerCase() !== clean && u.username.toLowerCase() !== clean
+    );
+    this.saveUsers(filtered);
+    return true;
+  },
+
+  /**
    * Atualiza o plano de assinatura do operador (Governança Master)
    */
   updateUserPlan(
