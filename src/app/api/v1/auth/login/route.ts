@@ -172,10 +172,10 @@ export async function POST(req: NextRequest) {
     // Sincroniza plano atual do operador
     const planRecord = await getServerUserPlan(targetUser.id);
 
-    // Consulta dados adicionais atualizados na tabela profiles
+    // Consulta dados adicionais atualizados na tabela profiles via supabaseAdmin (service role)
     let profileData: any = null;
     try {
-      const { data: pData } = await supabase
+      const { data: pData } = await supabaseAdmin
         .from("profiles")
         .select("*")
         .eq("id", targetUser.id)

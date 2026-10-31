@@ -74,9 +74,9 @@ export async function GET(req: NextRequest) {
       supabaseStatus = "degraded";
     }
 
-    // 2. Busca contagem de domínios, campanhas e eventos reais
+    // 2. Busca contagem de domínios, campanhas e eventos reais via supabaseAdmin
     try {
-      const { data: doms } = await supabase.from("domains").select("id", { count: "exact" });
+      const { data: doms } = await supabaseAdmin.from("domains").select("id", { count: "exact" });
       domainsCount = doms?.length || 0;
     } catch {}
 
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
     let trafficProcessedMB = 0;
 
     try {
-      const { data: evts } = await supabase.from("events").select("id, is_threat, payload_bytes");
+      const { data: evts } = await supabaseAdmin.from("events").select("id, is_threat, payload_bytes");
       if (evts && evts.length > 0) {
         blockedReviewersToday = evts.filter((e: any) => e.is_threat).length;
         const totalBytes = evts.reduce((acc: number, e: any) => acc + (e.payload_bytes || 512), 0);

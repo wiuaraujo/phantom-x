@@ -41,9 +41,9 @@ export async function GET(req: NextRequest) {
           }
         } catch {}
 
-        // Busca na tabela profiles
+        // Busca na tabela profiles via supabaseAdmin
         try {
-          const { data: profiles } = await supabase.from("profiles").select("id, phone, phone_country_code");
+          const { data: profiles } = await supabaseAdmin.from("profiles").select("id, phone, phone_country_code");
           if (profiles) {
             const profileTaken = profiles.some((p) =>
               arePhoneNumbersEqual(p.phone, p.phone_country_code, phone, countryCode)
@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
 
     if (!isPhoneAlreadyRegistered) {
       try {
-        const { data: profiles } = await supabase.from("profiles").select("id, email, phone, phone_country_code");
+        const { data: profiles } = await supabaseAdmin.from("profiles").select("id, email, phone, phone_country_code");
         if (profiles) {
           for (const p of profiles) {
             if (arePhoneNumbersEqual(p.phone, p.phone_country_code, cleanPhone, cleanCountryCode)) {
@@ -305,9 +305,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 7. Salva / Atualiza Perfil na Tabela profiles do Supabase
+    // 7. Salva / Atualiza Perfil na Tabela profiles do Supabase via supabaseAdmin (service role)
     try {
-      await supabase.from("profiles").upsert({
+      await supabaseAdmin.from("profiles").upsert({
         id: createdUserId,
         name: cleanName,
         nickname: cleanName.split(" ")[0],

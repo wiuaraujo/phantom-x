@@ -28,10 +28,10 @@ export async function GET(req: NextRequest) {
       user = data?.users?.find((u) => u.email?.toLowerCase() === email.trim().toLowerCase());
     }
 
-    // Busca perfil na tabela profiles
+    // Busca perfil na tabela profiles via supabaseAdmin (service role)
     let profile: any = null;
     if (user?.id) {
-      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      const { data } = await supabaseAdmin.from("profiles").select("*").eq("id", user.id).single();
       profile = data;
     }
 
@@ -140,7 +140,10 @@ async function handleUpdateProfile(req: NextRequest) {
         profilePayload.phone_country_code = cleanCountryCode;
         if (timezone) profilePayload.timezone = timezone;
 
-        await supabase.from("profiles").upsert(profilePayload);
+        const { error: upsertErr } = await supabaseAdmin.from("profiles").upsert(profilePayload);
+        if (upsertErr) {
+          console.warn("[Profile API] Erro profiles upsert:", upsertErr.message);
+        }
       } catch (pErr: any) {
         console.warn("[Profile API] Exceção profiles upsert:", pErr?.message);
       }

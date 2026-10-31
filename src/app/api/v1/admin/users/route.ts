@@ -14,10 +14,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: uErr.message }, { status: 500 });
     }
 
-    // 2. Busca perfis da tabela profiles
+    // 2. Busca perfis da tabela profiles via supabaseAdmin (service role)
     let profilesMap = new Map<string, any>();
     try {
-      const { data: profiles } = await supabase.from("profiles").select("*");
+      const { data: profiles } = await supabaseAdmin.from("profiles").select("*");
       if (profiles) {
         profiles.forEach((p) => profilesMap.set(p.id, p));
         profiles.forEach((p) => {
@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
 
         // Atualiza na tabela profiles se existir
         try {
-          await supabase.from("profiles").update({ updated_at: new Date().toISOString() }).eq("id", targetUserId);
+          await supabaseAdmin.from("profiles").update({ updated_at: new Date().toISOString() }).eq("id", targetUserId);
         } catch {}
 
         return NextResponse.json(
@@ -251,7 +251,7 @@ export async function POST(req: NextRequest) {
         });
 
         try {
-          await supabase.from("profiles").update({ role: newRole }).eq("id", targetUserId);
+          await supabaseAdmin.from("profiles").update({ role: newRole }).eq("id", targetUserId);
         } catch {}
 
         return NextResponse.json(
@@ -320,7 +320,7 @@ export async function POST(req: NextRequest) {
           }
 
           try {
-            await supabase.from("profiles").delete().eq("id", targetUserId);
+            await supabaseAdmin.from("profiles").delete().eq("id", targetUserId);
           } catch {}
 
           removeServerUserPlan(targetUserId);
@@ -328,7 +328,7 @@ export async function POST(req: NextRequest) {
 
         if (cleanEmail) {
           try {
-            await supabase.from("profiles").delete().eq("email", cleanEmail);
+            await supabaseAdmin.from("profiles").delete().eq("email", cleanEmail);
           } catch {}
 
           clearServerOtp(cleanEmail);
@@ -424,7 +424,7 @@ export async function POST(req: NextRequest) {
           }
 
           try {
-            await supabase.from("profiles").upsert({
+            await supabaseAdmin.from("profiles").upsert({
               id: targetUserId,
               email: cleanEmail,
               name: cleanName,
