@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   Code,
   User,
+  Sparkles,
 } from "lucide-react";
 
 function MobileAppNavContent() {
@@ -65,6 +66,7 @@ function MobileAppNavContent() {
     { label: "Campanhas", href: "/dashboard/campaigns", icon: Layers },
     { label: "Domínios", href: "/dashboard/domains", icon: Globe2 },
     { label: "Eventos", href: "/dashboard/events", icon: ListFilter },
+    { label: "Área Phantom-X", href: "/dashboard/area-phantom", icon: Sparkles, badge: "Hub" },
     { label: "Cloudflare Worker", href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
     { label: "Configurações do Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
     { label: "Configurações do Perfil", href: "/dashboard/settings?tab=profile", icon: User },

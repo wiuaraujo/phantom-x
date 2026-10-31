@@ -228,6 +228,9 @@ export interface Translations {
     mapSubtitle: string;
     settingsTitle: string;
     settingsSubtitle: string;
+    areaPhantom: string;
+    areaPhantomTitle: string;
+    areaPhantomSubtitle: string;
   };
   common: {
     portuguese: string;
@@ -467,6 +470,9 @@ const translations: Record<Language, Translations> = {
       mapSubtitle: "Visualização cartográfica em 3D dos nós de borda e requisições",
       settingsTitle: "Configurações da Operação",
       settingsSubtitle: "Preferências de perfil, chaves de API e integração com Cloudflare",
+      areaPhantom: "Área Phantom-X",
+      areaPhantomTitle: "Área Phantom-X • Base de Maestria Operacional",
+      areaPhantomSubtitle: "Documentação de ponta a ponta, engenharia de cloaking, estratégias de aprovação e FAQs",
     },
     common: {
       portuguese: "Português",
@@ -704,6 +710,9 @@ const translations: Record<Language, Translations> = {
       mapSubtitle: "3D cartographic visualization of edge nodes and requests",
       settingsTitle: "Operations Settings",
       settingsSubtitle: "Profile preferences, API keys, and Cloudflare integration",
+      areaPhantom: "Phantom-X Area",
+      areaPhantomTitle: "Phantom-X Area • Operations Mastery Hub",
+      areaPhantomSubtitle: "End-to-end tutorials, cloaking engineering, ad approval playbooks, and FAQs",
     },
     common: {
       portuguese: "Português",
@@ -941,6 +950,9 @@ const translations: Record<Language, Translations> = {
       mapSubtitle: "Visualización cartográfica en 3D de nodos de borde y solicitudes",
       settingsTitle: "Configuraciones de la Operación",
       settingsSubtitle: "Preferencias de perfil, claves de API e integración con Cloudflare",
+      areaPhantom: "Área Phantom-X",
+      areaPhantomTitle: "Área Phantom-X • Base de Maestría Operacional",
+      areaPhantomSubtitle: "Tutoriales integrales, ingeniería de cloaking, estrategias de aprobación y preguntas frecuentes",
     },
     common: {
       portuguese: "Português",

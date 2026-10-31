@@ -19,6 +19,7 @@ import {
   Code,
   User,
   HelpCircle,
+  Sparkles,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getPlanDefinition, PlanId } from "@/lib/plans";
@@ -103,6 +104,12 @@ function SidebarContent() {
         { label: t.dashboard.campaigns, href: "/dashboard/campaigns", icon: Layers },
         { label: t.dashboard.domains, href: "/dashboard/domains", icon: Globe2 },
         { label: t.dashboard.events, href: "/dashboard/events", icon: ListFilter },
+      ],
+    },
+    {
+      id: "hub",
+      items: [
+        { label: t.dashboard.areaPhantom, href: "/dashboard/area-phantom", icon: Sparkles, badge: "Hub" },
       ],
     },
     {
