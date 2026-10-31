@@ -180,9 +180,10 @@ export const auth = {
 
   /**
    * Validação Estrita de Login com Cibersegurança Avançada
-   * 1. Bloqueia se a conta não estiver previamente cadastrada
-   * 2. Proteção contra força bruta (limite de 5 tentativas com bloqueio temporário)
-   * 3. Verificação de senha com salt criptográfico SHA-256
+   * 1. Consulta Supabase Auth no backend para autenticar qualquer conta registrada
+   * 2. Bloqueia se a conta não estiver previamente cadastrada
+   * 3. Proteção contra força bruta (limite de 5 tentativas com bloqueio temporário)
+   * 4. Verificação de senha com salt criptográfico SHA-256 e Supabase Auth
    */
   async login(
     identifier: string,
@@ -197,6 +198,105 @@ export const auth = {
       };
     }
 
+    // 1. Consulta o Backend Oficial (Supabase Auth + Database Central)
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch("/api/v1/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: cleanId, password, rememberMe }),
+        });
+        const data = await res.json();
+
+        // A. Autenticado com sucesso no backend
+        if (data.success && data.session) {
+          const users = this.getUsers();
+          const existingIdx = users.findIndex(
+            (u) => u.email.toLowerCase() === data.session.user.email.toLowerCase()
+          );
+
+          const syncedUser: RegisteredUser = {
+            id: data.session.user.id,
+            name: data.session.user.name,
+            nickname: data.session.user.nickname,
+            username: data.session.user.email.split("@")[0],
+            email: data.session.user.email,
+            phone: data.session.user.phone,
+            phoneCountryCode: data.session.user.phoneCountryCode || "+55",
+            emailVerified: true,
+            emailOtpVerified: true,
+            emailConfirmedAt: new Date().toISOString(),
+            plan: data.session.user.plan || "free",
+            planStatus: data.session.user.planStatus || "trial",
+            planActivatedAt: data.session.user.planActivatedAt || new Date().toISOString(),
+            planExpiresAt: data.session.user.planExpiresAt || null,
+            passwordHash: "",
+            salt: "",
+            role: data.session.user.role || "operator",
+            timezone: data.session.user.timezone || "America/Sao_Paulo",
+            organizationId: data.session.user.organizationId || `org_${data.session.user.id.substring(0, 8)}`,
+            organizationName: data.session.user.organizationName || `${data.session.user.name.split(" ")[0]}'s Workspace`,
+            failedAttempts: 0,
+            lockoutUntil: null,
+            createdAt: data.session.user.createdAt || new Date().toISOString(),
+            lastLoginAt: new Date().toISOString(),
+          };
+
+          if (existingIdx >= 0) {
+            users[existingIdx] = { ...users[existingIdx], ...syncedUser };
+          } else {
+            users.push(syncedUser);
+          }
+          this.saveUsers(users);
+
+          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data.session));
+          document.cookie = `phantom_token=${data.session.token}; path=/; max-age=${(rememberMe ? 7 : 1) * 86400}; SameSite=Strict`;
+
+          return { success: true, session: data.session };
+        }
+
+        // B. Requer confirmação de e-mail
+        if (data.requiresEmailVerification && data.unverifiedUser) {
+          return {
+            success: false,
+            accountNotFound: false,
+            requiresEmailVerification: true,
+            unverifiedUser: data.unverifiedUser,
+            error: data.error,
+          };
+        }
+
+        // C. Senha incorreta (a conta EXISTE no Supabase!)
+        if (data.accountNotFound === false) {
+          return {
+            success: false,
+            accountNotFound: false,
+            error: data.error || "Senha incorreta. Por favor, tente novamente.",
+          };
+        }
+
+        // D. Conta realmente não encontrada no backend
+        if (data.accountNotFound === true) {
+          const localUsers = this.getUsers();
+          const localUser = localUsers.find(
+            (u) => u.email.toLowerCase() === cleanId || u.username.toLowerCase() === cleanId
+          );
+          if (!localUser) {
+            return {
+              success: false,
+              accountNotFound: true,
+              error:
+                data.error ||
+                "Esta conta não foi encontrada no Phantom-X. Você precisa criar uma conta primeiro antes de fazer login.",
+            };
+          }
+        }
+      } catch (err) {
+        console.warn("[Auth Login] Backend indisponível, usando fallback local:", err);
+      }
+    }
+
+    // 2. Fallback local para Admin Master e testes locais
     const users = this.getUsers();
     const userIndex = users.findIndex(
       (u) => u.email.toLowerCase() === cleanId || u.username.toLowerCase() === cleanId

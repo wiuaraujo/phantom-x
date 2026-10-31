@@ -36,6 +36,7 @@ import {
   UserCheck,
   Check,
   X,
+  KeyRound,
 } from "lucide-react";
 
 function SignupFormInner() {
@@ -236,13 +237,20 @@ function SignupFormInner() {
               </button>
             </div>
             {isExistingUser && (
-              <div className="pt-2 border-t border-neutral-800">
+              <div className="pt-2 border-t border-neutral-800 flex items-center justify-between gap-3">
                 <Link
                   href={`/login?email=${encodeURIComponent(email)}`}
                   className="inline-flex items-center space-x-1.5 text-xs text-brand-white font-semibold underline hover:text-brand-secondary"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   <span>{t.signup.signInLink}</span>
+                </Link>
+                <Link
+                  href={`/forgot-password?email=${encodeURIComponent(email)}`}
+                  className="inline-flex items-center space-x-1.5 text-xs text-neutral-400 hover:text-white underline"
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>Redefinir Senha</span>
                 </Link>
               </div>
             )}
