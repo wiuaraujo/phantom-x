@@ -13,6 +13,17 @@ export default function GlobalMapPage() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const geoData = store.getGeoDistribution();
 
+  const dynamicGlobePoints = geoData.length > 0
+    ? geoData.map((g, idx) => ({
+        name: g.country,
+        country: g.country,
+        flag: getCountryFlag(g.countryCode),
+        lat: g.latitude || -23.55,
+        lon: g.longitude || -46.63,
+        isPrimary: idx === 0,
+      }))
+    : undefined;
+
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
@@ -45,7 +56,7 @@ export default function GlobalMapPage() {
 
           <div className="relative h-[340px] xs:h-[400px] sm:h-[500px] md:h-[600px] w-full rounded-2xl border border-brand-border bg-brand-surface overflow-hidden shadow-glow-sm flex items-center justify-center">
             <div className="absolute inset-0 dark:bg-[radial-gradient(circle,rgba(255,255,255,0.06)_0%,transparent_70%)] bg-[radial-gradient(circle,rgba(0,0,0,0.03)_0%,transparent_70%)] pointer-events-none" />
-            <TechGlobe className="w-full h-full" />
+            <TechGlobe className="w-full h-full" points={dynamicGlobePoints} />
           </div>
         </div>
 

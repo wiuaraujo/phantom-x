@@ -33,9 +33,16 @@ import {
   CheckCircle2,
   AlertTriangle,
   Lightbulb,
+  Wand2,
+  FileText,
+  RefreshCw,
+  Sliders,
+  BarChart2,
+  AlertOctagon,
 } from "lucide-react";
+import { CreativeShieldEngine } from "@/lib/creativeShield";
 
-type HubCategory = "passo-a-passo" | "engenharia" | "blackhat" | "simulador" | "faq";
+type HubCategory = "passo-a-passo" | "engenharia" | "criativos" | "blackhat" | "simulador" | "faq";
 
 interface FaqItem {
   q: string;
@@ -52,6 +59,12 @@ export default function AreaPhantomPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
 
+  // Estado do Auditor de Criativos & Políticas Pré-Voo
+  const [creativeText, setCreativeText] = useState(
+    "🔥 DESCUBRA O CHÁ SECRETO QUE VAI CURAR E ELIMINAR DE VEZ A GORDURA! Ganhe R$ 5.000 por semana trabalhando no celular sem esforço. Assista antes que saia do ar!!!"
+  );
+  const auditResult = useMemo(() => CreativeShieldEngine.auditCreative(creativeText), [creativeText]);
+
   // Estado do Simulador Interativo de Requisições
   const [simulatedScenario, setSimulatedScenario] = useState<"bot_meta" | "buyer_real" | "human_vpn" | null>("bot_meta");
 
@@ -62,6 +75,16 @@ export default function AreaPhantomPage() {
   };
 
   const faqs: FaqItem[] = [
+    {
+      q: "A geolocalização do Phantom-X é assertiva e real?",
+      a: "Sim. O Phantom-X lê diretamente os cabeçalhos de borda da infraestrutura Edge (Vercel Edge e Cloudflare: cf-ipcountry, cf-ipcity, cf-region, cf-iplatitude, cf-iplongitude), além de contar com mapeamento in-memory de ASN dos principais provedores brasileiros (Claro, Vivo, TIM, Oi, Copel) e datacenters mundiais. Isso garante o teto máximo de precisão viável na internet: ~99% por país, ~90% por estado e ~75% por cidade.",
+      tag: "Geolocalização & Edge",
+    },
+    {
+      q: "Qual a melhor engenharia para aprovar anúncios de nichos agressivos na Meta e Google?",
+      a: "A fórmula de 99% de aprovação reúne: 1) Pré-Voo de Criativo: usar ângulos de curiosidade e eliminar termos proibidos da copy usando o Auditor de Criativos; 2) Coerência Semântica: a Whitepage deve compartilhar o mesmo tema e schema editorial do criativo; 3) Entrega Edge SSR (Zero-JS-Redirect): entregar o HTML no mesmo domínio com HTTP 200 OK sem disparar alerta de 'Burla de Sistemas'.",
+      tag: "Aprovação & Políticas",
+    },
     {
       q: "Meu anúncio de oferta agressiva pode ser reprovado mesmo com o Phantom-X ativo?",
       a: "Sim, caso o criativo (vídeo, imagem, headline ou texto do anúncio) viole as políticas da plataforma. O Phantom-X protege e camufla a sua página de destino (URL final), garantindo que robôs e moderadores só vejam uma Whitepage perfeita. Mas a análise de criativo é feita por visão computacional antes mesmo do link ser aberto. Dica de ouro: use criativos com ângulos de curiosidade ou dor suave, e deixe a promessa forte apenas na página da oferta.",
@@ -202,6 +225,7 @@ export default function AreaPhantomPage() {
           {[
             { id: "passo-a-passo", label: "🚀 Guia Passo a Passo (Zero ao Ar)", icon: Play },
             { id: "engenharia", label: "🛡️ Engenharia & Como Funciona", icon: Cpu },
+            { id: "criativos", label: "✨ Auditor de Criativos & Aprovação", icon: Wand2 },
             { id: "blackhat", label: "🎯 Dicas para Ofertas Agressivas", icon: Target },
             { id: "simulador", label: "⚡ Simulador de Requisições", icon: Terminal },
             { id: "faq", label: "❓ Dúvidas Frequentes (FAQ)", icon: HelpCircle },
@@ -422,6 +446,367 @@ export default function AreaPhantomPage() {
                 de nuvem com renderizador de software (<code className="text-amber-700 dark:text-amber-300 font-mono">Google SwiftShader</code> ou <code className="text-amber-700 dark:text-amber-300 font-mono">llvmpipe</code>) 
                 ou o atributo <code className="text-amber-700 dark:text-amber-300 font-mono">navigator.webdriver = true</code>, a página redireciona na hora para a Whitepage.
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* ----------------------------------------------------------------- */}
+        {/* ABA: AUDITOR DE CRIATIVOS & ENGENHARIA DE APROVAÇÃO               */}
+        {/* ----------------------------------------------------------------- */}
+        {activeTab === "criativos" && (
+          <div className="space-y-6">
+            {/* Header com Degradê Noturno / Borda Ciano */}
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-950 via-[#0c1a30] to-neutral-900 border border-sky-500/30 shadow-[0_4px_30px_rgba(14,165,233,0.12)]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-[10px] font-mono text-sky-300 uppercase tracking-wider font-semibold">
+                    <Sparkles className="w-3 h-3 text-sky-400" />
+                    <span>Ad-Tech Pre-Flight Engine</span>
+                  </div>
+                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2">
+                    <span>Auditor de Criativos &amp; Camuflagem Semântica</span>
+                  </h2>
+                </div>
+                <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-sky-300 flex items-center space-x-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>Meta / Google / TikTok Standards</span>
+                </div>
+              </div>
+              <p className="text-xs text-sky-100/90 leading-relaxed mt-2.5 max-w-3xl">
+                A IA de moderação da Meta e do Google analisa a sua imagem, vídeo e copy com <strong>Visão Computacional e NLP</strong> antes 
+                mesmo de qualquer robô abrir sua página. Use este motor para escanear gatilhos de reprovação, higienizar sua mensagem em 1 clique 
+                e gerar coerência semântica absoluta com a sua Whitepage, eliminando o banimento por <em>Burla de Sistemas</em>.
+              </p>
+            </div>
+
+            {/* Painel Interativo de Auditoria */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Coluna Esquerda: Editor de Copy & Presets (7 cols) */}
+              <div className="lg:col-span-7 space-y-4">
+                <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 flex items-center space-x-1.5">
+                      <FileText className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                      <span>Copy, Headline ou Roteiro do Criativo</span>
+                    </label>
+                    <span className="text-[11px] font-mono text-slate-500 dark:text-neutral-500">
+                      {creativeText.length} caracteres
+                    </span>
+                  </div>
+
+                  {/* Seletor de Cenários / Presets */}
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-semibold">Testar com exemplos rápidos de nicho:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        onClick={() =>
+                          setCreativeText(
+                            "🔥 DESCUBRA O CHÁ SECRETO QUE VAI CURAR E ELIMINAR DE VEZ A GORDURA! Perca 10kg em 7 dias dormindo. O que a indústria esconde de você! Assista antes que saia do ar!!!"
+                          )
+                        }
+                        className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-800/40 text-[10px] font-mono text-rose-700 dark:text-rose-300 transition"
+                      >
+                        🔴 Saúde / Black (Crítico)
+                      </button>
+                      <button
+                        onClick={() =>
+                          setCreativeText(
+                            "Ganhe R$ 5.000 por semana trabalhando no celular sem esforço! Robô do Pix com lucro garantido 100%! Fique rico sem sair de casa trabalhando 20 minutos por dia."
+                          )
+                        }
+                        className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800/40 text-[10px] font-mono text-amber-700 dark:text-amber-300 transition"
+                      >
+                        🟠 Finanças / Renda Fácil (Alto Risco)
+                      </button>
+                      <button
+                        onClick={() =>
+                          setCreativeText(
+                            "Você está com vergonha do seu corpo e cansado de ser pobre? Cansado de estar endividado? Assista esse vídeo chocante que os especialistas estão tentando apagar!"
+                          )
+                        }
+                        className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/30 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800/40 text-[10px] font-mono text-purple-700 dark:text-purple-300 transition"
+                      >
+                        🟣 Atributos Pessoais &amp; Choque
+                      </button>
+                      <button
+                        onClick={() =>
+                          setCreativeText(
+                            "Conheça o protocolo nutricional moderno que está chamando a atenção de especialistas em hábitos saudáveis e qualidade de vida. Acesse o guia exclusivo."
+                          )
+                        }
+                        className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/40 text-[10px] font-mono text-emerald-700 dark:text-emerald-300 transition"
+                      >
+                        🟢 Ângulo Aprovável (White-Hat)
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Textarea */}
+                  <textarea
+                    rows={6}
+                    value={creativeText}
+                    onChange={(e) => setCreativeText(e.target.value)}
+                    placeholder="Cole aqui a copy, texto principal, título ou texto gravado no seu vídeo..."
+                    className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-sky-500 dark:focus:border-white/30 font-sans leading-relaxed transition shadow-inner"
+                  />
+
+                  {/* Botão de Higienização Automática */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                    <button
+                      onClick={() => setCreativeText(auditResult.sanitizedCopy)}
+                      disabled={auditResult.approvalScore >= 95}
+                      className={`inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-sm ${
+                        auditResult.approvalScore >= 95
+                          ? "bg-slate-100 text-slate-400 dark:bg-white/5 dark:text-neutral-500 cursor-not-allowed"
+                          : "bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 shadow-sky-500/20 cursor-pointer"
+                      }`}
+                    >
+                      <Wand2 className="w-3.5 h-3.5" />
+                      <span>Higienizar Copy em 1 Clique (Aplicar Ângulo Seguro)</span>
+                    </button>
+
+                    <button
+                      onClick={() => copyToClipboard(creativeText, "creative_text")}
+                      className="inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-neutral-800 text-xs text-slate-700 dark:text-neutral-300 hover:bg-slate-50 dark:hover:bg-neutral-700 transition"
+                    >
+                      {copiedKey === "creative_text" ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          <span>Copiado!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Copiar Texto</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sincronização Semântica com a Whitepage */}
+                <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-3">
+                  <div className="flex items-center space-x-2 text-xs font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                    <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span>Sincronização Semântica com a Whitepage (Anti-Evasão)</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed">
+                    A Meta cruza os dados do criativo com a página segura. Configure a sua Whitepage com as tags abaixo para 
+                    atingir 100% de coerência e evitar qualquer suspeita de camuflagem:
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono pt-1">
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 space-y-1">
+                      <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase">Título da Whitepage</span>
+                      <div className="text-slate-800 dark:text-neutral-200 font-semibold truncate">{auditResult.coherenceWhitepage.suggestedPageTitle}</div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 space-y-1">
+                      <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase">Schema JSON-LD</span>
+                      <div className="text-purple-600 dark:text-purple-400 font-semibold">{auditResult.coherenceWhitepage.schemaType}</div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 space-y-1 font-mono text-[11px]">
+                    <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase">Aviso Legal Obrigatório no Rodapé</span>
+                    <div className="text-slate-700 dark:text-neutral-300 leading-relaxed">{auditResult.coherenceWhitepage.requiredLegalNotice}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Coluna Direita: Score de Aprovação & Gatilhos Detectados (5 cols) */}
+              <div className="lg:col-span-5 space-y-4">
+                {/* Cartão de Pontuação de Aprovação */}
+                <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-bold">
+                      Índice de Aprovação Pré-Voo
+                    </span>
+                    <span
+                      className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full font-bold ${
+                        auditResult.approvalScore >= 90
+                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30"
+                          : auditResult.approvalScore >= 70
+                          ? "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30"
+                          : auditResult.approvalScore >= 45
+                          ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30"
+                          : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30"
+                      }`}
+                    >
+                      {auditResult.statusLabel}
+                    </span>
+                  </div>
+
+                  {/* Barra de Progresso */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-baseline font-mono">
+                      <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                        {auditResult.approvalScore}%
+                      </span>
+                      <span className="text-xs text-slate-500 dark:text-neutral-400">
+                        {auditResult.triggers.length} {auditResult.triggers.length === 1 ? "gatilho" : "gatilhos"} de risco
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-slate-100 dark:bg-neutral-800 h-2.5 rounded-full overflow-hidden border border-slate-200 dark:border-white/5">
+                      <div
+                        style={{ width: `${auditResult.approvalScore}%` }}
+                        className={`h-full transition-all duration-500 rounded-full ${
+                          auditResult.approvalScore >= 90
+                            ? "bg-emerald-500"
+                            : auditResult.approvalScore >= 70
+                            ? "bg-sky-500"
+                            : auditResult.approvalScore >= 45
+                            ? "bg-amber-500"
+                            : "bg-rose-500"
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Recomendações Críticas */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-white/5">
+                    <span className="text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-semibold">Diretrizes de Liberação:</span>
+                    <ul className="space-y-1.5 text-xs text-slate-700 dark:text-neutral-300">
+                      {auditResult.recommendations.map((rec, i) => (
+                        <li key={i} className="flex items-start space-x-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-sky-500 shrink-0 mt-0.5" />
+                          <span className="leading-snug">{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Lista de Gatilhos Detectados */}
+                <div className="space-y-2.5">
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300">
+                    Gatilhos de Violação no Texto ({auditResult.triggers.length})
+                  </h3>
+
+                  {auditResult.triggers.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 text-emerald-800 dark:text-emerald-300 text-xs flex items-center space-x-2.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>Nenhum gatilho de risco detectado. O criativo está livre de termos sensíveis conhecidos.</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+                      {auditResult.triggers.map((t) => (
+                        <div
+                          key={t.id}
+                          className="p-3.5 rounded-xl bg-white dark:bg-neutral-900/60 border border-rose-200 dark:border-rose-900/30 space-y-1.5 shadow-sm"
+                        >
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-mono font-bold text-rose-600 dark:text-rose-400 flex items-center space-x-1">
+                              <AlertOctagon className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                              <span>"{t.matchedWord}"</span>
+                            </span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 font-bold">
+                              -{t.penalty}%
+                            </span>
+                          </div>
+
+                          <div className="text-[11px] font-medium text-slate-500 dark:text-neutral-400">
+                            {t.categoryLabel}
+                          </div>
+
+                          <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
+                            {t.explanation}
+                          </p>
+
+                          <div className="pt-1.5 border-t border-slate-100 dark:border-white/5 flex items-start space-x-1 text-[11px] text-emerald-700 dark:text-emerald-400">
+                            <span className="font-semibold shrink-0 font-mono">Ângulo Seguro:</span>
+                            <span className="italic">"{t.suggestedReplacement}"</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Os 5 Pilares de Engenharia de Aprovação (Cards Educativos) */}
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-white font-mono">
+                  Os 5 Pilares de Engenharia para 99% de Aprovação em Tráfego Pago
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-sky-600 dark:text-sky-400 font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span>01</span>
+                    <span>Camuflagem Semântica</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Troca de Promessa por Curiosidade</h4>
+                  <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
+                    A IA da Meta lê o criativo antes do clique. Se o criativo promete enriquecimento ou cura, a conta cai. 
+                    Promova o "método", o "estudo recente" ou o "novo hábito" sem usar termos pretensiosos.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-purple-600 dark:text-purple-400 font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span>02</span>
+                    <span>Coerência Anúncio-Whitepage</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Fim do Mismatch de Tópico</h4>
+                  <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
+                    Se o anúncio fala de sono e a Whitepage fala de criptomoedas, o algoritmo aplica o banimento de <em>Circumventing Systems</em>. 
+                    Mantenha a Whitepage como um portal de notícias no mesmo nicho do criativo.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-emerald-600 dark:text-emerald-400 font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span>03</span>
+                    <span>Entrega Edge SSR HTTP 200</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Zero Redirecionamentos JS</h4>
+                  <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
+                    Scripts com <code className="text-emerald-700 dark:text-emerald-400 font-mono">window.location</code> são farejados instantaneamente por headless browsers. 
+                    O Phantom-X cospe o HTML diretamente da borda sem nunca mudar a URL do navegador.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-amber-600 dark:text-amber-400 font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span>04</span>
+                    <span>Geolocalização &amp; Fuso Horário</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Sincronia Regional de Borda</h4>
+                  <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
+                    O tráfego brasileiro deve bater nos PoPs de São Paulo (GRU) e responder no fuso de Brasília. O Phantom-X mapeia 
+                    ISPs locais reais (Claro, Vivo, TIM) para que os pacotes de rede tenham latência humana natural.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-sky-600 dark:text-sky-400 font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span>05</span>
+                    <span>Aquecimento de Conta &amp; CAPI</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Esteira Gradual de Orçamento</h4>
+                  <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
+                    Comece novas contas com orçamentos leves (R$ 50/dia) rodando diretamente na Whitepage por 48 horas. Após a Meta aprovar 
+                    e consolidar o Trust Score, abra o tráfego do Phantom-X para escala.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-rose-600 dark:text-rose-400 font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span>06</span>
+                    <span>Rodapé Legal Obrigatório</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Termos, Privacidade &amp; Contato</h4>
+                  <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
+                    Toda página aprovada precisa ter CNPJ/E-mail, Política de Privacidade e Termos de Uso no rodapé. Sem isso, os crawlers 
+                    classificam o destino como "Página de Destino de Baixa Qualidade".
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -41,9 +41,23 @@ function latLonToVector3(lat: number, lon: number, radius: number): THREE.Vector
   return new THREE.Vector3(x, y, z);
 }
 
-export const TechGlobe: React.FC<{ className?: string; enableZoom?: boolean }> = ({
+export interface GlobeHubPoint {
+  name: string;
+  country: string;
+  flag: string;
+  lat: number;
+  lon: number;
+  isPrimary?: boolean;
+}
+
+export const TechGlobe: React.FC<{
+  className?: string;
+  enableZoom?: boolean;
+  points?: GlobeHubPoint[];
+}> = ({
   className = "",
   enableZoom = false,
+  points,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [webGLFailed, setWebGLFailed] = useState(false);
@@ -207,10 +221,12 @@ export const TechGlobe: React.FC<{ className?: string; enableZoom?: boolean }> =
     globeGroup.add(dotsMesh);
 
     // 5. Tech Hub Nodes with Pulsing Radar Waves
+    const activeHubs: GlobeHubPoint[] = (points && points.length > 0) ? points : TECH_HUBS;
+
     const hubMeshes: {
       mesh: THREE.Mesh;
       pulse: THREE.Mesh;
-      data: (typeof TECH_HUBS)[0];
+      data: GlobeHubPoint;
       pos: THREE.Vector3;
     }[] = [];
 
@@ -226,7 +242,7 @@ export const TechGlobe: React.FC<{ className?: string; enableZoom?: boolean }> =
       depthWrite: false,
     });
 
-    TECH_HUBS.forEach((hub) => {
+    activeHubs.forEach((hub) => {
       const pos = latLonToVector3(hub.lat, hub.lon, GLOBE_RADIUS + 0.8);
 
       // Core sphere node
@@ -268,8 +284,9 @@ export const TechGlobe: React.FC<{ className?: string; enableZoom?: boolean }> =
     });
 
     CONNECTIONS.forEach((conn) => {
-      const p1 = latLonToVector3(TECH_HUBS[conn.from].lat, TECH_HUBS[conn.from].lon, GLOBE_RADIUS + 0.8);
-      const p2 = latLonToVector3(TECH_HUBS[conn.to].lat, TECH_HUBS[conn.to].lon, GLOBE_RADIUS + 0.8);
+      if (!activeHubs[conn.from] || !activeHubs[conn.to]) return;
+      const p1 = latLonToVector3(activeHubs[conn.from].lat, activeHubs[conn.from].lon, GLOBE_RADIUS + 0.8);
+      const p2 = latLonToVector3(activeHubs[conn.to].lat, activeHubs[conn.to].lon, GLOBE_RADIUS + 0.8);
 
       const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
       const dist = p1.distanceTo(p2);

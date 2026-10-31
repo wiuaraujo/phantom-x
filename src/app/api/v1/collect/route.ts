@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { store } from "@/lib/store";
+import { resolveGeoFromRequest } from "@/lib/geoResolver";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,9 @@ export async function POST(req: NextRequest) {
     const campaignId = body.campaignId;
     const referrer = body.referrer || req.headers.get("referer") || "Direto";
     const userAgent = body.userAgent || req.headers.get("user-agent") || "Mozilla/5.0";
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "177.18.99.12";
+    
+    // Resolução de Geolocalização de Alta Fidelidade (Edge Headers + Fallback de IP)
+    const resolvedGeo = resolveGeoFromRequest(req.headers, body.ip);
 
     const event = store.ingestEvent({
       domain,
@@ -20,7 +23,8 @@ export async function POST(req: NextRequest) {
       campaignId,
       referrer,
       userAgent,
-      ip,
+      ip: resolvedGeo.ip,
+      geo: resolvedGeo,
       utmParams: body.utmParams,
     });
 
@@ -53,7 +57,7 @@ export async function GET(req: NextRequest) {
   const domain = url.host || "trk.phantom-x.pro";
   const referrer = req.headers.get("referer") || "Direto";
   const userAgent = req.headers.get("user-agent") || "Mozilla/5.0";
-  const ip = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "177.18.99.12";
+  const resolvedGeo = resolveGeoFromRequest(req.headers);
 
   const utmParams: Record<string, string> = {};
   ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid", "fbclid"].forEach((k) => {
@@ -67,7 +71,8 @@ export async function GET(req: NextRequest) {
     campaignId,
     referrer,
     userAgent,
-    ip,
+    ip: resolvedGeo.ip,
+    geo: resolvedGeo,
     utmParams,
   });
 

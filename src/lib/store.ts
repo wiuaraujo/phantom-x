@@ -16,6 +16,7 @@ import {
   BOT_PATTERNS,
 } from "./cloakerEngine";
 import { resolveLocationMetadata } from "./geoFlags";
+import { resolveGeoFromRequest, ResolvedGeoLocation } from "./geoResolver";
 import {
   checkEventLimit,
   checkDomainLimit,
@@ -410,8 +411,11 @@ export const store = {
     campaignId?: string;
     referrer?: string;
     utmParams?: Record<string, string>;
+    geo?: ResolvedGeoLocation;
   }): TrafficEvent {
-    const loc = GLOBAL_LOCATIONS[Math.floor(Math.random() * GLOBAL_LOCATIONS.length)];
+    const rawIp = payload.ip || "177.18.99.12";
+    const geo = payload.geo || resolveGeoFromRequest({}, rawIp);
+
     const matchedDomain = payload.domain || domainsStore[0]?.name || "app.phantom-x.pro";
     const matchedCampaign = campaignsStore.find((c) => c.id === payload.campaignId) || campaignsStore[0];
     const targetUrl = payload.targetUrl || matchedCampaign?.targetUrl || "https://meusite.com/oferta";
@@ -420,23 +424,22 @@ export const store = {
     const assessment = CloakerEngine.evaluateRequest({
       userAgent: payload.userAgent,
       referrer: payload.referrer,
-      countryCode: loc.code,
+      countryCode: geo.countryCode,
       urlParams: payload.utmParams,
+      ip: rawIp,
+      asn: geo.asn,
       config: {
         ofertaUrl: targetUrl,
         whitepageUrl: fallbackUrl,
       },
     });
 
-    const rawIp = payload.ip || `177.${Math.floor(Math.random() * 200)}.${Math.floor(Math.random() * 200)}.45`;
-    const ipMasked = rawIp.replace(/\.\d+\.\d+$/, ".***.***");
+    const ipMasked = geo.ipMasked || rawIp.replace(/\.\d+\.\d+$/, ".***.***");
     const riskCategory: RiskCategory = assessment.isThreat
       ? "bot"
       : assessment.riskScore > 40
       ? "suspicious"
       : "clean";
-
-    const meta = resolveLocationMetadata(loc.city, loc.code, loc.stateCode);
 
     const newEvent: TrafficEvent = {
       id: `evt_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 7)}`,
@@ -447,13 +450,13 @@ export const store = {
       campaignName: matchedCampaign?.name || "Roteamento Cloaker Geral",
       ip: rawIp,
       ipMasked,
-      country: meta.country,
-      countryCode: loc.code,
-      state: meta.state,
-      stateCode: meta.stateCode,
-      city: loc.city,
-      latitude: loc.lat,
-      longitude: loc.lon,
+      country: geo.country,
+      countryCode: geo.countryCode,
+      state: geo.state,
+      stateCode: geo.stateCode,
+      city: geo.city,
+      latitude: geo.latitude,
+      longitude: geo.longitude,
       device: assessment.device,
       browser: assessment.browser,
       os: assessment.os,
