@@ -21,7 +21,7 @@ import {
   ChevronDown,
   Search,
   ExternalLink,
-  Flame,
+  Target,
   HelpCircle,
   Code,
   ArrowRight,
@@ -173,7 +173,7 @@ export default function AreaPhantomPage() {
               </div>
               <div className="p-3.5 rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-white/10 backdrop-blur-md">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">Blindagem</div>
-                <div className="text-lg font-bold font-mono text-amber-400 mt-0.5">Meta / Google</div>
+                <div className="text-lg font-bold font-mono text-sky-400 mt-0.5">Meta / Google</div>
                 <div className="text-[10px] text-neutral-500">Reviewers isolados</div>
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function AreaPhantomPage() {
           {[
             { id: "passo-a-passo", label: "🚀 Guia Passo a Passo (Zero ao Ar)", icon: Play },
             { id: "engenharia", label: "🛡️ Engenharia & Como Funciona", icon: Cpu },
-            { id: "blackhat", label: "🎯 Dicas para Ofertas Agressivas", icon: Flame },
+            { id: "blackhat", label: "🎯 Dicas para Ofertas Agressivas", icon: Target },
             { id: "simulador", label: "⚡ Simulador de Requisições", icon: Terminal },
             { id: "faq", label: "❓ Dúvidas Frequentes (FAQ)", icon: HelpCircle },
           ].map((tab) => {
@@ -307,7 +307,7 @@ export default function AreaPhantomPage() {
               {/* Passo 4 */}
               <div className="relative p-6 rounded-2xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-white/10 hover:border-white/20 transition group">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-600/20 border border-amber-500/30 flex items-center justify-center font-mono font-bold text-amber-400 text-sm">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-600/20 border border-sky-500/30 flex items-center justify-center font-mono font-bold text-sky-400 text-sm">
                     04
                   </div>
                   <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">Subindo Anúncio</span>
@@ -428,9 +428,8 @@ export default function AreaPhantomPage() {
         {/* ----------------------------------------------------------------- */}
         {activeTab === "blackhat" && (
           <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-900/90 via-[#1b120f] to-neutral-950 border border-amber-500/20">
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-950 via-[#0c1a30] to-neutral-900 border border-sky-500/30 shadow-[0_4px_30px_rgba(14,165,233,0.12)]">
               <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2">
-                <Flame className="w-5 h-5 text-amber-400" />
                 <span>Guia Tático: Como Manter Campanhas Agressivas Vivas</span>
               </h2>
               <p className="text-xs text-neutral-300 leading-relaxed mt-2 max-w-3xl">
@@ -441,8 +440,8 @@ export default function AreaPhantomPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="p-5 rounded-2xl bg-neutral-900/60 border border-white/10 space-y-2.5">
-                <div className="flex items-center space-x-2 text-amber-400 font-mono text-xs font-bold">
-                  <Lightbulb className="w-4 h-4" />
+                <div className="flex items-center space-x-2 text-sky-400 font-mono text-xs font-bold">
+                  <Lightbulb className="w-4 h-4 text-sky-400" />
                   <span>REGRA 1: O Efeito Camaleão da Whitepage</span>
                 </div>
                 <h4 className="text-sm font-bold text-white">Clone a Paleta de Cores da Oferta</h4>
