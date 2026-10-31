@@ -206,13 +206,10 @@ export default function AreaPhantomPage() {
             <div className="space-y-4 max-w-3xl">
               {/* Badges de Destaque */}
               <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-500/10 dark:bg-white/[0.06] border border-sky-500/20 dark:border-white/15 backdrop-blur-md text-[11px] font-mono text-sky-900 dark:text-white font-medium">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-900/5 dark:bg-white/[0.06] border border-slate-300 dark:border-white/15 backdrop-blur-md text-[11px] font-mono text-slate-900 dark:text-white font-medium">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                   <span>PHANTOM-X ACADEMY &amp; MASTERY</span>
                 </div>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-sky-100 dark:bg-gradient-to-r dark:from-violet-500/20 dark:to-sky-500/20 border border-sky-300 dark:border-sky-400/30 text-sky-900 dark:text-sky-300 font-mono font-medium">
-                  Guia 2026 • Edge Engine V2.4
-                </span>
               </div>
 
               {/* Título com Logo Oficial da Phantom */}
@@ -239,24 +236,24 @@ export default function AreaPhantomPage() {
 
             {/* Quick Stats / Highlights */}
             <div className="grid grid-cols-2 gap-3 lg:w-80 shrink-0">
-              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
+              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-neutral-900/80 border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold">Entrega de Borda</div>
-                <div className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">HTTP 200 OK</div>
+                <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">HTTP 200 OK</div>
                 <div className="text-[10px] text-slate-500 dark:text-neutral-500">Sem redirects 301/302</div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
+              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-neutral-900/80 border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold">Latência Média</div>
-                <div className="text-lg font-bold font-mono text-sky-600 dark:text-sky-400 mt-0.5">&lt; 14ms</div>
+                <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">&lt; 14ms</div>
                 <div className="text-[10px] text-slate-500 dark:text-neutral-500">Cloudflare Edge Cluster</div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
+              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-neutral-900/80 border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold">Camadas Ativas</div>
-                <div className="text-lg font-bold font-mono text-purple-600 dark:text-purple-400 mt-0.5">6 Filtros</div>
+                <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">6 Filtros</div>
                 <div className="text-[10px] text-slate-500 dark:text-neutral-500">Hardware &amp; ASNs</div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-white/[0.04] border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
+              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-neutral-900/80 border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold">Blindagem</div>
-                <div className="text-lg font-bold font-mono text-sky-600 dark:text-sky-400 mt-0.5">Meta / Google</div>
+                <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">Meta / Google</div>
                 <div className="text-[10px] text-slate-500 dark:text-neutral-500">Reviewers isolados</div>
               </div>
             </div>
@@ -270,13 +267,13 @@ export default function AreaPhantomPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar por tópico, dúvida, código, fbclid, Whitepage ou DNS..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-sky-500 dark:focus:border-white/30 focus:ring-1 focus:ring-sky-500/20 dark:focus:ring-white/20 transition shadow-sm backdrop-blur-md"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-slate-500 dark:focus:border-white/30 transition shadow-sm backdrop-blur-md"
             />
           </div>
         </div>
 
         {/* ================================================================= */}
-        {/* 2. ABAS DE NAVEGAÇÃO INTERATIVAS COM DEGRADÊ                      */}
+        {/* 2. ABAS DE NAVEGAÇÃO MINIMALISTAS PRETO E BRANCO COM DEGRADÊ      */}
         {/* ================================================================= */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
           {[
@@ -295,31 +292,14 @@ export default function AreaPhantomPage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer border ${
                   isSelected
-                    ? "tab-active keep-white !bg-slate-900 !text-white !border-slate-900 shadow-md dark:!bg-white/[0.12] dark:!border-white/30 dark:!text-white scale-[1.02]"
-                    : "bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border-slate-200 dark:bg-neutral-900/40 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800/60 dark:border-white/5 shadow-sm"
+                    ? "!bg-slate-900 !text-white !border-slate-900 shadow-md dark:!bg-gradient-to-b dark:!from-neutral-800 dark:!to-neutral-900 dark:!border-white/20 dark:!text-white"
+                    : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200 dark:bg-neutral-900/40 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800/60 dark:border-white/5 shadow-sm"
                 }`}
-                style={
-                  isSelected
-                    ? {
-                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.12)" : "#0f172a",
-                        color: "#ffffff",
-                        borderColor: isDark ? "rgba(255, 255, 255, 0.3)" : "#0f172a",
-                      }
-                    : undefined
-                }
               >
                 <Icon
                   className="w-3.5 h-3.5 shrink-0"
-                  style={{
-                    color: isSelected ? "#ffffff" : isDark ? "#a1a1aa" : "#475569",
-                    stroke: "currentColor",
-                  }}
                 />
-                <span
-                  style={{
-                    color: isSelected ? "#ffffff" : undefined,
-                  }}
-                >
+                <span>
                   {tab.label}
                 </span>
               </button>
@@ -336,10 +316,10 @@ export default function AreaPhantomPage() {
         {/* ----------------------------------------------------------------- */}
         {activeTab === "passo-a-passo" && (
           <div className="space-y-6">
-            <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-r dark:from-neutral-900/80 dark:via-neutral-900 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm">
+            <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/95 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm">
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
                 <span>Roteiro de Implementação em 4 Passos</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 uppercase font-semibold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/15 text-slate-700 dark:text-neutral-200 uppercase font-semibold">
                   Tempo estimado: 4 minutos
                 </span>
               </h2>
@@ -352,7 +332,7 @@ export default function AreaPhantomPage() {
               {/* Passo 1 */}
               <div className="relative p-6 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition group shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-blue-600/20 border border-sky-200 dark:border-sky-500/30 flex items-center justify-center font-mono font-bold text-sky-600 dark:text-sky-400 text-sm shadow-sm">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-gradient-to-b dark:from-neutral-800 dark:to-neutral-900 border border-slate-300 dark:border-white/15 flex items-center justify-center font-mono font-bold text-slate-900 dark:text-white text-sm shadow-sm">
                     01
                   </div>
                   <span className="text-[10px] font-mono text-slate-500 dark:text-neutral-400 uppercase tracking-wider font-semibold">DNS &amp; Domínio</span>
@@ -364,15 +344,15 @@ export default function AreaPhantomPage() {
                 </p>
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-200 dark:border-white/5 font-mono text-[11px] text-slate-700 dark:text-neutral-400 space-y-1">
                   <div>• Tipo: <span className="text-slate-900 dark:text-white font-semibold">CNAME</span> ou <span className="text-slate-900 dark:text-white font-semibold">A</span></div>
-                  <div>• Proxy Status: <span className="text-amber-600 dark:text-amber-400 font-semibold">Proxied (Nuvem Laranja)</span></div>
-                  <div>• SSL: <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Full ou Strict</span></div>
+                  <div>• Proxy Status: <span className="text-slate-900 dark:text-white font-semibold">Proxied (Nuvem Laranja)</span></div>
+                  <div>• SSL: <span className="text-slate-900 dark:text-white font-semibold">Full ou Strict</span></div>
                 </div>
               </div>
 
               {/* Passo 2 */}
               <div className="relative p-6 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition group shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-gradient-to-br dark:from-purple-500/20 dark:to-indigo-600/20 border border-purple-200 dark:border-purple-500/30 flex items-center justify-center font-mono font-bold text-purple-600 dark:text-purple-400 text-sm shadow-sm">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-gradient-to-b dark:from-neutral-800 dark:to-neutral-900 border border-slate-300 dark:border-white/15 flex items-center justify-center font-mono font-bold text-slate-900 dark:text-white text-sm shadow-sm">
                     02
                   </div>
                   <span className="text-[10px] font-mono text-slate-500 dark:text-neutral-400 uppercase tracking-wider font-semibold">Páginas</span>
@@ -386,15 +366,15 @@ export default function AreaPhantomPage() {
                   <strong className="text-slate-900 dark:text-white">2. Oferta (Blackpage):</strong> Sua página real de vendas, VSL ou checkout agressivo.
                 </p>
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-200 dark:border-white/5 font-mono text-[11px] text-slate-700 dark:text-neutral-400 space-y-1">
-                  <div className="text-emerald-600 dark:text-emerald-400 font-medium">✓ Safe Page: https://seusite.com/artigo-informativo</div>
-                  <div className="text-purple-600 dark:text-purple-400 font-medium">✓ Black Page: https://seusite.com/vsl-secreta</div>
+                  <div>✓ Safe Page: <span className="text-slate-900 dark:text-white font-semibold">https://seusite.com/artigo-informativo</span></div>
+                  <div>✓ Black Page: <span className="text-slate-900 dark:text-white font-semibold">https://seusite.com/vsl-secreta</span></div>
                 </div>
               </div>
 
               {/* Passo 3 */}
               <div className="relative p-6 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition group shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-teal-600/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm shadow-sm">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-gradient-to-b dark:from-neutral-800 dark:to-neutral-900 border border-slate-300 dark:border-white/15 flex items-center justify-center font-mono font-bold text-slate-900 dark:text-white text-sm shadow-sm">
                     03
                   </div>
                   <span className="text-[10px] font-mono text-slate-500 dark:text-neutral-400 uppercase tracking-wider font-semibold">Cloudflare Worker</span>
@@ -412,7 +392,7 @@ export default function AreaPhantomPage() {
               {/* Passo 4 */}
               <div className="relative p-6 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition group shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-blue-600/20 border border-sky-200 dark:border-sky-500/30 flex items-center justify-center font-mono font-bold text-sky-600 dark:text-sky-400 text-sm shadow-sm">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-gradient-to-b dark:from-neutral-800 dark:to-neutral-900 border border-slate-300 dark:border-white/15 flex items-center justify-center font-mono font-bold text-slate-900 dark:text-white text-sm shadow-sm">
                     04
                   </div>
                   <span className="text-[10px] font-mono text-slate-500 dark:text-neutral-400 uppercase tracking-wider font-semibold">Subindo Anúncio</span>
@@ -435,9 +415,9 @@ export default function AreaPhantomPage() {
         {/* ----------------------------------------------------------------- */}
         {activeTab === "engenharia" && (
           <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-white dark:bg-gradient-to-r dark:from-neutral-900/90 dark:via-[#10141d] dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm">
+            <div className="p-6 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/95 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm">
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-                <Cpu className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <Cpu className="w-5 h-5 text-slate-900 dark:text-white" />
                 <span>Arquitetura de Borda: O que o Phantom-X faz nos bastidores</span>
               </h2>
               <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed mt-2 max-w-3xl">
@@ -500,12 +480,12 @@ export default function AreaPhantomPage() {
                       <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-white font-semibold">
                         {item.layer}
                       </span>
-                      <span className="text-xs font-mono text-sky-600 dark:text-sky-400 font-semibold">{item.badge}</span>
+                      <span className="text-xs font-mono text-slate-500 dark:text-neutral-400 font-semibold">{item.badge}</span>
                     </div>
                     <h4 className="text-sm font-bold text-slate-900 dark:text-white">{item.title}</h4>
                     <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed">{item.desc}</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-950 dark:bg-black/80 border border-slate-800 dark:border-white/10 font-mono text-[11px] text-emerald-400 shrink-0 md:max-w-xs overflow-x-auto shadow-inner">
+                  <div className="p-3 rounded-xl bg-slate-950 dark:bg-black/90 border border-slate-800 dark:border-white/10 font-mono text-[11px] text-neutral-200 shrink-0 md:max-w-xs overflow-x-auto shadow-inner">
                     <code>{item.tech}</code>
                   </div>
                 </div>
@@ -513,44 +493,44 @@ export default function AreaPhantomPage() {
             </div>
 
             {/* Hardware Fingerprinting Deep Dive */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-purple-50 via-white to-purple-50/50 dark:from-neutral-950 dark:via-purple-950/20 dark:to-neutral-900 border border-purple-200 dark:border-purple-500/20 space-y-3 shadow-sm">
-              <h3 className="text-sm font-bold text-purple-950 dark:text-white flex items-center space-x-2">
-                <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <div className="p-6 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/95 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-3 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <Sparkles className="w-4 h-4 text-slate-900 dark:text-white" />
                 <span>Telemetria de Hardware Client-Side (Camada Extra anti-Selenium)</span>
               </h3>
               <p className="text-xs text-slate-700 dark:text-neutral-300 leading-relaxed">
-                Além do Worker na borda, o Phantom-X conta com o snippet <code className="text-purple-700 dark:text-purple-300 font-mono bg-purple-100 dark:bg-purple-950/40 px-1 py-0.5 rounded">telemetry.js</code>. 
+                Além do Worker na borda, o Phantom-X conta com o snippet <code className="text-slate-900 dark:text-neutral-200 font-mono bg-slate-100 dark:bg-white/10 px-1 py-0.5 rounded">telemetry.js</code>. 
                 Ele renderiza uma malha oculta de Canvas 2D e WebGL no navegador do visitante. Se o moderador estiver usando um emulador 
-                de nuvem com renderizador de software (<code className="text-amber-700 dark:text-amber-300 font-mono">Google SwiftShader</code> ou <code className="text-amber-700 dark:text-amber-300 font-mono">llvmpipe</code>) 
-                ou o atributo <code className="text-amber-700 dark:text-amber-300 font-mono">navigator.webdriver = true</code>, a página redireciona na hora para a Whitepage.
+                de nuvem com renderizador de software (<code className="text-slate-800 dark:text-neutral-200 font-mono">Google SwiftShader</code> ou <code className="text-slate-800 dark:text-neutral-200 font-mono">llvmpipe</code>) 
+                ou o atributo <code className="text-slate-800 dark:text-neutral-200 font-mono">navigator.webdriver = true</code>, a página redireciona na hora para a Whitepage.
               </p>
             </div>
           </div>
         )}
 
         {/* ----------------------------------------------------------------- */}
-        {/* ABA: CAMUFLADOR DE CRIATIVOS & ENGENHARIA DE BYPASS DE MODERAÇÃO  */}
+        {/* ABA 3: CAMUFLADOR DE CRIATIVOS & ENGENHARIA DE BYPASS DE MODERAÇÃO  */}
         {/* ----------------------------------------------------------------- */}
         {activeTab === "criativos" && (
           <div className="space-y-6">
-            {/* Header com Degradê Noturno Azulado / Borda Ciano */}
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-950 via-[#0c1a30] to-neutral-900 border border-sky-500/30 shadow-[0_4px_30px_rgba(14,165,233,0.12)] dark-surface keep-white">
+            {/* Header Preto com Degradê Sutil (Padrão Clean Minimalista) */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/95 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
-                  <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-[10px] font-mono text-sky-300 uppercase tracking-wider font-semibold">
-                    <Sparkles className="w-3 h-3 text-sky-400" />
+                  <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/15 text-[10px] font-mono text-slate-800 dark:text-neutral-200 uppercase tracking-wider font-semibold">
+                    <Sparkles className="w-3 h-3 text-slate-700 dark:text-neutral-300" />
                     <span>Motor Backend de Camuflagem &amp; Bypass de Moderação</span>
                   </div>
-                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2" style={{ color: "#ffffff" }}>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
                     <span>Camuflador de Anúncios Phantom-X &amp; Aprovação Expressa</span>
                   </h2>
                 </div>
-                <div className="px-3 py-1.5 rounded-xl bg-sky-950/40 border border-sky-500/30 text-xs font-mono text-sky-300 flex items-center space-x-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <div className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-xs font-mono text-slate-700 dark:text-neutral-300 flex items-center space-x-1.5">
+                  <ShieldCheck className="w-4 h-4 text-slate-900 dark:text-white" />
                   <span>Meta / Google Bypass 100% Funcional</span>
                 </div>
               </div>
-              <p className="text-xs leading-relaxed mt-2.5 max-w-3xl" style={{ color: "rgba(224, 242, 254, 0.95)" }}>
+              <p className="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mt-2.5 max-w-3xl">
                 A engenharia definitiva para subir e aprovar ofertas agressivas (black) sem risco de reprovação ou queda de conta. 
                 O backend do Phantom-X processa termos sensíveis e transforma sua promessa em <strong>ângulos camuflados com até 99% de aprovação na Meta Ads</strong>, 
                 gerando simultaneamente a <strong>Whitepage Camaleão sincronizada</strong> para eliminar o banimento por evasão de sistemas.
@@ -561,7 +541,7 @@ export default function AreaPhantomPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Coluna Esquerda: Entrada de Copy, Nicho & Disparo do Backend (7 cols) */}
               <div className="lg:col-span-7 space-y-4">
-                <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
+                <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
                   {/* Seletor de Nicho e Plataforma */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2 border-b border-slate-100 dark:border-white/5">
                     <div>
@@ -575,7 +555,7 @@ export default function AreaPhantomPage() {
                           setSelectedNiche(val);
                           handleRunCamouflage(creativeText, val);
                         }}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-sky-500"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-slate-500"
                       >
                         <option value="saude">Saúde &amp; Emagrecimento (Black)</option>
                         <option value="financas">Finanças &amp; Renda Extra (Black)</option>
@@ -592,7 +572,7 @@ export default function AreaPhantomPage() {
                       <select
                         value={selectedPlatform}
                         onChange={(e) => setSelectedPlatform(e.target.value as any)}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-sky-500"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-slate-500"
                       >
                         <option value="meta_ads">Meta Ads (Facebook &amp; Instagram)</option>
                         <option value="google_ads">Google Ads &amp; YouTube</option>
@@ -601,7 +581,7 @@ export default function AreaPhantomPage() {
                     </div>
                   </div>
 
-                  {/* Presets Rápidos para Demonstração de Camuflagem */}
+                  {/* Presets Rápidos Minimalistas */}
                   <div className="space-y-1.5">
                     <span className="text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-semibold">
                       Testar camuflagem com ofertas agressivas reais:
@@ -614,9 +594,9 @@ export default function AreaPhantomPage() {
                           setSelectedNiche("saude");
                           handleRunCamouflage(text, "saude");
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-800/40 text-[10px] font-mono text-rose-700 dark:text-rose-300 transition"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-neutral-800/80 dark:hover:bg-neutral-700 border border-slate-300 dark:border-white/10 text-[10px] font-mono text-slate-800 dark:text-neutral-200 transition"
                       >
-                        🔴 Saúde / Perda de Peso Agressiva
+                        Saúde / Perda de Peso
                       </button>
                       <button
                         onClick={() => {
@@ -625,9 +605,9 @@ export default function AreaPhantomPage() {
                           setSelectedNiche("financas");
                           handleRunCamouflage(text, "financas");
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800/40 text-[10px] font-mono text-amber-700 dark:text-amber-300 transition"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-neutral-800/80 dark:hover:bg-neutral-700 border border-slate-300 dark:border-white/10 text-[10px] font-mono text-slate-800 dark:text-neutral-200 transition"
                       >
-                        🟠 Finanças / Renda Garantida
+                        Finanças / Renda Extra
                       </button>
                       <button
                         onClick={() => {
@@ -636,9 +616,9 @@ export default function AreaPhantomPage() {
                           setSelectedNiche("geral");
                           handleRunCamouflage(text, "geral");
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/30 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800/40 text-[10px] font-mono text-purple-700 dark:text-purple-300 transition"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-neutral-800/80 dark:hover:bg-neutral-700 border border-slate-300 dark:border-white/10 text-[10px] font-mono text-slate-800 dark:text-neutral-200 transition"
                       >
-                        🟣 Atributos Pessoais &amp; Choque
+                        Atributos Pessoais &amp; Curiosidade
                       </button>
                       <button
                         onClick={() => {
@@ -647,9 +627,9 @@ export default function AreaPhantomPage() {
                           setSelectedNiche("apostas");
                           handleRunCamouflage(text, "apostas");
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/40 text-[10px] font-mono text-emerald-700 dark:text-emerald-300 transition"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-neutral-800/80 dark:hover:bg-neutral-700 border border-slate-300 dark:border-white/10 text-[10px] font-mono text-slate-800 dark:text-neutral-200 transition"
                       >
-                        🟢 Apostas / iGaming
+                        Apostas / iGaming
                       </button>
                     </div>
                   </div>
@@ -658,7 +638,7 @@ export default function AreaPhantomPage() {
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 flex items-center space-x-1.5">
-                        <FileText className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                        <FileText className="w-3.5 h-3.5 text-slate-700 dark:text-neutral-300" />
                         <span>Texto / Promessa Black da sua Oferta</span>
                       </label>
                       <span className="text-[11px] font-mono text-slate-400 dark:text-neutral-500">
@@ -670,16 +650,16 @@ export default function AreaPhantomPage() {
                       value={creativeText}
                       onChange={(e) => setCreativeText(e.target.value)}
                       placeholder="Cole aqui a promessa forte ou anúncio que a Meta costuma reprovar..."
-                      className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-sky-500 dark:focus:border-white/30 font-sans leading-relaxed transition shadow-inner"
+                      className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-slate-500 dark:focus:border-white/30 font-sans leading-relaxed transition shadow-inner"
                     />
                   </div>
 
-                  {/* Botão de Camuflagem no Backend */}
+                  {/* Botão de Camuflagem no Backend Minimalista Preto e Branco */}
                   <div className="pt-1">
                     <button
                       onClick={() => handleRunCamouflage()}
                       disabled={isCamouflaging || !creativeText.trim()}
-                      className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-sky-500/20 disabled:opacity-50 transition flex items-center justify-center space-x-2 cursor-pointer"
+                      className="w-full py-3 px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-black font-bold text-xs shadow-md disabled:opacity-50 transition flex items-center justify-center space-x-2 cursor-pointer"
                     >
                       {isCamouflaging ? (
                         <>
@@ -688,8 +668,8 @@ export default function AreaPhantomPage() {
                         </>
                       ) : (
                         <>
-                          <Wand2 className="w-4 h-4 text-sky-200" />
-                          <span>⚡ Camuflar Anúncio no Backend (Gerar Ângulos de Alta Aprovação)</span>
+                          <Wand2 className="w-4 h-4" />
+                          <span>Camuflar Anúncio no Backend (Gerar Ângulos de Alta Aprovação)</span>
                         </>
                       )}
                     </button>
@@ -697,10 +677,10 @@ export default function AreaPhantomPage() {
                 </div>
 
                 {/* Sincronização Semântica com a Whitepage Camaleão */}
-                <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-3">
+                <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 text-xs font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                      <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <Layers className="w-4 h-4 text-slate-800 dark:text-neutral-200" />
                       <span>Whitepage Camaleão Sincronizada (Anti-Mismatch)</span>
                     </div>
                     <button
@@ -710,16 +690,16 @@ export default function AreaPhantomPage() {
                           "whitepage_html"
                         )
                       }
-                      className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800/40 text-[10px] font-mono text-purple-700 dark:text-purple-300 transition flex items-center space-x-1"
+                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-neutral-800/80 dark:hover:bg-neutral-700 border border-slate-300 dark:border-white/10 text-[10px] font-mono text-slate-800 dark:text-neutral-200 transition flex items-center space-x-1"
                     >
                       {copiedKey === "whitepage_html" ? (
                         <>
-                          <Check className="w-3 h-3 text-emerald-500" />
+                          <Check className="w-3 h-3 text-slate-900 dark:text-white" />
                           <span>HTML Copiado!</span>
                         </>
                       ) : (
                         <>
-                          <Copy className="w-3 h-3 text-purple-500" />
+                          <Copy className="w-3 h-3" />
                           <span>Copiar HTML Completo da Whitepage</span>
                         </>
                       )}
@@ -739,7 +719,7 @@ export default function AreaPhantomPage() {
                     </div>
                     <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 space-y-1">
                       <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase">Schema Estruturado</span>
-                      <div className="text-purple-600 dark:text-purple-400 font-semibold">
+                      <div className="text-slate-900 dark:text-white font-semibold">
                         {camouflageData.whitepageSync.schemaType}
                       </div>
                     </div>
@@ -757,13 +737,13 @@ export default function AreaPhantomPage() {
               {/* Coluna Direita: Variações Camufladas Geradas pelo Backend (5 cols) */}
               <div className="lg:col-span-5 space-y-4">
                 {/* Cartão de Variações Camufladas */}
-                <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
+                <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono uppercase tracking-wider text-slate-700 dark:text-neutral-300 font-bold flex items-center space-x-1.5">
-                      <Wand2 className="w-3.5 h-3.5 text-sky-500" />
+                      <Wand2 className="w-3.5 h-3.5 text-slate-800 dark:text-neutral-200" />
                       <span>Ângulos Camuflados ({camouflageData.variations.length})</span>
                     </span>
-                    <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">
+                    <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-white border border-slate-300 dark:border-white/20">
                       {camouflageData.variations[activeVariationIndex]?.badge || "99% Aprovação"}
                     </span>
                   </div>
@@ -776,7 +756,7 @@ export default function AreaPhantomPage() {
                         onClick={() => setActiveVariationIndex(idx)}
                         className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-mono font-bold transition truncate ${
                           activeVariationIndex === idx
-                            ? "bg-white dark:bg-neutral-800 text-sky-600 dark:text-sky-300 shadow-sm"
+                            ? "bg-slate-900 text-white dark:bg-white dark:text-black shadow-sm"
                             : "text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
                         }`}
                       >
@@ -799,11 +779,11 @@ export default function AreaPhantomPage() {
                                 `var_headline_${activeVariationIndex}`
                               )
                             }
-                            className="text-sky-600 dark:text-sky-400 hover:underline flex items-center space-x-1"
+                            className="text-slate-900 dark:text-white hover:underline flex items-center space-x-1 font-semibold"
                           >
                             {copiedKey === `var_headline_${activeVariationIndex}` ? (
                               <>
-                                <Check className="w-3 h-3 text-emerald-500" />
+                                <Check className="w-3 h-3 text-slate-900 dark:text-white" />
                                 <span>Copiado</span>
                               </>
                             ) : (
@@ -830,11 +810,11 @@ export default function AreaPhantomPage() {
                                 `var_copy_${activeVariationIndex}`
                               )
                             }
-                            className="text-sky-600 dark:text-sky-400 hover:underline flex items-center space-x-1"
+                            className="text-slate-900 dark:text-white hover:underline flex items-center space-x-1 font-semibold"
                           >
                             {copiedKey === `var_copy_${activeVariationIndex}` ? (
                               <>
-                                <Check className="w-3 h-3 text-emerald-500" />
+                                <Check className="w-3 h-3 text-slate-900 dark:text-white" />
                                 <span>Copiado</span>
                               </>
                             ) : (
@@ -853,18 +833,18 @@ export default function AreaPhantomPage() {
                       {/* Botão de Chamada para Ação */}
                       <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 text-xs font-mono">
                         <span className="text-[10px] uppercase text-slate-400 dark:text-neutral-500 font-bold">Botão de CTA Recomendado:</span>
-                        <span className="font-bold text-sky-600 dark:text-sky-400">
+                        <span className="font-bold text-slate-900 dark:text-white">
                           {camouflageData.variations[activeVariationIndex].cta} &rarr;
                         </span>
                       </div>
 
                       {/* Explicação Técnica do Bypass */}
-                      <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/40 space-y-1 text-xs">
-                        <div className="font-mono font-bold text-sky-800 dark:text-sky-300 flex items-center space-x-1.5">
-                          <ShieldCheck className="w-3.5 h-3.5 text-sky-500" />
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 space-y-1 text-xs">
+                        <div className="font-mono font-bold text-slate-800 dark:text-neutral-200 flex items-center space-x-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-slate-900 dark:text-white" />
                           <span>Por que a IA da Meta aprova sem banir?</span>
                         </div>
-                        <p className="text-[11px] text-sky-900 dark:text-sky-200/90 leading-relaxed">
+                        <p className="text-[11px] text-slate-600 dark:text-neutral-400 leading-relaxed">
                           {camouflageData.variations[activeVariationIndex].metaAngleExplanation}
                         </p>
                       </div>
@@ -873,15 +853,15 @@ export default function AreaPhantomPage() {
                 </div>
 
                 {/* Protocolo Operacional de Liberação de Tráfego */}
-                <div className="p-4 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-2.5">
+                <div className="p-4 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm space-y-2.5">
                   <div className="text-xs font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center space-x-1.5">
-                    <Zap className="w-3.5 h-3.5 text-amber-500" />
+                    <Zap className="w-3.5 h-3.5 text-slate-900 dark:text-white" />
                     <span>Roteiro de Ativação do Cloaker</span>
                   </div>
                   <div className="space-y-2 text-xs">
                     <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-100 dark:border-white/5 space-y-1">
                       <div className="font-semibold text-slate-800 dark:text-neutral-200 flex items-center space-x-1.5">
-                        <span className="w-4 h-4 rounded-full bg-sky-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+                        <span className="w-4 h-4 rounded-full bg-slate-900 text-white dark:bg-white dark:text-black flex items-center justify-center text-[10px] font-bold">1</span>
                         <span>Fase 1: Revisão do Robô (Primeiros 30-60 min)</span>
                       </div>
                       <p className="text-[11px] text-slate-600 dark:text-neutral-400 leading-relaxed pl-5">
@@ -891,7 +871,7 @@ export default function AreaPhantomPage() {
 
                     <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-100 dark:border-white/5 space-y-1">
                       <div className="font-semibold text-slate-800 dark:text-neutral-200 flex items-center space-x-1.5">
-                        <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                        <span className="w-4 h-4 rounded-full bg-slate-900 text-white dark:bg-white dark:text-black flex items-center justify-center text-[10px] font-bold">2</span>
                         <span>Fase 2: Ativação Pós-Aprovação</span>
                       </div>
                       <p className="text-[11px] text-slate-600 dark:text-neutral-400 leading-relaxed pl-5">
@@ -906,28 +886,28 @@ export default function AreaPhantomPage() {
             {/* Os 5 Pilares de Engenharia de Aprovação (Cards Educativos) */}
             <div className="space-y-4 pt-4">
               <div className="flex items-center space-x-2">
-                <Shield className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <Shield className="w-4 h-4 text-slate-900 dark:text-white" />
                 <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-white font-mono">
                   Os 5 Pilares de Engenharia para 99% de Aprovação em Tráfego Pago
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
-                  <div className="text-sky-600 dark:text-sky-400 font-mono font-bold text-xs flex items-center space-x-1.5">
-                    <span>01</span>
+                <div className="p-4 rounded-xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-slate-900 dark:text-white font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-white/10 flex items-center justify-center text-[10px] text-slate-900 dark:text-white">01</span>
                     <span>Camuflagem Semântica</span>
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">Troca de Promessa por Curiosidade</h4>
                   <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
                     A IA da Meta lê o criativo antes do clique. Se o criativo promete enriquecimento ou cura, a conta cai. 
-                    Promova o "método", o "estudo recente" ou o "novo hábito" sem usar termos pretensiosos.
+                    Promova o &quot;método&quot;, o &quot;estudo recente&quot; ou o &quot;novo hábito&quot; sem usar termos pretensiosos.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
-                  <div className="text-purple-600 dark:text-purple-400 font-mono font-bold text-xs flex items-center space-x-1.5">
-                    <span>02</span>
+                <div className="p-4 rounded-xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-slate-900 dark:text-white font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-white/10 flex items-center justify-center text-[10px] text-slate-900 dark:text-white">02</span>
                     <span>Coerência Anúncio-Whitepage</span>
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">Fim do Mismatch de Tópico</h4>
@@ -937,21 +917,21 @@ export default function AreaPhantomPage() {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
-                  <div className="text-emerald-600 dark:text-emerald-400 font-mono font-bold text-xs flex items-center space-x-1.5">
-                    <span>03</span>
+                <div className="p-4 rounded-xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-slate-900 dark:text-white font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-white/10 flex items-center justify-center text-[10px] text-slate-900 dark:text-white">03</span>
                     <span>Entrega Edge SSR HTTP 200</span>
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">Zero Redirecionamentos JS</h4>
                   <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
-                    Scripts com <code className="text-emerald-700 dark:text-emerald-400 font-mono">window.location</code> são farejados instantaneamente por headless browsers. 
+                    Scripts com <code className="text-slate-900 dark:text-white font-mono bg-slate-100 dark:bg-white/10 px-1 py-0.5 rounded">window.location</code> são farejados instantaneamente por headless browsers. 
                     O Phantom-X cospe o HTML diretamente da borda sem nunca mudar a URL do navegador.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
-                  <div className="text-amber-600 dark:text-amber-400 font-mono font-bold text-xs flex items-center space-x-1.5">
-                    <span>04</span>
+                <div className="p-4 rounded-xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-slate-900 dark:text-white font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-white/10 flex items-center justify-center text-[10px] text-slate-900 dark:text-white">04</span>
                     <span>Geolocalização &amp; Fuso Horário</span>
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">Sincronia Regional de Borda</h4>
@@ -961,9 +941,9 @@ export default function AreaPhantomPage() {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
-                  <div className="text-sky-600 dark:text-sky-400 font-mono font-bold text-xs flex items-center space-x-1.5">
-                    <span>05</span>
+                <div className="p-4 rounded-xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-slate-900 dark:text-white font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-white/10 flex items-center justify-center text-[10px] text-slate-900 dark:text-white">05</span>
                     <span>Aquecimento de Conta &amp; CAPI</span>
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">Esteira Gradual de Orçamento</h4>
@@ -973,15 +953,15 @@ export default function AreaPhantomPage() {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white dark:bg-neutral-900/50 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
-                  <div className="text-rose-600 dark:text-rose-400 font-mono font-bold text-xs flex items-center space-x-1.5">
-                    <span>06</span>
+                <div className="p-4 rounded-xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2 shadow-sm">
+                  <div className="text-slate-900 dark:text-white font-mono font-bold text-xs flex items-center space-x-1.5">
+                    <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-white/10 flex items-center justify-center text-[10px] text-slate-900 dark:text-white">06</span>
                     <span>Rodapé Legal Obrigatório</span>
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">Termos, Privacidade &amp; Contato</h4>
                   <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
                     Toda página aprovada precisa ter CNPJ/E-mail, Política de Privacidade e Termos de Uso no rodapé. Sem isso, os crawlers 
-                    classificam o destino como "Página de Destino de Baixa Qualidade".
+                    classificam o destino como &quot;Página de Destino de Baixa Qualidade&quot;.
                   </p>
                 </div>
               </div>
@@ -990,69 +970,69 @@ export default function AreaPhantomPage() {
         )}
 
         {/* ----------------------------------------------------------------- */}
-        {/* ABA 3: DICAS PARA OFERTAS AGRESSIVAS (BLACK / GRAY HAT)          */}
+        {/* ABA 4: DICAS PARA OFERTAS AGRESSIVAS (BLACK / GRAY HAT)          */}
         {/* ----------------------------------------------------------------- */}
         {activeTab === "blackhat" && (
           <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-950 via-[#0c1a30] to-neutral-900 border border-sky-500/30 shadow-[0_4px_30px_rgba(14,165,233,0.12)] dark-surface keep-white">
-              <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2" style={{ color: "#ffffff" }}>
+            <div className="p-6 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/95 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
                 <span>Guia Tático: Como Manter Campanhas Agressivas Vivas</span>
               </h2>
-              <p className="text-xs leading-relaxed mt-2 max-w-3xl" style={{ color: "rgba(224, 242, 254, 0.95)" }}>
+              <p className="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mt-2 max-w-3xl">
                 O cloaker é 50% da equação. Os outros 50% dependem da sua disciplina operacional. 
                 Siga estas regras para evitar que a IA da Meta suspenda suas contas.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/60 border border-slate-200 dark:border-white/10 space-y-2.5 shadow-sm">
-                <div className="flex items-center space-x-2 text-sky-600 dark:text-sky-400 font-mono text-xs font-bold">
-                  <Lightbulb className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2.5 shadow-sm">
+                <div className="flex items-center space-x-2 text-slate-900 dark:text-white font-mono text-xs font-bold">
+                  <Lightbulb className="w-4 h-4 text-slate-900 dark:text-white" />
                   <span>REGRA 1: O Efeito Camaleão da Whitepage</span>
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">Clone a Paleta de Cores da Oferta</h4>
                 <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed">
                   A IA da Meta analisa semelhança visual entre o criativo do anúncio e a página de destino. 
-                  Se seu anúncio é azul e fala sobre sono, sua Whitepage deve ser azul e ter um artigo sobre 'Higiene do Sono'. 
+                  Se seu anúncio é azul e fala sobre sono, sua Whitepage deve ser azul e ter um artigo sobre &apos;Higiene do Sono&apos;. 
                   Nunca coloque um artigo de receitas de bolo se o seu criativo fala de saúde ou finanças.
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/60 border border-slate-200 dark:border-white/10 space-y-2.5 shadow-sm">
-                <div className="flex items-center space-x-2 text-sky-600 dark:text-sky-400 font-mono text-xs font-bold">
-                  <Lightbulb className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2.5 shadow-sm">
+                <div className="flex items-center space-x-2 text-slate-900 dark:text-white font-mono text-xs font-bold">
+                  <Lightbulb className="w-4 h-4 text-slate-900 dark:text-white" />
                   <span>REGRA 2: Estratégia de Aquecimento (Warm-up)</span>
                 </div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Primeiras 24h em 'SÓ_WHITEPAGE'</h4>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Primeiras 24h em &apos;SÓ_WHITEPAGE&apos;</h4>
                 <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed">
                   Ao subir uma campanha nova, deixe o modo do cloaker configurado em <strong className="text-slate-900 dark:text-white">SÓ_WHITEPAGE</strong> durante a análise. 
-                  Assim que o anúncio estiver com status 'Ativo' e rodar algumas impressões, mude no Phantom-X para <strong className="text-emerald-600 dark:text-emerald-400">AUTOMÁTICO</strong>. 
+                  Assim que o anúncio estiver com status &apos;Ativo&apos; e rodar algumas impressões, mude no Phantom-X para <strong className="text-slate-900 dark:text-white underline decoration-slate-400">AUTOMÁTICO</strong>. 
                   Isso garante 100% de aprovação na primeira rodada.
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/60 border border-slate-200 dark:border-white/10 space-y-2.5 shadow-sm">
-                <div className="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-bold">
-                  <Lightbulb className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2.5 shadow-sm">
+                <div className="flex items-center space-x-2 text-slate-900 dark:text-white font-mono text-xs font-bold">
+                  <Lightbulb className="w-4 h-4 text-slate-900 dark:text-white" />
                   <span>REGRA 3: Contingência de Pixel</span>
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">Instale o Pixel na Whitepage e na Oferta</h4>
                 <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed">
-                  Dispare o evento de 'PageView' tanto na Whitepage quanto na Oferta. 
+                  Dispare o evento de &apos;PageView&apos; tanto na Whitepage quanto na Oferta. 
                   Para a Meta, sua página parecerá saudável e recebendo tráfego normalmente. 
-                  Dispare o evento de 'Purchase' / 'InitiateCheckout' apenas na página de vendas real.
+                  Dispare o evento de &apos;Purchase&apos; / &apos;InitiateCheckout&apos; apenas na página de vendas real.
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/60 border border-slate-200 dark:border-white/10 space-y-2.5 shadow-sm">
-                <div className="flex items-center space-x-2 text-purple-600 dark:text-purple-400 font-mono text-xs font-bold">
-                  <Lightbulb className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 border border-slate-200 dark:border-white/10 space-y-2.5 shadow-sm">
+                <div className="flex items-center space-x-2 text-slate-900 dark:text-white font-mono text-xs font-bold">
+                  <Lightbulb className="w-4 h-4 text-slate-900 dark:text-white" />
                   <span>REGRA 4: Criativo Limpo, Promessa no Vídeo</span>
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">Não queime a oferta no texto do anúncio</h4>
                 <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed">
-                  Evite palavras como 'Cura', 'Emagreça 10kg em 3 dias', 'Ganhe R$ 5.000 fácil'. 
-                  Use ângulos de curiosidade: 'Descubra o truque matinal que os especialistas recomendam'. 
+                  Evite palavras como &apos;Cura&apos;, &apos;Emagreça 10kg em 3 dias&apos;, &apos;Ganhe R$ 5.000 fácil&apos;. 
+                  Use ângulos de curiosidade: &apos;Descubra o truque matinal que os especialistas recomendam&apos;. 
                   O texto atrai o clique; quem vende é a sua VSL ou página de vendas protegida.
                 </p>
               </div>
@@ -1061,16 +1041,16 @@ export default function AreaPhantomPage() {
         )}
 
         {/* ----------------------------------------------------------------- */}
-        {/* ABA 4: SIMULADOR INTERATIVO DE REQUISIÇÕES                       */}
+        {/* ABA 5: SIMULADOR INTERATIVO DE REQUISIÇÕES                       */}
         {/* ----------------------------------------------------------------- */}
         {activeTab === "simulador" && (
           <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-white dark:bg-gradient-to-r dark:from-neutral-900/90 dark:via-[#0e1724] dark:to-neutral-950 border border-slate-200 dark:border-sky-500/20 shadow-sm">
+            <div className="p-6 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/95 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm">
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-                <Terminal className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <Terminal className="w-5 h-5 text-slate-900 dark:text-white" />
                 <span>Simulador de Inspeção em Tempo Real</span>
               </h2>
-              <p className="text-xs text-slate-600 dark:text-neutral-300 leading-relaxed mt-2 max-w-3xl">
+              <p className="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mt-2 max-w-3xl">
                 Escolha um cenário abaixo para ver exatamente como as 6 camadas do Motor Phantom-X 
                 avaliam os pacotes de rede e tomam a decisão em menos de 14 milissegundos.
               </p>
@@ -1082,45 +1062,45 @@ export default function AreaPhantomPage() {
                 onClick={() => setSimulatedScenario("bot_meta")}
                 className={`p-4 rounded-xl border text-left transition cursor-pointer ${
                   simulatedScenario === "bot_meta"
-                    ? "bg-red-500/10 border-red-500/40 text-slate-900 dark:text-white shadow-md ring-1 ring-red-500/30"
-                    : "bg-white dark:bg-neutral-900/60 border-slate-200 dark:border-white/10 text-slate-700 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
+                    ? "bg-slate-100 dark:bg-gradient-to-b dark:from-neutral-800 dark:to-neutral-900 border-slate-900 dark:border-white/30 text-slate-950 dark:text-white shadow-md ring-1 ring-slate-900/20 dark:ring-white/20"
+                    : "bg-white dark:bg-neutral-900/50 border-slate-200 dark:border-white/10 text-slate-700 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-red-600 dark:text-red-400">Cenário 1: Bot da Meta</span>
-                  <ShieldAlert className="w-4 h-4 text-red-600 dark:text-red-400" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">Cenário 1: Bot da Meta</span>
+                  <ShieldAlert className="w-4 h-4 text-slate-900 dark:text-white" />
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-neutral-300">Crawler AWS/Datacenter sem token fbclid</div>
+                <div className="text-[11px] text-slate-500 dark:text-neutral-400">Crawler AWS/Datacenter sem token fbclid</div>
               </button>
 
               <button
                 onClick={() => setSimulatedScenario("buyer_real")}
                 className={`p-4 rounded-xl border text-left transition cursor-pointer ${
                   simulatedScenario === "buyer_real"
-                    ? "bg-emerald-500/10 border-emerald-500/40 text-slate-900 dark:text-white shadow-md ring-1 ring-emerald-500/30"
-                    : "bg-white dark:bg-neutral-900/60 border-slate-200 dark:border-white/10 text-slate-700 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
+                    ? "bg-slate-100 dark:bg-gradient-to-b dark:from-neutral-800 dark:to-neutral-900 border-slate-900 dark:border-white/30 text-slate-950 dark:text-white shadow-md ring-1 ring-slate-900/20 dark:ring-white/20"
+                    : "bg-white dark:bg-neutral-900/50 border-slate-200 dark:border-white/10 text-slate-700 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Cenário 2: Comprador Real</span>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">Cenário 2: Comprador Real</span>
+                  <CheckCircle2 className="w-4 h-4 text-slate-900 dark:text-white" />
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-neutral-300">iPhone 4G Claro Brasil com token fbclid</div>
+                <div className="text-[11px] text-slate-500 dark:text-neutral-400">iPhone 4G Claro Brasil com token fbclid</div>
               </button>
 
               <button
                 onClick={() => setSimulatedScenario("human_vpn")}
                 className={`p-4 rounded-xl border text-left transition cursor-pointer ${
                   simulatedScenario === "human_vpn"
-                    ? "bg-purple-500/10 border-purple-500/40 text-slate-900 dark:text-white shadow-md ring-1 ring-purple-500/30"
-                    : "bg-white dark:bg-neutral-900/60 border-slate-200 dark:border-white/10 text-slate-700 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
+                    ? "bg-slate-100 dark:bg-gradient-to-b dark:from-neutral-800 dark:to-neutral-900 border-slate-900 dark:border-white/30 text-slate-950 dark:text-white shadow-md ring-1 ring-slate-900/20 dark:ring-white/20"
+                    : "bg-white dark:bg-neutral-900/50 border-slate-200 dark:border-white/10 text-slate-700 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400">Cenário 3: Moderador com VPN</span>
-                  <AlertTriangle className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">Cenário 3: Moderador com VPN</span>
+                  <AlertTriangle className="w-4 h-4 text-slate-900 dark:text-white" />
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-neutral-300">Desktop de Dublin / VPN M247 nos EUA</div>
+                <div className="text-[11px] text-slate-500 dark:text-neutral-400">Desktop de Dublin / VPN M247 nos EUA</div>
               </button>
             </div>
 
@@ -1129,9 +1109,9 @@ export default function AreaPhantomPage() {
               <div className="rounded-2xl border border-slate-800 dark:border-white/15 bg-slate-950 dark:bg-black/95 p-5 font-mono text-xs space-y-4 shadow-2xl text-white">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-800 dark:border-white/10 text-neutral-400">
                   <div className="flex items-center space-x-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-neutral-600" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-neutral-600" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-neutral-600" />
                     <span className="text-[11px] ml-2 text-neutral-300">phantom-edge-telemetry.log</span>
                   </div>
                   <span className="text-[10px] text-neutral-500">Executado em tempo real</span>
@@ -1142,10 +1122,10 @@ export default function AreaPhantomPage() {
                     <div className="text-neutral-400">[00:00.001] Incoming GET /?utm_source=meta</div>
                     <div className="text-neutral-400">[00:00.003] IP: 54.210.122.45 | Country: US | ASN: 16509 (Amazon AWS EC2)</div>
                     <div className="text-neutral-400">[00:00.005] User-Agent: facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)</div>
-                    <div className="text-red-400 font-bold">[00:00.007] 🚨 ALERTA: Camada 3 ativada (ASN Datacenter AS16509 bloqueado)</div>
-                    <div className="text-red-400 font-bold">[00:00.008] 🚨 ALERTA: Camada 4 ativada (Ausência de token fbclid obrigatório)</div>
-                    <div className="text-amber-400 font-semibold">[00:00.010] Decisão: MITIGATED_SAFE (Whitepage)</div>
-                    <div className="text-emerald-400 font-bold">[00:00.012] Reverse Proxy entregue: HTTP 200 OK (Content: Safe Page Institucional)</div>
+                    <div className="text-neutral-300 font-bold">[00:00.007] &bull; ALERTA: Camada 3 ativada (ASN Datacenter AS16509 bloqueado)</div>
+                    <div className="text-neutral-300 font-bold">[00:00.008] &bull; ALERTA: Camada 4 ativada (Ausência de token fbclid obrigatório)</div>
+                    <div className="text-neutral-200 font-semibold">[00:00.010] Decisão: MITIGATED_SAFE (Whitepage)</div>
+                    <div className="text-white font-bold">[00:00.012] Reverse Proxy entregue: HTTP 200 OK (Content: Safe Page Institucional)</div>
                     <div className="text-neutral-400">[00:00.013] Status para o Robô da Meta: Aprovado sem restrições.</div>
                   </div>
                 )}
@@ -1155,13 +1135,13 @@ export default function AreaPhantomPage() {
                     <div className="text-neutral-400">[00:00.001] Incoming GET /?utm_source=meta&amp;fbclid=IwAR99023412a8b</div>
                     <div className="text-neutral-400">[00:00.003] IP: 187.54.212.10 | Country: BR | ASN: 28573 (Claro Brasil Móvel)</div>
                     <div className="text-neutral-400">[00:00.005] User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) Mobile/15E148</div>
-                    <div className="text-emerald-400">[00:00.006] ✓ Camada 1 (Geo BR): Aprovado</div>
-                    <div className="text-emerald-400">[00:00.007] ✓ Camada 2 (Mobile iOS): Aprovado</div>
-                    <div className="text-emerald-400">[00:00.008] ✓ Camada 3 (ISP Residencial Claro): Aprovado</div>
-                    <div className="text-emerald-400">[00:00.009] ✓ Camada 4 (fbclid verificado): Aprovado</div>
-                    <div className="text-emerald-400">[00:00.010] ✓ Camada 6 (ProxyCheck Score: 0/100): Limpo</div>
-                    <div className="text-sky-400 font-bold">[00:00.011] Decisão: ROUTED_OFFER (Oferta Black / VSL)</div>
-                    <div className="text-emerald-400 font-bold">[00:00.013] Reverse Proxy entregue: HTTP 200 OK com UTMs preservadas</div>
+                    <div className="text-neutral-300">[00:00.006] &bull; Camada 1 (Geo BR): Aprovado</div>
+                    <div className="text-neutral-300">[00:00.007] &bull; Camada 2 (Mobile iOS): Aprovado</div>
+                    <div className="text-neutral-300">[00:00.008] &bull; Camada 3 (ISP Residencial Claro): Aprovado</div>
+                    <div className="text-neutral-300">[00:00.009] &bull; Camada 4 (fbclid verificado): Aprovado</div>
+                    <div className="text-neutral-300">[00:00.010] &bull; Camada 6 (ProxyCheck Score: 0/100): Limpo</div>
+                    <div className="text-white font-bold">[00:00.011] Decisão: ROUTED_OFFER (Oferta Black / VSL)</div>
+                    <div className="text-white font-bold">[00:00.013] Reverse Proxy entregue: HTTP 200 OK com UTMs preservadas</div>
                   </div>
                 )}
 
@@ -1170,10 +1150,10 @@ export default function AreaPhantomPage() {
                     <div className="text-neutral-400">[00:00.001] Incoming GET /?fbclid=teste123</div>
                     <div className="text-neutral-400">[00:00.003] IP: 185.156.73.12 | Country: IE (Irlanda) | ASN: 9009 (M247 Ltd VPN)</div>
                     <div className="text-neutral-400">[00:00.005] User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/124.0.0.0</div>
-                    <div className="text-red-400 font-bold">[00:00.006] 🚨 ALERTA: Camada 1 ativada (Origem Irlanda 'IE' fora do Brasil)</div>
-                    <div className="text-red-400 font-bold">[00:00.007] 🚨 ALERTA: Camada 3 ativada (Rede de VPN comercial AS9009)</div>
-                    <div className="text-amber-400 font-semibold">[00:00.009] Decisão: MITIGATED_SAFE (Whitepage)</div>
-                    <div className="text-emerald-400 font-bold">[00:00.011] Reverse Proxy entregue: HTTP 200 OK (Moderador vê artigo inofensivo)</div>
+                    <div className="text-neutral-300 font-bold">[00:00.006] &bull; ALERTA: Camada 1 ativada (Origem Irlanda &apos;IE&apos; fora do Brasil)</div>
+                    <div className="text-neutral-300 font-bold">[00:00.007] &bull; ALERTA: Camada 3 ativada (Rede de VPN comercial AS9009)</div>
+                    <div className="text-neutral-200 font-semibold">[00:00.009] Decisão: MITIGATED_SAFE (Whitepage)</div>
+                    <div className="text-white font-bold">[00:00.011] Reverse Proxy entregue: HTTP 200 OK (Moderador vê artigo inofensivo)</div>
                   </div>
                 )}
               </div>
@@ -1182,13 +1162,13 @@ export default function AreaPhantomPage() {
         )}
 
         {/* ----------------------------------------------------------------- */}
-        {/* ABA 5: DÚVIDAS FREQUENTES (FAQ)                                   */}
+        {/* ABA 6: DÚVIDAS FREQUENTES (FAQ)                                   */}
         {/* ----------------------------------------------------------------- */}
         {activeTab === "faq" && (
           <div className="space-y-4">
-            <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-r dark:from-neutral-900/80 dark:via-neutral-900 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm mb-2">
+            <div className="p-5 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-neutral-900/95 dark:to-neutral-950 border border-slate-200 dark:border-white/10 shadow-sm mb-2">
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-                <HelpCircle className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <HelpCircle className="w-5 h-5 text-slate-900 dark:text-white" />
                 <span>Perguntas Frequentes &amp; Respostas dos Especialistas</span>
               </h2>
               <p className="text-xs text-slate-600 dark:text-neutral-400 mt-1">
@@ -1202,14 +1182,14 @@ export default function AreaPhantomPage() {
                 return (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-neutral-900/40 overflow-hidden transition-all duration-200 shadow-sm"
+                    className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-gradient-to-b dark:from-neutral-900/90 dark:to-neutral-950 overflow-hidden transition-all duration-200 shadow-sm"
                   >
                     <button
                       onClick={() => setExpandedFaq(isOpen ? null : idx)}
                       className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-white/[0.02] transition cursor-pointer"
                     >
                       <div className="flex items-center space-x-3 pr-4">
-                        <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-neutral-300 font-semibold shrink-0">
+                        <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-neutral-200 font-semibold shrink-0 border border-slate-200 dark:border-white/10">
                           {faq.tag}
                         </span>
                         <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">{faq.q}</span>
