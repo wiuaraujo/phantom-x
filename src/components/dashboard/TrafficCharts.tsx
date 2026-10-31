@@ -6,6 +6,7 @@ import { getCountryFlag } from "@/lib/geoFlags";
 import { store } from "@/lib/store";
 import { Activity, ShieldCheck, ShieldAlert, TrendingUp } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
+import { useTheme } from "@/lib/theme";
 
 interface TrafficChartsProps {
   timeSeries: { hour: string; events: number; threats: number }[];
@@ -19,6 +20,8 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
   deviceStats = { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
 }) => {
   const { t, language } = useLanguage();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const activeLocale = language === "en" ? "en-US" : language === "es" ? "es-ES" : "pt-BR";
   const [timeframe, setTimeframe] = useState<"24h" | "7d" | "30d">("24h");
   const [metric, setMetric] = useState<"total" | "clean" | "threats" | "efficiency">("total");
@@ -157,9 +160,9 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-sans">
       {/* 1. GRÁFICO DE TELEMETRIA SVG VETORIAL (Estilo Admin Minimalista) */}
-      <div className="lg:col-span-2 bg-gradient-to-b from-brand-surface/90 via-brand-surface to-brand-surface/95 border border-brand-border rounded-2xl p-4 sm:p-5 shadow-sm">
+      <div className="lg:col-span-2 bg-brand-surface border border-brand-border rounded-2xl p-4 sm:p-5 shadow-sm">
         {/* Top Controls: Métrica & Timeframe */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-white/[0.06]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-brand-borderSubtle">
           <div>
             <div className="text-[11px] font-mono text-brand-secondary uppercase tracking-wider flex items-center space-x-1.5">
               <Activity className="w-3.5 h-3.5 text-brand-white" />
@@ -184,15 +187,15 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
           </div>
 
           {/* Timeframe Buttons */}
-          <div className="flex items-center space-x-1 bg-black/40 border border-white/10 rounded-xl p-1 self-start sm:self-auto">
+          <div className="flex items-center space-x-1 bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/10 rounded-xl p-1 self-start sm:self-auto">
             {(["24h", "7d", "30d"] as const).map((tf) => (
               <button
                 key={tf}
                 onClick={() => setTimeframe(tf)}
                 className={`px-2.5 py-1 text-xs font-mono rounded-lg transition ${
                   timeframe === tf
-                    ? "bg-white text-black font-semibold shadow-sm"
-                    : "text-neutral-400 hover:text-white"
+                    ? "bg-white text-neutral-900 shadow-sm font-semibold dark:bg-white dark:text-black"
+                    : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
                 }`}
               >
                 {tf}
@@ -217,8 +220,8 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
                 onClick={() => setMetric(tab.id as any)}
                 className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition border ${
                   isSelected
-                    ? "bg-white/[0.08] border-white/30 text-white font-medium"
-                    : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.02]"
+                    ? "bg-neutral-900/10 text-neutral-900 border-neutral-300 dark:bg-white/[0.08] dark:border-white/30 dark:text-white font-medium"
+                    : "border-transparent text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/[0.02]"
                 }`}
               >
                 <Icon className="w-3 h-3" />
@@ -237,9 +240,9 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
           >
             <defs>
               <linearGradient id="userTrafficGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18" />
-                <stop offset="85%" stopColor="#ffffff" stopOpacity="0.01" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+                <stop offset="0%" stopColor={isDark ? "#ffffff" : "#0f172a"} stopOpacity={isDark ? 0.18 : 0.12} />
+                <stop offset="85%" stopColor={isDark ? "#ffffff" : "#0f172a"} stopOpacity={0.01} />
+                <stop offset="100%" stopColor={isDark ? "#ffffff" : "#0f172a"} stopOpacity={0} />
               </linearGradient>
             </defs>
 
@@ -254,18 +257,18 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
                     y1={y}
                     x2={width - paddingX}
                     y2={y}
-                    stroke="rgba(255, 255, 255, 0.05)"
+                    stroke={isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(15, 23, 42, 0.08)"}
                     strokeDasharray="2 3"
                   />
                   <text
                     x={paddingX - 8}
                     y={y + 3}
-                    fill="rgba(255, 255, 255, 0.25)"
+                    fill={isDark ? "rgba(255, 255, 255, 0.35)" : "rgba(15, 23, 42, 0.6)"}
                     fontSize="9"
                     fontFamily="monospace"
                     textAnchor="end"
                   >
-                    {metric === "efficiency" ? `${val}%` : val.toLocaleString("pt-BR")}
+                    {metric === "efficiency" ? `${val}%` : val.toLocaleString(activeLocale)}
                   </text>
                 </g>
               );
@@ -277,7 +280,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
               y1={height - paddingY}
               x2={width - paddingX}
               y2={height - paddingY}
-              stroke="rgba(255, 255, 255, 0.12)"
+              stroke={isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(15, 23, 42, 0.15)"}
             />
 
             {/* Área com Gradiente Suave */}
@@ -290,8 +293,8 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
               <path
                 d={pathD}
                 fill="none"
-                stroke="#ffffff"
-                strokeWidth="2"
+                stroke={isDark ? "#ffffff" : "#0f172a"}
+                strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className="transition-all duration-300"
@@ -305,7 +308,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
                 y1={height - paddingY}
                 x2={width - paddingX}
                 y2={height - paddingY}
-                stroke="rgba(255, 255, 255, 0.25)"
+                stroke={isDark ? "rgba(255, 255, 255, 0.25)" : "rgba(15, 23, 42, 0.3)"}
                 strokeWidth="1.5"
                 strokeDasharray="4 4"
               />
@@ -319,7 +322,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
                   y1={paddingY}
                   x2={activePoint.x}
                   y2={height - paddingY}
-                  stroke="rgba(255, 255, 255, 0.3)"
+                  stroke={isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(15, 23, 42, 0.3)"}
                   strokeWidth="1"
                   strokeDasharray="2 2"
                 />
@@ -327,8 +330,8 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
                   cx={activePoint.x}
                   cy={activePoint.y}
                   r="5"
-                  fill="#ffffff"
-                  stroke="#000000"
+                  fill={isDark ? "#ffffff" : "#0f172a"}
+                  stroke={isDark ? "#000000" : "#ffffff"}
                   strokeWidth="2"
                   className="shadow-glow"
                 />
@@ -363,37 +366,37 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
           {/* Tooltip Flutuante no Hover */}
           {hoverIndex !== null && activePoint && (
             <div
-              className="absolute pointer-events-none bg-neutral-950/95 border border-white/20 rounded-xl px-3 py-2 shadow-2xl backdrop-blur-md z-30 font-mono text-xs animate-in fade-in zoom-in-95 duration-150"
+              className="absolute pointer-events-none bg-white/95 dark:bg-neutral-950/95 border border-neutral-200 dark:border-white/20 rounded-xl px-3 py-2 shadow-2xl backdrop-blur-md z-30 font-mono text-xs animate-in fade-in zoom-in-95 duration-150"
               style={{
                 left: `${Math.min(Math.max(activePoint.x - 70, 10), width - 150)}px`,
                 top: "10px",
               }}
             >
-              <div className="text-[10px] text-neutral-400 font-medium pb-1 border-b border-white/10 mb-1">
+              <div className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium pb-1 border-b border-neutral-200 dark:border-white/10 mb-1">
                 {activePoint.data.fullDate}
               </div>
               <div className="space-y-0.5 text-[11px]">
-                <div className="flex justify-between space-x-3 text-neutral-300">
+                <div className="flex justify-between space-x-3 text-neutral-700 dark:text-neutral-300">
                   <span>Total:</span>
-                  <span className="font-bold text-white">
+                  <span className="font-bold text-neutral-900 dark:text-white">
                     {activePoint.data.total.toLocaleString(activeLocale)}
                   </span>
                 </div>
-                <div className="flex justify-between space-x-3 text-emerald-400">
+                <div className="flex justify-between space-x-3 text-emerald-600 dark:text-emerald-400">
                   <span>{t.dashboard.cleanHits}:</span>
                   <span className="font-bold">
                     {activePoint.data.clean.toLocaleString(activeLocale)}
                   </span>
                 </div>
-                <div className="flex justify-between space-x-3 text-red-400">
+                <div className="flex justify-between space-x-3 text-red-600 dark:text-red-400">
                   <span>{t.dashboard.threatsBlocked}:</span>
                   <span className="font-bold">
                     {activePoint.data.threats.toLocaleString(activeLocale)}
                   </span>
                 </div>
-                <div className="flex justify-between space-x-3 text-neutral-400 pt-0.5 border-t border-white/10">
+                <div className="flex justify-between space-x-3 text-neutral-600 dark:text-neutral-400 pt-0.5 border-t border-neutral-200 dark:border-white/10">
                   <span>{t.dashboard.blockRate}:</span>
-                  <span className="font-bold text-white">
+                  <span className="font-bold text-neutral-900 dark:text-white">
                     {activePoint.data.efficiency}%
                   </span>
                 </div>
