@@ -12,7 +12,6 @@ const STORAGE_KEY = "phantom_pending_verification";
  * Gera um token OTP criptograficamente seguro e único de 6 dígitos numéricos
  */
 export function generateVerificationOtp(): string {
-  // Gera código aleatório entre 100000 e 999999
   const randomNum = Math.floor(100000 + Math.random() * 900000);
   return randomNum.toString();
 }
@@ -76,7 +75,6 @@ export function verifyOtpCode(inputCode: string, email?: string): { success: boo
     };
   }
 
-  // Validação de expiração de 5 minutos
   const now = Date.now();
   if (now > record.expiresAt) {
     return {
@@ -85,7 +83,6 @@ export function verifyOtpCode(inputCode: string, email?: string): { success: boo
     };
   }
 
-  // Validação dos 6 dígitos
   const cleanInput = inputCode.replace(/\D/g, "").trim();
   if (cleanInput.length !== 6) {
     return {
@@ -117,9 +114,12 @@ export function clearPendingVerification(): void {
 
 /**
  * Template Oficial do E-mail de Verificação Phantom-X
+ * - Fundo exterior (quadrado maior / Gmail wrapper): Branco (#ffffff)
+ * - Card central com os dados e assets: Preto profundo (#0c0c0e) com borda e cantos arredondados
  * - Logotipo minimalista da Phantom
  * - Saudação com nome do operador
  * - Botão direto de "Confirmar e Ativar Minha Conta" sem exibir caixa de código
+ * - 100% responsivo e blindado para Desktop e Mobile (Gmail Android/iOS, Apple Mail, Outlook)
  */
 export function renderVerificationEmailHtml(name: string, code: string, origin?: string, email?: string): string {
   const cleanName = name || "Operador";
@@ -128,125 +128,148 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
     ? `${baseUrl}/api/v1/auth/confirm?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`
     : `${baseUrl}/login?confirmed=1`;
 
-  return `<!DOCTYPE html>
-<html lang="pt-BR">
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="supported-color-schemes" content="light dark" />
   <title>Confirme sua conta no Phantom-X</title>
-  <style>
-    body {
+  <style type="text/css">
+    /* Reset styles */
+    body, p, h1, div, table, td, a {
       margin: 0;
       padding: 0;
-      background-color: #050505;
+    }
+    body {
+      width: 100% !important;
+      height: 100% !important;
+      background-color: #ffffff !important;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: #ffffff;
-      -webkit-font-smoothing: antialiased;
     }
-    .wrapper {
-      width: 100%;
-      background-color: #050505;
-      padding: 40px 15px;
-      box-sizing: border-box;
+    table, td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
     }
-    .container {
-      max-width: 520px;
-      margin: 0 auto;
-      background-color: #0c0c0e;
-      border: 1px solid #27272a;
-      border-radius: 20px;
-      padding: 36px 30px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-    }
-    .logo-container {
-      margin-bottom: 24px;
-    }
-    .greeting {
-      font-size: 20px;
-      font-weight: 700;
-      color: #ffffff;
-      margin: 0 0 14px 0;
-      line-height: 1.3;
-    }
-    .subtext {
-      font-size: 14px;
-      color: #a1a1aa;
-      margin: 0 0 20px 0;
-      line-height: 1.5;
-    }
-    .instruction {
-      font-size: 13px;
-      color: #a1a1aa;
-      line-height: 1.6;
-      margin: 0 0 28px 0;
-    }
-    .btn-container {
-      text-align: center;
-      margin: 32px 0 34px 0;
-    }
-    .btn-confirm {
-      display: inline-block;
-      background-color: #ffffff;
-      color: #000000 !important;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      padding: 14px 34px;
-      border-radius: 12px;
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      outline: none;
       text-decoration: none;
-      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
     }
-    .ignore-text {
-      font-size: 12px;
-      color: #71717a;
-      line-height: 1.5;
-      margin: 24px 0 28px 0;
-    }
-    .closing {
-      font-size: 14px;
-      color: #ffffff;
-      font-weight: 600;
-      margin: 0;
-      border-top: 1px solid #27272a;
-      padding-top: 24px;
-    }
-    .brand-sub {
-      font-size: 12px;
-      color: #71717a;
-      margin-top: 4px;
+    /* Mobile responsive adjustments */
+    @media only screen and (max-width: 600px) {
+      .card-cell {
+        padding: 28px 20px !important;
+      }
+      .card-table {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 16px !important;
+      }
+      .btn-link {
+        display: block !important;
+        width: auto !important;
+        padding: 14px 20px !important;
+        text-align: center !important;
+      }
+      .outer-cell {
+        padding: 20px 10px !important;
+      }
     }
   </style>
+  <!--[if mso]>
+  <style type="text/css">
+    body, table, td, p, a { font-family: Arial, sans-serif !important; }
+  </style>
+  <![endif]-->
 </head>
-<body>
-  <div class="wrapper">
-    <div class="container">
-      <!-- Logotipo Minimalista Pequeno da Phantom -->
-      <div class="logo-container">
-        <img src="${baseUrl}/logo.png" alt="Phantom-X" width="36" height="36" style="display: block; width: 36px; height: 36px; object-fit: contain;" />
-      </div>
+<body bgcolor="#ffffff" style="margin: 0; padding: 0; width: 100% !important; background-color: #ffffff !important; background: #ffffff !important;">
 
-      <h1 class="greeting">Olá, ${cleanName}</h1>
-      <p class="subtext">Sua conta na plataforma Phantom-X foi criada com sucesso.</p>
+  <!-- TABELA EXTERNA (FUNDO BRANCO DO GMAIL - QUADRADO MAIOR) -->
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="margin: 0; padding: 0; width: 100% !important; background-color: #ffffff !important; background: #ffffff !important;">
+    <tr>
+      <td class="outer-cell" align="center" valign="top" style="padding: 40px 15px; background-color: #ffffff !important; background: #ffffff !important;">
+        
+        <!-- CARD PRETO CENTRAL (ONDE ESTÃO OS ASSETS, ESCRITA E BOTÃO - MESMO VISUAL DESKTOP E MOBILE) -->
+        <table role="presentation" class="card-table" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#0c0c0e" style="max-width: 520px; width: 100%; margin: 0 auto; background-color: #0c0c0e !important; background: #0c0c0e !important; border: 1px solid #27272a; border-radius: 20px; border-collapse: separate; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+          <tr>
+            <td class="card-cell" bgcolor="#0c0c0e" style="padding: 36px 32px; background-color: #0c0c0e !important; background: #0c0c0e !important; border-radius: 20px; text-align: left;">
+              
+              <!-- Logotipo Minimalista Oficial da Phantom -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td bgcolor="#0c0c0e" style="background-color: #0c0c0e !important; padding: 0;">
+                    <img src="${baseUrl}/logo.png" alt="Phantom-X" width="38" height="38" style="display: block; width: 38px; height: 38px; max-width: 38px; object-fit: contain; border: 0;" />
+                  </td>
+                </tr>
+              </table>
 
-      <p class="instruction">
-        Para ativar o seu acesso de operador e começar a utilizar a plataforma, confirme o seu e-mail clicando no botão abaixo:
-      </p>
+              <!-- Saudação Oficial -->
+              <h1 style="margin: 0 0 14px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 22px; font-weight: 700; color: #ffffff !important; line-height: 1.3;">
+                Olá, ${cleanName}
+              </h1>
 
-      <!-- Botão Oficial de Ativação de Conta (Sem caixa de código) -->
-      <div class="btn-container">
-        <a href="${confirmationUrl}" class="btn-confirm" target="_blank" rel="noopener noreferrer">
-          Confirmar e Ativar Minha Conta &rarr;
-        </a>
-      </div>
+              <!-- Texto de Confirmação -->
+              <p style="margin: 0 0 18px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #a1a1aa !important; line-height: 1.5;">
+                Sua conta na plataforma Phantom-X foi criada com sucesso.
+              </p>
 
-      <p class="ignore-text">
-        Se você não solicitou este cadastro, por favor, ignore esta mensagem.
-      </p>
+              <!-- Instrução de Ativação -->
+              <p style="margin: 0 0 28px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13px; color: #a1a1aa !important; line-height: 1.6;">
+                Para ativar o seu acesso de operador e começar a utilizar a plataforma, confirme o seu e-mail clicando no botão abaixo:
+              </p>
 
-      <p class="closing">Um abraço,<br/>Equipe Phantom-X.</p>
-      <div class="brand-sub">Infraestrutura Edge & Cibersegurança de Tráfego</div>
-    </div>
-  </div>
+              <!-- Botão Oficial de Ativação de Conta (Sem código numérico) -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0 32px 0;">
+                <tr>
+                  <td align="center" bgcolor="#0c0c0e" style="background-color: #0c0c0e !important; text-align: center;">
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${confirmationUrl}" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="25%" strokecolor="#ffffff" fillcolor="#ffffff">
+                      <w:anchorlock/>
+                      <center style="color:#000000;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;">Confirmar e Ativar Minha Conta &rarr;</center>
+                    </v:roundrect>
+                    <![endif]-->
+                    <!--[if !mso]><!-->
+                    <a href="${confirmationUrl}" target="_blank" rel="noopener noreferrer" class="btn-link" style="display: inline-block; background-color: #ffffff !important; background: #ffffff !important; color: #000000 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 14px; padding: 14px 34px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25); mso-padding-alt: 0;">
+                      <span style="color: #000000 !important; text-decoration: none; font-weight: 700;">Confirmar e Ativar Minha Conta &rarr;</span>
+                    </a>
+                    <!--<![endif]-->
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Aviso de Segurança -->
+              <p style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #71717a !important; line-height: 1.5;">
+                Se você não solicitou este cadastro, por favor, ignore esta mensagem.
+              </p>
+
+              <!-- Divisória Limpa -->
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top: 24px; border-top: 1px solid #27272a;">
+                <tr>
+                  <td bgcolor="#0c0c0e" style="background-color: #0c0c0e !important; padding-top: 20px;">
+                    <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #ffffff !important; font-weight: 600; line-height: 1.4;">
+                      Um abraço,<br />
+                      Equipe Phantom-X.
+                    </p>
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #71717a !important; margin-top: 4px;">
+                      Infraestrutura Edge &amp; Cibersegurança de Tráfego
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+        </table>
+        
+      </td>
+    </tr>
+  </table>
+
 </body>
 </html>`;
 }
