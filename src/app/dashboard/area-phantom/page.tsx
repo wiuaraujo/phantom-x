@@ -223,12 +223,12 @@ export default function AreaPhantomPage() {
         {/* ================================================================= */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
           {[
-            { id: "passo-a-passo", label: "🚀 Guia Passo a Passo (Zero ao Ar)", icon: Play },
-            { id: "engenharia", label: "🛡️ Engenharia & Como Funciona", icon: Cpu },
-            { id: "criativos", label: "✨ Auditor de Criativos & Aprovação", icon: Wand2 },
-            { id: "blackhat", label: "🎯 Dicas para Ofertas Agressivas", icon: Target },
-            { id: "simulador", label: "⚡ Simulador de Requisições", icon: Terminal },
-            { id: "faq", label: "❓ Dúvidas Frequentes (FAQ)", icon: HelpCircle },
+            { id: "passo-a-passo", label: "Guia Passo a Passo", icon: Play },
+            { id: "engenharia", label: "Engenharia & Borda", icon: Cpu },
+            { id: "criativos", label: "Auditor de Criativos", icon: Wand2 },
+            { id: "blackhat", label: "Dicas para Ofertas Agressivas", icon: Target },
+            { id: "simulador", label: "Simulador de Rede", icon: Terminal },
+            { id: "faq", label: "Dúvidas Frequentes (FAQ)", icon: HelpCircle },
           ].map((tab) => {
             const Icon = tab.icon;
             const isSelected = activeTab === tab.id;
@@ -236,14 +236,35 @@ export default function AreaPhantomPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer border ${
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer border ${
                   isSelected
-                    ? "bg-slate-900 text-white font-semibold border-slate-900 shadow-md dark:bg-gradient-to-r dark:from-neutral-800 dark:via-neutral-800/90 dark:to-neutral-700 dark:border-white/30 dark:text-white scale-[1.02]"
-                    : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-slate-200 dark:bg-neutral-900/40 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800/60 dark:border-white/5 shadow-sm"
+                    ? "tab-active keep-white !bg-slate-900 !text-white !border-slate-900 shadow-md dark:!bg-white/[0.12] dark:!border-white/30 dark:!text-white scale-[1.02]"
+                    : "bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border-slate-200 dark:bg-neutral-900/40 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800/60 dark:border-white/5 shadow-sm"
                 }`}
+                style={
+                  isSelected
+                    ? {
+                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.12)" : "#0f172a",
+                        color: "#ffffff",
+                        borderColor: isDark ? "rgba(255, 255, 255, 0.3)" : "#0f172a",
+                      }
+                    : undefined
+                }
               >
-                <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-white" : "text-slate-500 dark:text-neutral-400"}`} />
-                <span>{tab.label}</span>
+                <Icon
+                  className="w-3.5 h-3.5 shrink-0"
+                  style={{
+                    color: isSelected ? "#ffffff" : isDark ? "#a1a1aa" : "#475569",
+                    stroke: "currentColor",
+                  }}
+                />
+                <span
+                  style={{
+                    color: isSelected ? "#ffffff" : undefined,
+                  }}
+                >
+                  {tab.label}
+                </span>
               </button>
             );
           })}
@@ -456,14 +477,14 @@ export default function AreaPhantomPage() {
         {activeTab === "criativos" && (
           <div className="space-y-6">
             {/* Header com Degradê Noturno / Borda Ciano */}
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-950 via-[#0c1a30] to-neutral-900 border border-sky-500/30 shadow-[0_4px_30px_rgba(14,165,233,0.12)]">
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-950 via-[#0c1a30] to-neutral-900 border border-sky-500/30 shadow-[0_4px_30px_rgba(14,165,233,0.12)] dark-surface keep-white">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
                   <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-[10px] font-mono text-sky-300 uppercase tracking-wider font-semibold">
                     <Sparkles className="w-3 h-3 text-sky-400" />
                     <span>Ad-Tech Pre-Flight Engine</span>
                   </div>
-                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2">
+                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2" style={{ color: "#ffffff" }}>
                     <span>Auditor de Criativos &amp; Camuflagem Semântica</span>
                   </h2>
                 </div>
@@ -472,7 +493,7 @@ export default function AreaPhantomPage() {
                   <span>Meta / Google / TikTok Standards</span>
                 </div>
               </div>
-              <p className="text-xs text-sky-100/90 leading-relaxed mt-2.5 max-w-3xl">
+              <p className="text-xs leading-relaxed mt-2.5 max-w-3xl" style={{ color: "rgba(224, 242, 254, 0.95)" }}>
                 A IA de moderação da Meta e do Google analisa a sua imagem, vídeo e copy com <strong>Visão Computacional e NLP</strong> antes 
                 mesmo de qualquer robô abrir sua página. Use este motor para escanear gatilhos de reprovação, higienizar sua mensagem em 1 clique 
                 e gerar coerência semântica absoluta com a sua Whitepage, eliminando o banimento por <em>Burla de Sistemas</em>.
@@ -816,11 +837,11 @@ export default function AreaPhantomPage() {
         {/* ----------------------------------------------------------------- */}
         {activeTab === "blackhat" && (
           <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-950 via-[#0c1a30] to-neutral-900 border border-sky-500/30 shadow-[0_4px_30px_rgba(14,165,233,0.12)]">
-              <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2">
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-950 via-[#0c1a30] to-neutral-900 border border-sky-500/30 shadow-[0_4px_30px_rgba(14,165,233,0.12)] dark-surface keep-white">
+              <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2" style={{ color: "#ffffff" }}>
                 <span>Guia Tático: Como Manter Campanhas Agressivas Vivas</span>
               </h2>
-              <p className="text-xs text-sky-100/90 leading-relaxed mt-2 max-w-3xl">
+              <p className="text-xs leading-relaxed mt-2 max-w-3xl" style={{ color: "rgba(224, 242, 254, 0.95)" }}>
                 O cloaker é 50% da equação. Os outros 50% dependem da sua disciplina operacional. 
                 Siga estas regras para evitar que a IA da Meta suspenda suas contas.
               </p>
