@@ -63,7 +63,8 @@ export async function setServerUserPlan(
   planStatus: "active" | "trial" | "expired" | "canceled" = "active",
   expiresAt?: string | null,
   updatedBy: string = "admin",
-  planSourceParam?: "stripe" | "admin" | "free"
+  planSourceParam?: "stripe" | "admin" | "free",
+  customerId?: string | null
 ): Promise<UserPlanRecord> {
   const cleanId = userId.trim();
   const cleanEmail = email.trim().toLowerCase();
@@ -88,19 +89,41 @@ export async function setServerUserPlan(
     isPaid,
   };
 
-  // Salva no mapa em memória por ID e por e-mail
+  // Salva no mapa em memória por ID, por e-mail e por customerId
   if (cleanId) {
     serverPlanMap.set(cleanId, record);
   }
   if (cleanEmail) {
     serverPlanMap.set(cleanEmail, record);
   }
+  if (customerId) {
+    serverPlanMap.set(customerId.trim(), record);
+  }
 
-  // Tenta persistir no Supabase Auth e na tabela profiles
+  // Tenta persistir no Supabase Auth e na tabela profiles se for UUID válido
   try {
-    if (cleanId) {
-      await supabaseAdmin.auth.admin.updateUserById(cleanId, {
-        user_metadata: {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanId);
+    if (cleanId && isUuid) {
+      try {
+        await supabaseAdmin.auth.admin.updateUserById(cleanId, {
+          user_metadata: {
+            plan,
+            plan_status: planStatus,
+            plan_activated_at: now,
+            plan_expires_at: expiresAt ?? null,
+            plan_source: planSource,
+            granted_by: updatedBy,
+            is_paid: isPaid,
+          },
+        });
+      } catch (authErr) {
+        console.warn("[serverPlanStore] updateUserById warning:", authErr);
+      }
+
+      try {
+        await supabaseAdmin.from("profiles").upsert({
+          id: cleanId,
+          email: cleanEmail,
           plan,
           plan_status: planStatus,
           plan_activated_at: now,
@@ -108,24 +131,14 @@ export async function setServerUserPlan(
           plan_source: planSource,
           granted_by: updatedBy,
           is_paid: isPaid,
-        },
-      });
-
-      await supabaseAdmin.from("profiles").upsert({
-        id: cleanId,
-        email: cleanEmail,
-        plan,
-        plan_status: planStatus,
-        plan_activated_at: now,
-        plan_expires_at: expiresAt ?? null,
-        plan_source: planSource,
-        granted_by: updatedBy,
-        is_paid: isPaid,
-        updated_at: now,
-      });
+          updated_at: now,
+        });
+      } catch (dbErr) {
+        console.warn("[serverPlanStore] profiles.upsert warning:", dbErr);
+      }
     }
   } catch (err) {
-    console.warn("[serverPlanStore] Erro ao sincronizar com Supabase:", err);
+    console.warn("[serverPlanStore] Erro geral ao sincronizar com Supabase:", err);
   }
 
   return record;
@@ -163,8 +176,8 @@ export async function getServerUserPlan(
 
   // 2. Consulta no Supabase
   try {
-    // Se for UUID, busca direto
-    if (userIdOrEmail.includes("-") || userIdOrEmail.length > 20) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdOrEmail);
+    if (isUuid) {
       const { data: userResp } = await supabaseAdmin.auth.admin.getUserById(userIdOrEmail);
       if (userResp?.user) {
         const u = userResp.user;

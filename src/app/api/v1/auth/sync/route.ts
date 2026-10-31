@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
       planExpiresAt: record.planExpiresAt,
       isTrial: effectivePlan === "free" || record.planStatus === "trial",
       isActive: record.planStatus === "active",
+      isPaid: record.isPaid,
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {
@@ -84,6 +85,7 @@ export async function POST(req: NextRequest) {
       planExpiresAt: record.planExpiresAt,
       isTrial: effectivePlan === "free" || record.planStatus === "trial",
       isActive: record.planStatus === "active",
+      isPaid: record.isPaid,
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {
