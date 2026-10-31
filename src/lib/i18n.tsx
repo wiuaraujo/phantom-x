@@ -260,7 +260,7 @@ const translations: Record<Language, Translations> = {
       titleLine1: "Infraestrutura de Tráfego Invisível.",
       titleLine2: "Em Escala Global.",
       subtitle:
-        "Roteamento determinístico em borda com filtragem de bots em tempo real, entrega via Proxy Reverso transparente (HTTP 200 OK sem redirects), auditoria pré-voo de criativos e geolocalização de alta fidelidade para Meta e Google Ads.",
+        "Roteamento determinístico em borda com filtragem de bots em tempo real, entrega via Proxy Reverso transparente (HTTP 200 OK sem redirects), camuflagem inteligente para aprovação rápida e geolocalização de alta fidelidade para Meta e Google Ads.",
       startFree: "Criar Conta Gratuita",
       explore: "Conhecer a Arquitetura",
       latency: "Latência de Borda: < 14ms",
@@ -500,7 +500,7 @@ const translations: Record<Language, Translations> = {
       titleLine1: "Invisible Traffic Infrastructure.",
       titleLine2: "At Global Scale.",
       subtitle:
-        "Deterministic edge routing with real-time bot filtering, transparent Reverse Proxy delivery (HTTP 200 OK without redirects), pre-flight creative policy auditing, and high-fidelity edge geolocation for Meta and Google Ads.",
+        "Deterministic edge routing with real-time bot filtering, transparent Reverse Proxy delivery (HTTP 200 OK without redirects), smart camouflage for fast ad approval, and high-fidelity edge geolocation for Meta and Google Ads.",
       startFree: "Create Free Account",
       explore: "Explore Architecture",
       latency: "Edge Latency: < 14ms",
@@ -740,7 +740,7 @@ const translations: Record<Language, Translations> = {
       titleLine1: "Infraestructura de Tráfico Invisible.",
       titleLine2: "A Escala Global.",
       subtitle:
-        "Enrutamiento determinista en el borde con filtrado de bots en tiempo real, entrega transparente mediante Proxy Inverso (HTTP 200 OK sin redirecciones), auditoría previa de creativos y geolocalización de alta fidelidad.",
+        "Enrutamiento determinista en el borde con filtrado de bots en tiempo real, entrega transparente mediante Proxy Inverso (HTTP 200 OK sin redirecciones), camuflaje inteligente para aprobación rápida y geolocalización de alta fidelidad.",
       startFree: "Crear Cuenta Gratuita",
       explore: "Explorar la Arquitectura",
       latency: "Latencia de Borde: < 14ms",

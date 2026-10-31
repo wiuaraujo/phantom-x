@@ -56,10 +56,10 @@ export const Hero: React.FC = () => {
               <div className="w-5 h-5 rounded-md bg-brand-hover flex items-center justify-center text-brand-white">
                 <Shield className="w-3 h-3 text-brand-white" />
               </div>
-              <span className="text-xs font-mono font-bold text-brand-white">Creative Shield</span>
+              <span className="text-xs font-mono font-bold text-brand-white">Camuflagem Ativa</span>
             </div>
             <p className="text-[11px] text-brand-secondary leading-snug">
-              Auditoria pré-voo de criativos e proteção contra reprovações de políticas.
+              Camuflagem inteligente para aprovação rápida de anúncios na Meta e Google.
             </p>
           </div>
 

@@ -225,7 +225,7 @@ export default function AreaPhantomPage() {
           {[
             { id: "passo-a-passo", label: "Guia Passo a Passo", icon: Play },
             { id: "engenharia", label: "Engenharia & Borda", icon: Cpu },
-            { id: "criativos", label: "Auditor de Criativos", icon: Wand2 },
+            { id: "criativos", label: "Camuflagem & Aprovação", icon: Wand2 },
             { id: "blackhat", label: "Dicas para Ofertas Agressivas", icon: Target },
             { id: "simulador", label: "Simulador de Rede", icon: Terminal },
             { id: "faq", label: "Dúvidas Frequentes (FAQ)", icon: HelpCircle },
@@ -482,25 +482,25 @@ export default function AreaPhantomPage() {
                 <div className="space-y-1">
                   <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-[10px] font-mono text-sky-300 uppercase tracking-wider font-semibold">
                     <Sparkles className="w-3 h-3 text-sky-400" />
-                    <span>Ad-Tech Pre-Flight Engine</span>
+                    <span>Engenharia de Camuflagem &amp; Aprovação Expressa</span>
                   </div>
                   <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2" style={{ color: "#ffffff" }}>
-                    <span>Auditor de Criativos &amp; Camuflagem Semântica</span>
+                    <span>Camuflagem de Tráfego &amp; Aprovação Rápida de Anúncios</span>
                   </h2>
                 </div>
                 <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-sky-300 flex items-center space-x-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>Meta / Google / TikTok Standards</span>
+                  <span>Meta / Google Bypass Architecture</span>
                 </div>
               </div>
               <p className="text-xs leading-relaxed mt-2.5 max-w-3xl" style={{ color: "rgba(224, 242, 254, 0.95)" }}>
-                A IA de moderação da Meta e do Google analisa a sua imagem, vídeo e copy com <strong>Visão Computacional e NLP</strong> antes 
-                mesmo de qualquer robô abrir sua página. Use este motor para escanear gatilhos de reprovação, higienizar sua mensagem em 1 clique 
-                e gerar coerência semântica absoluta com a sua Whitepage, eliminando o banimento por <em>Burla de Sistemas</em>.
+                A estratégia definitiva para burlar a análise das plataformas e aprovar campanhas agressivas em minutos. 
+                Durante o período de revisão da Meta e Google, o Phantom-X entrega uma Whitepage institucional impecável via <strong>Reverse Proxy HTTP 200 OK</strong>. 
+                Assim que a campanha é aprovada, a entrega para compradores reais é destravada automaticamente para a página da oferta, mantendo robôs e moderadores permanentemente camuflados.
               </p>
             </div>
 
-            {/* Painel Interativo de Auditoria */}
+            {/* Painel Interativo de Camuflagem de Anúncios */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Coluna Esquerda: Editor de Copy & Presets (7 cols) */}
               <div className="lg:col-span-7 space-y-4">
@@ -508,7 +508,7 @@ export default function AreaPhantomPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 flex items-center space-x-1.5">
                       <FileText className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                      <span>Copy, Headline ou Roteiro do Criativo</span>
+                      <span>Promessa da Oferta &amp; Roteiro do Criativo</span>
                     </label>
                     <span className="text-[11px] font-mono text-slate-500 dark:text-neutral-500">
                       {creativeText.length} caracteres
@@ -517,7 +517,7 @@ export default function AreaPhantomPage() {
 
                   {/* Seletor de Cenários / Presets */}
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-semibold">Testar com exemplos rápidos de nicho:</span>
+                    <span className="text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-semibold">Simular camuflagem com ofertas agressivas:</span>
                     <div className="flex flex-wrap gap-1.5">
                       <button
                         onClick={() =>
@@ -527,7 +527,7 @@ export default function AreaPhantomPage() {
                         }
                         className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-800/40 text-[10px] font-mono text-rose-700 dark:text-rose-300 transition"
                       >
-                        🔴 Saúde / Black (Crítico)
+                        🔴 Saúde / Black (Promessa Forte)
                       </button>
                       <button
                         onClick={() =>
@@ -537,7 +537,7 @@ export default function AreaPhantomPage() {
                         }
                         className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800/40 text-[10px] font-mono text-amber-700 dark:text-amber-300 transition"
                       >
-                        🟠 Finanças / Renda Fácil (Alto Risco)
+                        🟠 Finanças / Renda Rápida
                       </button>
                       <button
                         onClick={() =>
@@ -557,7 +557,7 @@ export default function AreaPhantomPage() {
                         }
                         className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/40 text-[10px] font-mono text-emerald-700 dark:text-emerald-300 transition"
                       >
-                        🟢 Ângulo Aprovável (White-Hat)
+                        🟢 Ângulo Camuflado (Aprovável)
                       </button>
                     </div>
                   </div>
@@ -567,11 +567,11 @@ export default function AreaPhantomPage() {
                     rows={6}
                     value={creativeText}
                     onChange={(e) => setCreativeText(e.target.value)}
-                    placeholder="Cole aqui a copy, texto principal, título ou texto gravado no seu vídeo..."
+                    placeholder="Cole aqui a promessa forte da sua oferta para gerar o ângulo camuflado que a Meta aprova..."
                     className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-sky-500 dark:focus:border-white/30 font-sans leading-relaxed transition shadow-inner"
                   />
 
-                  {/* Botão de Higienização Automática */}
+                  {/* Botão de Camuflagem Automática */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
                     <button
                       onClick={() => setCreativeText(auditResult.sanitizedCopy)}
@@ -583,7 +583,7 @@ export default function AreaPhantomPage() {
                       }`}
                     >
                       <Wand2 className="w-3.5 h-3.5" />
-                      <span>Higienizar Copy em 1 Clique (Aplicar Ângulo Seguro)</span>
+                      <span>Gerar Ângulo Camuflado para Anúncio (Aprovação Expressa)</span>
                     </button>
 
                     <button
@@ -640,7 +640,7 @@ export default function AreaPhantomPage() {
                 <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-bold">
-                      Índice de Aprovação Pré-Voo
+                      Índice de Camuflagem &amp; Aprovação
                     </span>
                     <span
                       className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full font-bold ${
