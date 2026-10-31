@@ -332,10 +332,8 @@ export const store = {
     const recentClean = userEvents.filter(
       (e) => new Date(e.timestamp).getTime() > fifteenMinAgo && !e.isThreat
     );
-    const activeVisitors = Math.max(
-      recentClean.length > 0 ? new Set(recentClean.map((e) => e.ipMasked)).size : 1,
-      0
-    );
+    const activeVisitors =
+      recentClean.length > 0 ? new Set(recentClean.map((e) => e.ipMasked)).size : 0;
 
     return {
       activeVisitors,

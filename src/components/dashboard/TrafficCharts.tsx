@@ -13,7 +13,7 @@ interface TrafficChartsProps {
 export const TrafficCharts: React.FC<TrafficChartsProps> = ({
   timeSeries,
   geoData,
-  deviceStats = { desktop: 34, mobile: 58, tablet: 4, bot: 4 },
+  deviceStats = { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
 }) => {
   const maxEvents = Math.max(...timeSeries.map((t) => t.events), 1);
 
@@ -150,15 +150,21 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
         <div className="pt-4 border-t border-brand-border mt-4">
           <div className="text-xs font-semibold text-brand-white mb-2">Principais Regiões</div>
           <div className="space-y-1.5 text-xs font-mono">
-            {geoData.slice(0, 3).map((g, i) => (
-              <div key={i} className="flex justify-between items-center text-brand-secondary">
-                <span className="flex items-center space-x-1.5">
-                  <span className="text-sm select-none">{getCountryFlag(g.countryCode)}</span>
-                  <span>{g.country}</span>
-                </span>
-                <span className="text-brand-white font-semibold">{g.eventsCount} ({g.percentage}%)</span>
+            {geoData.length === 0 ? (
+              <div className="text-[11px] text-brand-muted py-2">
+                Nenhuma região com tráfego registrado no momento.
               </div>
-            ))}
+            ) : (
+              geoData.slice(0, 3).map((g, i) => (
+                <div key={i} className="flex justify-between items-center text-brand-secondary">
+                  <span className="flex items-center space-x-1.5">
+                    <span className="text-sm select-none">{getCountryFlag(g.countryCode)}</span>
+                    <span>{g.country}</span>
+                  </span>
+                  <span className="text-brand-white font-semibold">{g.eventsCount} ({g.percentage}%)</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

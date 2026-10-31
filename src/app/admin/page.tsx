@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
+import { store } from "@/lib/store";
 import { Logo } from "@/components/ui/Logo";
 import { PHANTOM_PLANS, PlanId } from "@/lib/plans";
 
@@ -124,33 +125,39 @@ interface TelemetryChartProps {
 const TelemetryChart: React.FC<TelemetryChartProps> = ({ timeframe, metric, baseMrr }) => {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  // Geração de dados de telemetria coerentes por período
+  // Geração de dados de telemetria coerentes por período (100% Baseado em Dados Reais)
   const chartData = useMemo(() => {
     const days = timeframe === "7d" ? 7 : timeframe === "14d" ? 14 : 30;
     const items = [];
     const now = new Date();
+    const realEvents = store.getEvents({ limit: 100000 });
 
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
       
-      // Simulação de distribuição estocástica realista de telemetria
-      const variance = Math.sin(i * 0.9) * 0.15 + (1 - i / days) * 0.25;
-      const baseReqs = Math.round(18400 + variance * 6200);
-      const blockedBots = Math.round(baseReqs * (0.118 + Math.cos(i * 0.7) * 0.024));
-      const cleanReqs = baseReqs - blockedBots;
-      const blockRate = Number(((blockedBots / baseReqs) * 100).toFixed(1));
-      const mrrGrowth = Math.max(0, Math.round(baseMrr * (0.75 + ((days - i) / days) * 0.25)));
+      const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      const dayEnd = dayStart + 24 * 3600 * 1000;
+      const dayEvts = realEvents.filter((e) => {
+        const t = new Date(e.timestamp).getTime();
+        return t >= dayStart && t < dayEnd;
+      });
+
+      const totalReqs = dayEvts.length;
+      const blockedBots = dayEvts.filter((e) => e.isThreat).length;
+      const cleanReqs = totalReqs - blockedBots;
+      const blockRate = totalReqs > 0 ? Number(((blockedBots / totalReqs) * 100).toFixed(1)) : 0;
+      const mrrVal = baseMrr;
 
       items.push({
         label,
         date: d.toLocaleDateString("pt-BR"),
-        totalReqs: baseReqs,
+        totalReqs,
         blockedBots,
         cleanReqs,
         blockRate,
-        mrr: mrrGrowth,
-        latency: Math.round(12 + Math.random() * 3),
+        mrr: mrrVal,
+        latency: totalReqs > 0 ? 12 : 0,
       });
     }
     return items;
@@ -171,14 +178,17 @@ const TelemetryChart: React.FC<TelemetryChartProps> = ({ timeframe, metric, base
     return d.mrr;
   });
 
-  const minVal = Math.min(...values) * 0.92;
-  const maxVal = Math.max(...values) * 1.05 || 1;
+  const allZero = values.every((v) => v === 0);
+  const minVal = 0;
+  const maxVal = allZero
+    ? (metric === "bot_defense" ? 100 : metric === "mrr" ? 500 : 10)
+    : Math.max(...values) * 1.05;
 
   // Converte dados para pontos cartesianos no viewBox SVG
   const points = chartData.map((d, index) => {
     const val = metric === "traffic" ? d.totalReqs : metric === "bot_defense" ? d.blockRate : d.mrr;
     const x = paddingX + (index / (chartData.length - 1)) * graphWidth;
-    const normalizedY = (val - minVal) / (maxVal - minVal || 1);
+    const normalizedY = allZero ? 0 : (val - minVal) / (maxVal - minVal || 1);
     const y = height - paddingY - normalizedY * graphHeight;
     return { x, y, data: d, val };
   });
@@ -382,7 +392,7 @@ export default function AdminPortalPage() {
   // Autenticação Mestra
   const [isAdminAuth, setIsAdminAuth] = useState(false);
   const [passkeyInput, setPasskeyInput] = useState("");
-  const [adminEmailInput, setAdminEmailInput] = useState("wiuaraujo@gmail.com");
+  const [adminEmailInput, setAdminEmailInput] = useState("");
   const [activePlatformUser, setActivePlatformUser] = useState<any>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
@@ -416,7 +426,7 @@ export default function AdminPortalPage() {
   const [chartMetric, setChartMetric] = useState<"traffic" | "bot_defense" | "mrr">("traffic");
 
   // Teste de Envio de E-mails (Resend)
-  const [testEmailTarget, setTestEmailTarget] = useState("wiuaraujo@gmail.com");
+  const [testEmailTarget, setTestEmailTarget] = useState("");
   const [resendApiKeyInput, setResendApiKeyInput] = useState("");
   const [testingEmail, setTestingEmail] = useState(false);
   const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -1015,7 +1025,7 @@ export default function AdminPortalPage() {
               <Activity className="w-4 h-4 text-neutral-400" />
             </div>
             <div className="text-2xl font-bold text-white font-poppins">
-              {overview?.metrics?.blockedReviewersToday ?? 142}
+              {overview?.metrics?.blockedReviewersToday ?? 0}
             </div>
             <div className="mt-1 text-[11px] text-neutral-400">
               Meta, Google Ads, TikTok, ASNs
@@ -1387,59 +1397,75 @@ export default function AdminPortalPage() {
         {/* ========================================================================= */}
         {/* ABA 2: TELEMETRIA DETALHADA DE BORDA                                      */}
         {/* ========================================================================= */}
-        {activeTab === "telemetry" && (
-          <div className="space-y-4 font-mono text-xs">
-            <div className="p-5 rounded-xl bg-[#0c0c0e] border border-white/[0.08] space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-white font-poppins">Auditoria de Borda & Camuflagem</h3>
-                  <p className="text-xs text-neutral-400 mt-0.5">
-                    Filtragem de robôs de auditoria e moderação em menos de 14ms
-                  </p>
-                </div>
-                <span className="px-2.5 py-1 rounded bg-neutral-900 border border-white/10 text-neutral-300 text-[11px]">
-                  Engine v2.4 Ativo
-                </span>
-              </div>
+        {activeTab === "telemetry" && (() => {
+          const allEvts = store.getEvents({ limit: 100000 });
+          const totalEvts = allEvts.length;
+          const threatEvts = allEvts.filter((e) => e.isThreat);
+          const cleanEvts = totalEvts - threatEvts.length;
+          const humanRate = totalEvts > 0 ? `${((cleanEvts / totalEvts) * 100).toFixed(1)}%` : "0.0%";
+          const botRate = totalEvts > 0 ? `${((threatEvts.length / totalEvts) * 100).toFixed(1)}%` : "0.0%";
+          const volumeMB =
+            overview?.metrics?.trafficProcessedMB ??
+            (totalEvts > 0 ? Number(((totalEvts * 512) / (1024 * 1024)).toFixed(2)) : 0);
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3.5 rounded-lg bg-neutral-950 border border-white/[0.06]">
-                  <div className="text-[10px] text-neutral-500 uppercase">Tráfego Humano Permitido</div>
-                  <div className="text-lg font-bold text-white mt-1">87.4%</div>
-                  <div className="text-[10px] text-neutral-400 mt-0.5">Redirecionados para Offer Page</div>
+          return (
+            <div className="space-y-4 font-mono text-xs">
+              <div className="p-5 rounded-xl bg-[#0c0c0e] border border-white/[0.08] space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white font-poppins">Auditoria de Borda & Camuflagem</h3>
+                    <p className="text-xs text-neutral-400 mt-0.5">
+                      Filtragem de robôs de auditoria e moderação em menos de 14ms
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded bg-neutral-900 border border-white/10 text-neutral-300 text-[11px]">
+                    Engine v2.4 Ativo
+                  </span>
                 </div>
-                <div className="p-3.5 rounded-lg bg-neutral-950 border border-white/[0.06]">
-                  <div className="text-[10px] text-neutral-500 uppercase">Reviewers Bloqueados</div>
-                  <div className="text-lg font-bold text-white mt-1">12.6%</div>
-                  <div className="text-[10px] text-neutral-400 mt-0.5">Retidos na Safe Page</div>
-                </div>
-                <div className="p-3.5 rounded-lg bg-neutral-950 border border-white/[0.06]">
-                  <div className="text-[10px] text-neutral-500 uppercase">Volume Processado Hoje</div>
-                  <div className="text-lg font-bold text-white mt-1">840 MB</div>
-                  <div className="text-[10px] text-neutral-400 mt-0.5">Total acumulado hoje</div>
-                </div>
-              </div>
 
-              {/* ASNs Filtrados */}
-              <div className="p-3.5 rounded-lg bg-black/50 border border-white/[0.06] space-y-2">
-                <div className="text-neutral-300 font-semibold flex items-center space-x-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-neutral-400" />
-                  <span>ASNs e Redes Filtradas Heuristicamente:</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-lg bg-neutral-950 border border-white/[0.06]">
+                    <div className="text-[10px] text-neutral-500 uppercase">Tráfego Humano Permitido</div>
+                    <div className="text-lg font-bold text-white mt-1">{humanRate}</div>
+                    <div className="text-[10px] text-neutral-400 mt-0.5">
+                      {totalEvts > 0 ? "Redirecionados para Offer Page" : "Aguardando tráfego real"}
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-lg bg-neutral-950 border border-white/[0.06]">
+                    <div className="text-[10px] text-neutral-500 uppercase">Reviewers Bloqueados</div>
+                    <div className="text-lg font-bold text-white mt-1">{botRate}</div>
+                    <div className="text-[10px] text-neutral-400 mt-0.5">
+                      {totalEvts > 0 ? "Retidos na Safe Page" : "Zero bloqueios registrados"}
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-lg bg-neutral-950 border border-white/[0.06]">
+                    <div className="text-[10px] text-neutral-500 uppercase">Volume Processado Hoje</div>
+                    <div className="text-lg font-bold text-white mt-1">{volumeMB} MB</div>
+                    <div className="text-[10px] text-neutral-400 mt-0.5">Total acumulado hoje</div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-neutral-400">
-                  <div>• AS32934 (Meta / Facebook)</div>
-                  <div>• AS15169 (Google LLC)</div>
-                  <div>• AS138699 (ByteDance / TikTok)</div>
-                  <div>• AS8075 (Microsoft Ads)</div>
-                  <div>• AS16509 (Amazon AWS Datacenter)</div>
-                  <div>• AS14061 (DigitalOcean Crawlers)</div>
-                  <div>• AS209242 (Cloudflare Workers)</div>
-                  <div>• AS16276 (OVH SAS Hosting)</div>
+
+                {/* ASNs Filtrados */}
+                <div className="p-3.5 rounded-lg bg-black/50 border border-white/[0.06] space-y-2">
+                  <div className="text-neutral-300 font-semibold flex items-center space-x-1.5">
+                    <Terminal className="w-3.5 h-3.5 text-neutral-400" />
+                    <span>ASNs e Redes Filtradas Heuristicamente:</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-neutral-400">
+                    <div>• AS32934 (Meta / Facebook)</div>
+                    <div>• AS15169 (Google LLC)</div>
+                    <div>• AS138699 (ByteDance / TikTok)</div>
+                    <div>• AS8075 (Microsoft Ads)</div>
+                    <div>• AS16509 (Amazon AWS Datacenter)</div>
+                    <div>• AS14061 (DigitalOcean Crawlers)</div>
+                    <div>• AS209242 (Cloudflare Workers)</div>
+                    <div>• AS16276 (OVH SAS Hosting)</div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ========================================================================= */}
         {/* ABA 3: PLANOS & ATRIBUIÇÃO DIRETA                                         */}

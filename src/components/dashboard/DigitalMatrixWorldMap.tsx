@@ -160,8 +160,28 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     let animId: number;
     let pulseCycle = 0;
     let particleOffset = 0;
+    let isIntersecting = true;
+    let isDocVisible = typeof document !== "undefined" ? !document.hidden : true;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isIntersecting = entry.isIntersecting;
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(canvas);
+
+    const handleVisibility = () => {
+      isDocVisible = !document.hidden;
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     const render = () => {
+      if (!isIntersecting || !isDocVisible) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
+
       pulseCycle = (pulseCycle + 0.035) % (Math.PI * 2);
       particleOffset = (particleOffset + 0.008) % 1;
 
@@ -490,9 +510,15 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
 
           ctx.font = "8px 'JetBrains Mono', monospace";
           ctx.fillStyle = isLight ? "#52525b" : "#a1a1aa";
-          ctx.fillText("ORIGEM: IP 177.136.24.*** [SP/BR]", termX + 8, termY + 27);
-          ctx.fillText("DESTINO: PROXY 200 OK (DIRETO)", termX + 8, termY + 39);
-          ctx.fillText("ASNS BLOQUEADOS: 14 REDES (META/AWS)", termX + 8, termY + 51);
+          if (events && events.length > 0) {
+            const latest = events[0];
+            ctx.fillText(`ORIGEM: IP ${latest.ipMasked} [${latest.city || latest.countryCode}]`, termX + 8, termY + 27);
+            ctx.fillText(`DESTINO: PROXY 200 OK (${latest.isThreat ? "WHITE" : "OFERTA"})`, termX + 8, termY + 39);
+          } else {
+            ctx.fillText("ORIGEM: AGUARDANDO TRÁFEGO REAL", termX + 8, termY + 27);
+            ctx.fillText("DESTINO: ESCUTANDO EM BORDA (0 REQS)", termX + 8, termY + 39);
+          }
+          ctx.fillText("ASNS BLOQUEADOS: REDES DE DATA CENTERS", termX + 8, termY + 51);
 
           ctx.fillStyle = isLight ? "#047857" : "#34d399";
           ctx.fillText("STATUS: ZERO REDIRECIONAMENTOS • < 14ms", termX + 8, termY + 63);
@@ -507,6 +533,8 @@ export const DigitalMatrixWorldMap: React.FC<DigitalMatrixWorldMapProps> = ({
     render();
     return () => {
       cancelAnimationFrame(animId);
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [activeHubNodes, hasConfiguredTraffic, selectedCountry, compact]);
 

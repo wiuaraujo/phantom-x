@@ -184,7 +184,14 @@ export default function LiveMonitoringPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-borderSubtle">
-                {filteredEvents.map((evt) => {
+                {filteredEvents.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-brand-muted font-sans text-xs">
+                      Nenhum tráfego detectado no momento. Aguardando requisições reais de borda...
+                    </td>
+                  </tr>
+                ) : (
+                  filteredEvents.map((evt) => {
                   const layerBadge = getLayerBadge(evt.detectedLayer);
                   return (
                     <tr
@@ -252,7 +259,7 @@ export default function LiveMonitoringPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>

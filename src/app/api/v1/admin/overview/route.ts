@@ -74,16 +74,37 @@ export async function GET(req: NextRequest) {
       supabaseStatus = "degraded";
     }
 
-    // 2. Busca contagem de domínios e campanhas
+    // 2. Busca contagem de domínios, campanhas e eventos reais
     try {
       const { data: doms } = await supabase.from("domains").select("id", { count: "exact" });
       domainsCount = doms?.length || 0;
     } catch {}
 
+    let blockedReviewersToday = 0;
+    let trafficProcessedMB = 0;
+
+    try {
+      const { data: evts } = await supabase.from("events").select("id, is_threat, payload_bytes");
+      if (evts && evts.length > 0) {
+        blockedReviewersToday = evts.filter((e: any) => e.is_threat).length;
+        const totalBytes = evts.reduce((acc: number, e: any) => acc + (e.payload_bytes || 512), 0);
+        trafficProcessedMB = Number((totalBytes / (1024 * 1024)).toFixed(2));
+      }
+    } catch {}
+
     const localDomains = store.getDomains().length;
     const localCampaigns = store.getCampaigns().length;
+    const localEvents = store.getEvents({ limit: 100000 });
+
     domainsCount = Math.max(domainsCount, localDomains);
     campaignsCount = Math.max(campaignsCount, localCampaigns);
+    if (localEvents.length > 0) {
+      blockedReviewersToday = Math.max(blockedReviewersToday, localEvents.filter((e) => e.isThreat).length);
+      trafficProcessedMB = Math.max(
+        trafficProcessedMB,
+        Number(((localEvents.length * 512) / (1024 * 1024)).toFixed(2))
+      );
+    }
 
     // 3. Status de Infraestrutura Edge Phantom-X
     const edgeEngine = {
@@ -119,8 +140,8 @@ export async function GET(req: NextRequest) {
             pendingUsers: pendingUsersCount,
             totalDomains: domainsCount,
             totalCampaigns: campaignsCount,
-            blockedReviewersToday: 142,
-            trafficProcessedMB: 840,
+            blockedReviewersToday,
+            trafficProcessedMB,
             mrr: totalMrr,
             totalPaidSubscriptions: realPaidSubscribers,
             adminGrantedUsers,
