@@ -18,16 +18,44 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Valida o código OTP
-    const otpResult = verifyServerOtp(cleanEmail, cleanCode);
-    if (!otpResult.success) {
+    // 1. Localiza o usuário no Supabase Auth
+    const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
+    const existing = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
+
+    if (!existing) {
       return NextResponse.json(
-        { success: false, error: otpResult.error || "Código de verificação incorreto ou expirado." },
+        { success: false, error: "Usuário não localizado no sistema." },
+        { status: 404 }
+      );
+    }
+
+    // 2. Valida o código OTP (Memória Server OTP Store OU Fallback Supabase Metadata)
+    const otpResult = verifyServerOtp(cleanEmail, cleanCode);
+    let isCodeValid = otpResult.success;
+
+    if (!isCodeValid) {
+      const metaOtp = existing.user_metadata?.email_otp;
+      const metaExpires = existing.user_metadata?.email_otp_expires_at;
+      const now = Date.now();
+
+      if (metaOtp && metaOtp.toString() === cleanCode && metaExpires && now <= Number(metaExpires)) {
+        isCodeValid = true;
+      }
+    }
+
+    if (!isCodeValid) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            otpResult.error ||
+            "Código de verificação incorreto ou expirado. Por favor, solicite um novo código.",
+        },
         { status: 400 }
       );
     }
 
-    // 2. Valida os requisitos de segurança da nova senha
+    // 3. Valida os requisitos de segurança da nova senha
     const pwdValidation = validatePasswordSecurity(newPassword);
     if (!pwdValidation.isValid) {
       return NextResponse.json(
@@ -39,17 +67,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Localiza o usuário no Supabase Auth
-    const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
-    const existing = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
-
-    if (!existing) {
-      return NextResponse.json(
-        { success: false, error: "Usuário não localizado no sistema." },
-        { status: 404 }
-      );
-    }
-
     // 4. Atualiza a senha no Supabase Auth
     await supabaseAdmin.auth.admin.updateUserById(existing.id, {
       password: newPassword,
@@ -57,6 +74,8 @@ export async function POST(req: NextRequest) {
       user_metadata: {
         ...existing.user_metadata,
         email_verified: true,
+        email_otp: null,
+        email_otp_expires_at: null,
         password_updated_at: new Date().toISOString(),
       },
     });

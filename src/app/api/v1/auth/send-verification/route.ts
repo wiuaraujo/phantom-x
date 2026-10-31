@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { setServerOtp } from "@/lib/serverOtpStore";
-import { dispatchVerificationEmail } from "@/lib/mailer";
+import { dispatchVerificationEmail, dispatchPasswordResetEmail } from "@/lib/mailer";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, name } = body;
+    const { email, name, type = "verification" } = body;
 
     if (!email || !email.includes("@")) {
       return NextResponse.json(
@@ -18,40 +18,83 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const cleanName = (name || "Operador").trim();
+    const isPasswordReset = type === "password_reset";
+
+    // Se for recuperação de senha, verifica primeiro se o usuário existe no Supabase
+    let matchedUser: any = null;
+    try {
+      const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
+      matchedUser = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
+    } catch (e: any) {
+      console.warn(`[Send Verification] Erro ao listar usuários no Supabase: ${e?.message}`);
+    }
+
+    if (isPasswordReset && !matchedUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Nenhuma conta localizada com este e-mail. Verifique o endereço digitado ou cadastre-se.",
+        },
+        { status: 404 }
+      );
+    }
+
+    const resolvedName = (
+      name ||
+      matchedUser?.user_metadata?.full_name ||
+      matchedUser?.user_metadata?.name ||
+      cleanEmail.split("@")[0] ||
+      "Operador"
+    ).trim();
 
     // 1. Gera código OTP de 6 números no backend com expiração de 5 minutos
     const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const record = setServerOtp(cleanEmail, cleanName, randomOtp);
+    const record = setServerOtp(cleanEmail, resolvedName, randomOtp);
 
     let emailSent = false;
     let emailProviderUsed = "resend";
     let emailError: string | null = null;
 
-    // 2. Disparo Oficial via Resend (com fallback automático: API REST Nativa + Resend SMTP Relay)
+    // 2. Disparo Oficial (Password Reset ou Confirmação de Cadastro)
     const origin = req.headers.get("origin") || req.nextUrl.origin || undefined;
 
     try {
-      const emailRes = await dispatchVerificationEmail({
-        to: cleanEmail,
-        name: cleanName,
-        code: record.code,
-        origin,
-      });
+      if (isPasswordReset) {
+        const resetRes = await dispatchPasswordResetEmail({
+          to: cleanEmail,
+          name: resolvedName,
+          code: record.code,
+          origin,
+        });
 
-      if (emailRes.success) {
-        emailSent = true;
-        emailProviderUsed = emailRes.provider;
+        if (resetRes.success) {
+          emailSent = true;
+          emailProviderUsed = resetRes.provider;
+        } else {
+          emailError = resetRes.error || null;
+        }
       } else {
-        emailError = emailRes.error || null;
+        const verifyRes = await dispatchVerificationEmail({
+          to: cleanEmail,
+          name: resolvedName,
+          code: record.code,
+          origin,
+        });
+
+        if (verifyRes.success) {
+          emailSent = true;
+          emailProviderUsed = verifyRes.provider;
+        } else {
+          emailError = verifyRes.error || null;
+        }
       }
     } catch (e: any) {
-      console.warn(`[Send Verification] Erro no dispatchVerificationEmail: ${e?.message}`);
+      console.warn(`[Send Verification] Erro no dispatch email: ${e?.message}`);
       emailError = e?.message;
     }
 
-    // 3. Fallback adicional de contingência via Supabase Auth caso o Resend tenha falhado
-    if (!emailSent) {
+    // 3. Fallback adicional via Supabase APENAS para verificação de cadastro (NUNCA para reset de senha)
+    if (!emailSent && !isPasswordReset) {
       try {
         const { error: sbErr } = await supabase.auth.signInWithOtp({
           email: cleanEmail,
@@ -69,21 +112,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Atualiza metadata no Supabase se o usuário já existir
-    try {
-      const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
-      const existing = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
-      if (existing) {
-        await supabaseAdmin.auth.admin.updateUserById(existing.id, {
+    // 4. Salva o OTP e expiração no metadata do usuário no Supabase se existir
+    if (matchedUser) {
+      try {
+        await supabaseAdmin.auth.admin.updateUserById(matchedUser.id, {
           user_metadata: {
-            ...existing.user_metadata,
+            ...matchedUser.user_metadata,
             email_otp: record.code,
             email_otp_expires_at: record.expiresAt,
+            last_otp_type: type,
           },
         });
+      } catch (e: any) {
+        console.warn(`[Supabase Admin Metadata] Aviso: ${e?.message}`);
       }
-    } catch (e: any) {
-      console.warn(`[Supabase Admin Metadata] Aviso: ${e?.message}`);
     }
 
     if (!emailSent) {
@@ -92,7 +134,9 @@ export async function POST(req: NextRequest) {
           success: false,
           error:
             emailError ||
-            "Não foi possível enviar o e-mail de confirmação. Por favor, tente novamente em alguns instantes.",
+            (isPasswordReset
+              ? "Não foi possível enviar o e-mail de recuperação de senha. Verifique as configurações de envio."
+              : "Não foi possível enviar o e-mail de confirmação. Por favor, tente novamente em alguns instantes."),
         },
         { status: 500 }
       );
@@ -100,7 +144,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `E-mail de confirmação enviado com sucesso via ${emailProviderUsed.toUpperCase()}! Verifique sua caixa de entrada no Gmail.`,
+      message: isPasswordReset
+        ? `Código de recuperação de 6 dígitos enviado com sucesso para ${cleanEmail}! Verifique sua caixa de entrada no Gmail.`
+        : `E-mail de confirmação enviado com sucesso via ${emailProviderUsed.toUpperCase()}! Verifique sua caixa de entrada no Gmail.`,
       provider: emailProviderUsed,
       expiresAt: record.expiresAt,
     });

@@ -23,8 +23,17 @@ function ForgotPasswordInner() {
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
+    const codeParam = searchParams.get("code");
+
     if (emailParam) {
       setEmail(emailParam);
+    }
+    if (codeParam) {
+      const cleanCode = codeParam.replace(/\D/g, "").slice(0, 6);
+      setCode(cleanCode);
+      if (cleanCode.length === 6) {
+        setStep("reset");
+      }
     }
   }, [searchParams]);
 
@@ -42,7 +51,7 @@ function ForgotPasswordInner() {
       const res = await fetch("/api/v1/auth/send-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail }),
+        body: JSON.stringify({ email: cleanEmail, type: "password_reset" }),
       });
       const data = await res.json();
       if (!data.success) {

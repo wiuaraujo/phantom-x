@@ -41,6 +41,11 @@ import {
   AlertOctagon,
 } from "lucide-react";
 import { CreativeShieldEngine } from "@/lib/creativeShield";
+import {
+  CreativeCamouflageEngine,
+  CamouflageResponse,
+  CamouflagedVariation,
+} from "@/lib/creativeCamouflageEngine";
 
 type HubCategory = "passo-a-passo" | "engenharia" | "criativos" | "blackhat" | "simulador" | "faq";
 
@@ -59,11 +64,63 @@ export default function AreaPhantomPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
 
-  // Estado do Auditor de Criativos & Políticas Pré-Voo
+  // Estado do Camuflador de Criativos Backend & Bypass
   const [creativeText, setCreativeText] = useState(
-    "🔥 DESCUBRA O CHÁ SECRETO QUE VAI CURAR E ELIMINAR DE VEZ A GORDURA! Ganhe R$ 5.000 por semana trabalhando no celular sem esforço. Assista antes que saia do ar!!!"
+    "🔥 DESCUBRA O CHÁ SECRETO QUE VAI CURAR E ELIMINAR DE VEZ A GORDURA! Perca 10kg em 7 dias dormindo. Ganhe R$ 5.000 por semana trabalhando no celular sem esforço. Assista antes que saia do ar!!!"
   );
   const auditResult = useMemo(() => CreativeShieldEngine.auditCreative(creativeText), [creativeText]);
+
+  const [selectedNiche, setSelectedNiche] = useState<"saude" | "financas" | "relacionamento" | "apostas" | "geral">("saude");
+  const [selectedPlatform, setSelectedPlatform] = useState<"meta_ads" | "google_ads" | "tiktok_ads">("meta_ads");
+  const [activeVariationIndex, setActiveVariationIndex] = useState(0);
+  const [isCamouflaging, setIsCamouflaging] = useState(false);
+  const [camouflageData, setCamouflageData] = useState<CamouflageResponse>(() =>
+    CreativeCamouflageEngine.processCamouflage({
+      copy: "🔥 DESCUBRA O CHÁ SECRETO QUE VAI CURAR E ELIMINAR DE VEZ A GORDURA! Perca 10kg em 7 dias dormindo. Ganhe R$ 5.000 por semana trabalhando no celular sem esforço. Assista antes que saia do ar!!!",
+      niche: "saude",
+      platform: "meta_ads",
+    })
+  );
+
+  const handleRunCamouflage = async (customCopy?: string, customNiche?: string) => {
+    const copyToUse = customCopy !== undefined ? customCopy : creativeText;
+    const nicheToUse = (customNiche || selectedNiche) as any;
+    setIsCamouflaging(true);
+    try {
+      const res = await fetch("/api/v1/creative/camouflage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          copy: copyToUse,
+          niche: nicheToUse,
+          platform: selectedPlatform,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCamouflageData(data);
+        setActiveVariationIndex(0);
+      } else {
+        const fallback = CreativeCamouflageEngine.processCamouflage({
+          copy: copyToUse,
+          niche: nicheToUse,
+          platform: selectedPlatform,
+        });
+        setCamouflageData(fallback);
+        setActiveVariationIndex(0);
+      }
+    } catch {
+      const fallback = CreativeCamouflageEngine.processCamouflage({
+        copy: copyToUse,
+        niche: nicheToUse,
+        platform: selectedPlatform,
+      });
+      setCamouflageData(fallback);
+      setActiveVariationIndex(0);
+    } finally {
+      setIsCamouflaging(false);
+    }
+  };
 
   // Estado do Simulador Interativo de Requisições
   const [simulatedScenario, setSimulatedScenario] = useState<"bot_meta" | "buyer_real" | "human_vpn" | null>("bot_meta");
@@ -472,276 +529,376 @@ export default function AreaPhantomPage() {
         )}
 
         {/* ----------------------------------------------------------------- */}
-        {/* ABA: AUDITOR DE CRIATIVOS & ENGENHARIA DE APROVAÇÃO               */}
+        {/* ABA: CAMUFLADOR DE CRIATIVOS & ENGENHARIA DE BYPASS DE MODERAÇÃO  */}
         {/* ----------------------------------------------------------------- */}
         {activeTab === "criativos" && (
           <div className="space-y-6">
-            {/* Header com Degradê Noturno / Borda Ciano */}
+            {/* Header com Degradê Noturno Azulado / Borda Ciano */}
             <div className="p-6 rounded-2xl bg-gradient-to-r from-neutral-950 via-[#0c1a30] to-neutral-900 border border-sky-500/30 shadow-[0_4px_30px_rgba(14,165,233,0.12)] dark-surface keep-white">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
                   <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-[10px] font-mono text-sky-300 uppercase tracking-wider font-semibold">
                     <Sparkles className="w-3 h-3 text-sky-400" />
-                    <span>Engenharia de Camuflagem &amp; Aprovação Expressa</span>
+                    <span>Motor Backend de Camuflagem &amp; Bypass de Moderação</span>
                   </div>
                   <h2 className="text-base sm:text-lg font-bold text-white flex items-center space-x-2" style={{ color: "#ffffff" }}>
-                    <span>Camuflagem de Tráfego &amp; Aprovação Rápida de Anúncios</span>
+                    <span>Camuflador de Anúncios Phantom-X &amp; Aprovação Expressa</span>
                   </h2>
                 </div>
-                <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-sky-300 flex items-center space-x-1.5">
+                <div className="px-3 py-1.5 rounded-xl bg-sky-950/40 border border-sky-500/30 text-xs font-mono text-sky-300 flex items-center space-x-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>Meta / Google Bypass Architecture</span>
+                  <span>Meta / Google Bypass 100% Funcional</span>
                 </div>
               </div>
               <p className="text-xs leading-relaxed mt-2.5 max-w-3xl" style={{ color: "rgba(224, 242, 254, 0.95)" }}>
-                A estratégia definitiva para burlar a análise das plataformas e aprovar campanhas agressivas em minutos. 
-                Durante o período de revisão da Meta e Google, o Phantom-X entrega uma Whitepage institucional impecável via <strong>Reverse Proxy HTTP 200 OK</strong>. 
-                Assim que a campanha é aprovada, a entrega para compradores reais é destravada automaticamente para a página da oferta, mantendo robôs e moderadores permanentemente camuflados.
+                A engenharia definitiva para subir e aprovar ofertas agressivas (black) sem risco de reprovação ou queda de conta. 
+                O backend do Phantom-X processa termos sensíveis e transforma sua promessa em <strong>ângulos camuflados com até 99% de aprovação na Meta Ads</strong>, 
+                gerando simultaneamente a <strong>Whitepage Camaleão sincronizada</strong> para eliminar o banimento por evasão de sistemas.
               </p>
             </div>
 
-            {/* Painel Interativo de Camuflagem de Anúncios */}
+            {/* Painel Operacional de Camuflagem */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Coluna Esquerda: Editor de Copy & Presets (7 cols) */}
+              {/* Coluna Esquerda: Entrada de Copy, Nicho & Disparo do Backend (7 cols) */}
               <div className="lg:col-span-7 space-y-4">
                 <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 flex items-center space-x-1.5">
-                      <FileText className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                      <span>Promessa da Oferta &amp; Roteiro do Criativo</span>
-                    </label>
-                    <span className="text-[11px] font-mono text-slate-500 dark:text-neutral-500">
-                      {creativeText.length} caracteres
-                    </span>
+                  {/* Seletor de Nicho e Plataforma */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2 border-b border-slate-100 dark:border-white/5">
+                    <div>
+                      <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 mb-1.5">
+                        Nicho da Oferta
+                      </label>
+                      <select
+                        value={selectedNiche}
+                        onChange={(e) => {
+                          const val = e.target.value as any;
+                          setSelectedNiche(val);
+                          handleRunCamouflage(creativeText, val);
+                        }}
+                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-sky-500"
+                      >
+                        <option value="saude">Saúde &amp; Emagrecimento (Black)</option>
+                        <option value="financas">Finanças &amp; Renda Extra (Black)</option>
+                        <option value="relacionamento">Relacionamento &amp; Adulto</option>
+                        <option value="apostas">Apostas &amp; iGaming</option>
+                        <option value="geral">Geral / Infoprodutos</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 mb-1.5">
+                        Rede de Tráfego Alvo
+                      </label>
+                      <select
+                        value={selectedPlatform}
+                        onChange={(e) => setSelectedPlatform(e.target.value as any)}
+                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-sky-500"
+                      >
+                        <option value="meta_ads">Meta Ads (Facebook &amp; Instagram)</option>
+                        <option value="google_ads">Google Ads &amp; YouTube</option>
+                        <option value="tiktok_ads">TikTok Ads</option>
+                      </select>
+                    </div>
                   </div>
 
-                  {/* Seletor de Cenários / Presets */}
+                  {/* Presets Rápidos para Demonstração de Camuflagem */}
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-semibold">Simular camuflagem com ofertas agressivas:</span>
+                    <span className="text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-semibold">
+                      Testar camuflagem com ofertas agressivas reais:
+                    </span>
                     <div className="flex flex-wrap gap-1.5">
                       <button
-                        onClick={() =>
-                          setCreativeText(
-                            "🔥 DESCUBRA O CHÁ SECRETO QUE VAI CURAR E ELIMINAR DE VEZ A GORDURA! Perca 10kg em 7 dias dormindo. O que a indústria esconde de você! Assista antes que saia do ar!!!"
-                          )
-                        }
+                        onClick={() => {
+                          const text = "🔥 DESCUBRA O CHÁ SECRETO QUE VAI CURAR E ELIMINAR DE VEZ A GORDURA! Perca 10kg em 7 dias dormindo. O que a indústria esconde de você! Assista antes que saia do ar!!!";
+                          setCreativeText(text);
+                          setSelectedNiche("saude");
+                          handleRunCamouflage(text, "saude");
+                        }}
                         className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-800/40 text-[10px] font-mono text-rose-700 dark:text-rose-300 transition"
                       >
-                        🔴 Saúde / Black (Promessa Forte)
+                        🔴 Saúde / Perda de Peso Agressiva
                       </button>
                       <button
-                        onClick={() =>
-                          setCreativeText(
-                            "Ganhe R$ 5.000 por semana trabalhando no celular sem esforço! Robô do Pix com lucro garantido 100%! Fique rico sem sair de casa trabalhando 20 minutos por dia."
-                          )
-                        }
+                        onClick={() => {
+                          const text = "Ganhe R$ 5.000 por semana trabalhando no celular sem esforço! Robô do Pix com lucro garantido 100%! Fique rico sem sair de casa trabalhando 20 minutos por dia.";
+                          setCreativeText(text);
+                          setSelectedNiche("financas");
+                          handleRunCamouflage(text, "financas");
+                        }}
                         className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800/40 text-[10px] font-mono text-amber-700 dark:text-amber-300 transition"
                       >
-                        🟠 Finanças / Renda Rápida
+                        🟠 Finanças / Renda Garantida
                       </button>
                       <button
-                        onClick={() =>
-                          setCreativeText(
-                            "Você está com vergonha do seu corpo e cansado de ser pobre? Cansado de estar endividado? Assista esse vídeo chocante que os especialistas estão tentando apagar!"
-                          )
-                        }
+                        onClick={() => {
+                          const text = "Você está com vergonha do seu corpo e cansado de ser pobre? Cansado de estar endividado? Assista esse vídeo chocante que os especialistas estão tentando apagar!";
+                          setCreativeText(text);
+                          setSelectedNiche("geral");
+                          handleRunCamouflage(text, "geral");
+                        }}
                         className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/30 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800/40 text-[10px] font-mono text-purple-700 dark:text-purple-300 transition"
                       >
                         🟣 Atributos Pessoais &amp; Choque
                       </button>
                       <button
-                        onClick={() =>
-                          setCreativeText(
-                            "Conheça o protocolo nutricional moderno que está chamando a atenção de especialistas em hábitos saudáveis e qualidade de vida. Acesse o guia exclusivo."
-                          )
-                        }
+                        onClick={() => {
+                          const text = "Método da brecha na roleta que paga R$ 500 todos os dias! Bug comprovado para lucrar em apostas sem risco!";
+                          setCreativeText(text);
+                          setSelectedNiche("apostas");
+                          handleRunCamouflage(text, "apostas");
+                        }}
                         className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/40 text-[10px] font-mono text-emerald-700 dark:text-emerald-300 transition"
                       >
-                        🟢 Ângulo Camuflado (Aprovável)
+                        🟢 Apostas / iGaming
                       </button>
                     </div>
                   </div>
 
-                  {/* Textarea */}
-                  <textarea
-                    rows={6}
-                    value={creativeText}
-                    onChange={(e) => setCreativeText(e.target.value)}
-                    placeholder="Cole aqui a promessa forte da sua oferta para gerar o ângulo camuflado que a Meta aprova..."
-                    className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-sky-500 dark:focus:border-white/30 font-sans leading-relaxed transition shadow-inner"
-                  />
+                  {/* Textarea da Promessa Black */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 flex items-center space-x-1.5">
+                        <FileText className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                        <span>Texto / Promessa Black da sua Oferta</span>
+                      </label>
+                      <span className="text-[11px] font-mono text-slate-400 dark:text-neutral-500">
+                        {creativeText.length} caracteres
+                      </span>
+                    </div>
+                    <textarea
+                      rows={5}
+                      value={creativeText}
+                      onChange={(e) => setCreativeText(e.target.value)}
+                      placeholder="Cole aqui a promessa forte ou anúncio que a Meta costuma reprovar..."
+                      className="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-black/60 border border-slate-300 dark:border-white/10 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-sky-500 dark:focus:border-white/30 font-sans leading-relaxed transition shadow-inner"
+                    />
+                  </div>
 
-                  {/* Botão de Camuflagem Automática */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                  {/* Botão de Camuflagem no Backend */}
+                  <div className="pt-1">
                     <button
-                      onClick={() => setCreativeText(auditResult.sanitizedCopy)}
-                      disabled={auditResult.approvalScore >= 95}
-                      className={`inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition shadow-sm ${
-                        auditResult.approvalScore >= 95
-                          ? "bg-slate-100 text-slate-400 dark:bg-white/5 dark:text-neutral-500 cursor-not-allowed"
-                          : "bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 shadow-sky-500/20 cursor-pointer"
-                      }`}
+                      onClick={() => handleRunCamouflage()}
+                      disabled={isCamouflaging || !creativeText.trim()}
+                      className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-sky-500/20 disabled:opacity-50 transition flex items-center justify-center space-x-2 cursor-pointer"
                     >
-                      <Wand2 className="w-3.5 h-3.5" />
-                      <span>Gerar Ângulo Camuflado para Anúncio (Aprovação Expressa)</span>
-                    </button>
-
-                    <button
-                      onClick={() => copyToClipboard(creativeText, "creative_text")}
-                      className="inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-neutral-800 text-xs text-slate-700 dark:text-neutral-300 hover:bg-slate-50 dark:hover:bg-neutral-700 transition"
-                    >
-                      {copiedKey === "creative_text" ? (
+                      {isCamouflaging ? (
                         <>
-                          <Check className="w-3.5 h-3.5 text-emerald-500" />
-                          <span>Copiado!</span>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Processando Camuflagem no Backend Phantom-X...</span>
                         </>
                       ) : (
                         <>
-                          <Copy className="w-3.5 h-3.5 text-slate-400" />
-                          <span>Copiar Texto</span>
+                          <Wand2 className="w-4 h-4 text-sky-200" />
+                          <span>⚡ Camuflar Anúncio no Backend (Gerar Ângulos de Alta Aprovação)</span>
                         </>
                       )}
                     </button>
                   </div>
                 </div>
 
-                {/* Sincronização Semântica com a Whitepage */}
+                {/* Sincronização Semântica com a Whitepage Camaleão */}
                 <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-3">
-                  <div className="flex items-center space-x-2 text-xs font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                    <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    <span>Sincronização Semântica com a Whitepage (Anti-Evasão)</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-xs font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                      <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <span>Whitepage Camaleão Sincronizada (Anti-Mismatch)</span>
+                    </div>
+                    <button
+                      onClick={() =>
+                        copyToClipboard(
+                          camouflageData.whitepageSync.editorialHtmlSnippet,
+                          "whitepage_html"
+                        )
+                      }
+                      className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800/40 text-[10px] font-mono text-purple-700 dark:text-purple-300 transition flex items-center space-x-1"
+                    >
+                      {copiedKey === "whitepage_html" ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-500" />
+                          <span>HTML Copiado!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3 text-purple-500" />
+                          <span>Copiar HTML Completo da Whitepage</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                   <p className="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed">
-                    A Meta cruza os dados do criativo com a página segura. Configure a sua Whitepage com as tags abaixo para 
-                    atingir 100% de coerência e evitar qualquer suspeita de camuflagem:
+                    O robô da Meta analisa a página segura e cruza com a copy do anúncio. 
+                    O Phantom-X gera o código HTML pronto de um portal de notícias limpo no mesmo nicho:
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono pt-1">
                     <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 space-y-1">
                       <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase">Título da Whitepage</span>
-                      <div className="text-slate-800 dark:text-neutral-200 font-semibold truncate">{auditResult.coherenceWhitepage.suggestedPageTitle}</div>
+                      <div className="text-slate-800 dark:text-neutral-200 font-semibold truncate">
+                        {camouflageData.whitepageSync.recommendedTitle}
+                      </div>
                     </div>
                     <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 space-y-1">
-                      <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase">Schema JSON-LD</span>
-                      <div className="text-purple-600 dark:text-purple-400 font-semibold">{auditResult.coherenceWhitepage.schemaType}</div>
+                      <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase">Schema Estruturado</span>
+                      <div className="text-purple-600 dark:text-purple-400 font-semibold">
+                        {camouflageData.whitepageSync.schemaType}
+                      </div>
                     </div>
                   </div>
 
                   <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 space-y-1 font-mono text-[11px]">
                     <span className="text-[10px] text-slate-400 dark:text-neutral-500 uppercase">Aviso Legal Obrigatório no Rodapé</span>
-                    <div className="text-slate-700 dark:text-neutral-300 leading-relaxed">{auditResult.coherenceWhitepage.requiredLegalNotice}</div>
+                    <div className="text-slate-700 dark:text-neutral-300 leading-relaxed">
+                      {camouflageData.whitepageSync.requiredLegalNotice}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Coluna Direita: Score de Aprovação & Gatilhos Detectados (5 cols) */}
+              {/* Coluna Direita: Variações Camufladas Geradas pelo Backend (5 cols) */}
               <div className="lg:col-span-5 space-y-4">
-                {/* Cartão de Pontuação de Aprovação */}
+                {/* Cartão de Variações Camufladas */}
                 <div className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-bold">
-                      Índice de Camuflagem &amp; Aprovação
+                    <span className="text-xs font-mono uppercase tracking-wider text-slate-700 dark:text-neutral-300 font-bold flex items-center space-x-1.5">
+                      <Wand2 className="w-3.5 h-3.5 text-sky-500" />
+                      <span>Ângulos Camuflados ({camouflageData.variations.length})</span>
                     </span>
-                    <span
-                      className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full font-bold ${
-                        auditResult.approvalScore >= 90
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30"
-                          : auditResult.approvalScore >= 70
-                          ? "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30"
-                          : auditResult.approvalScore >= 45
-                          ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30"
-                          : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30"
-                      }`}
-                    >
-                      {auditResult.statusLabel}
+                    <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">
+                      {camouflageData.variations[activeVariationIndex]?.badge || "99% Aprovação"}
                     </span>
                   </div>
 
-                  {/* Barra de Progresso */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-baseline font-mono">
-                      <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                        {auditResult.approvalScore}%
-                      </span>
-                      <span className="text-xs text-slate-500 dark:text-neutral-400">
-                        {auditResult.triggers.length} {auditResult.triggers.length === 1 ? "gatilho" : "gatilhos"} de risco
-                      </span>
-                    </div>
-
-                    <div className="w-full bg-slate-100 dark:bg-neutral-800 h-2.5 rounded-full overflow-hidden border border-slate-200 dark:border-white/5">
-                      <div
-                        style={{ width: `${auditResult.approvalScore}%` }}
-                        className={`h-full transition-all duration-500 rounded-full ${
-                          auditResult.approvalScore >= 90
-                            ? "bg-emerald-500"
-                            : auditResult.approvalScore >= 70
-                            ? "bg-sky-500"
-                            : auditResult.approvalScore >= 45
-                            ? "bg-amber-500"
-                            : "bg-rose-500"
+                  {/* Seletor de Variações */}
+                  <div className="flex space-x-1 bg-slate-100 dark:bg-black/40 p-1 rounded-xl">
+                    {camouflageData.variations.map((v, idx) => (
+                      <button
+                        key={v.id}
+                        onClick={() => setActiveVariationIndex(idx)}
+                        className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-mono font-bold transition truncate ${
+                          activeVariationIndex === idx
+                            ? "bg-white dark:bg-neutral-800 text-sky-600 dark:text-sky-300 shadow-sm"
+                            : "text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
                         }`}
-                      />
-                    </div>
+                      >
+                        Var {idx + 1} ({v.approvalProbability}%)
+                      </button>
+                    ))}
                   </div>
 
-                  {/* Recomendações Críticas */}
-                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-white/5">
-                    <span className="text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-semibold">Diretrizes de Liberação:</span>
-                    <ul className="space-y-1.5 text-xs text-slate-700 dark:text-neutral-300">
-                      {auditResult.recommendations.map((rec, i) => (
-                        <li key={i} className="flex items-start space-x-2">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-sky-500 shrink-0 mt-0.5" />
-                          <span className="leading-snug">{rec}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Lista de Gatilhos Detectados */}
-                <div className="space-y-2.5">
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300">
-                    Gatilhos de Violação no Texto ({auditResult.triggers.length})
-                  </h3>
-
-                  {auditResult.triggers.length === 0 ? (
-                    <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 text-emerald-800 dark:text-emerald-300 text-xs flex items-center space-x-2.5">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <span>Nenhum gatilho de risco detectado. O criativo está livre de termos sensíveis conhecidos.</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-                      {auditResult.triggers.map((t) => (
-                        <div
-                          key={t.id}
-                          className="p-3.5 rounded-xl bg-white dark:bg-neutral-900/60 border border-rose-200 dark:border-rose-900/30 space-y-1.5 shadow-sm"
-                        >
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-mono font-bold text-rose-600 dark:text-rose-400 flex items-center space-x-1">
-                              <AlertOctagon className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                              <span>"{t.matchedWord}"</span>
-                            </span>
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 font-bold">
-                              -{t.penalty}%
-                            </span>
-                          </div>
-
-                          <div className="text-[11px] font-medium text-slate-500 dark:text-neutral-400">
-                            {t.categoryLabel}
-                          </div>
-
-                          <p className="text-[11px] text-slate-600 dark:text-neutral-300 leading-relaxed">
-                            {t.explanation}
-                          </p>
-
-                          <div className="pt-1.5 border-t border-slate-100 dark:border-white/5 flex items-start space-x-1 text-[11px] text-emerald-700 dark:text-emerald-400">
-                            <span className="font-semibold shrink-0 font-mono">Ângulo Seguro:</span>
-                            <span className="italic">"{t.suggestedReplacement}"</span>
-                          </div>
+                  {/* Detalhes da Variação Selecionada */}
+                  {camouflageData.variations[activeVariationIndex] && (
+                    <div className="space-y-3.5 pt-1">
+                      {/* Título / Headline Camuflada */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-bold">
+                          <span>Headline do Anúncio (Meta Ads):</span>
+                          <button
+                            onClick={() =>
+                              copyToClipboard(
+                                camouflageData.variations[activeVariationIndex].headline,
+                                `var_headline_${activeVariationIndex}`
+                              )
+                            }
+                            className="text-sky-600 dark:text-sky-400 hover:underline flex items-center space-x-1"
+                          >
+                            {copiedKey === `var_headline_${activeVariationIndex}` ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-500" />
+                                <span>Copiado</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                <span>Copiar</span>
+                              </>
+                            )}
+                          </button>
                         </div>
-                      ))}
+                        <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/5 text-xs font-semibold text-slate-900 dark:text-white leading-relaxed">
+                          {camouflageData.variations[activeVariationIndex].headline}
+                        </div>
+                      </div>
+
+                      {/* Texto Principal / Copy Camuflada */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center text-[10px] font-mono uppercase text-slate-500 dark:text-neutral-400 font-bold">
+                          <span>Texto Principal (Copy do Anúncio):</span>
+                          <button
+                            onClick={() =>
+                              copyToClipboard(
+                                camouflageData.variations[activeVariationIndex].bodyCopy,
+                                `var_copy_${activeVariationIndex}`
+                              )
+                            }
+                            className="text-sky-600 dark:text-sky-400 hover:underline flex items-center space-x-1"
+                          >
+                            {copiedKey === `var_copy_${activeVariationIndex}` ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-500" />
+                                <span>Copiado</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                <span>Copiar</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/5 text-xs text-slate-700 dark:text-neutral-300 leading-relaxed font-sans whitespace-pre-wrap">
+                          {camouflageData.variations[activeVariationIndex].bodyCopy}
+                        </div>
+                      </div>
+
+                      {/* Botão de Chamada para Ação */}
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 text-xs font-mono">
+                        <span className="text-[10px] uppercase text-slate-400 dark:text-neutral-500 font-bold">Botão de CTA Recomendado:</span>
+                        <span className="font-bold text-sky-600 dark:text-sky-400">
+                          {camouflageData.variations[activeVariationIndex].cta} &rarr;
+                        </span>
+                      </div>
+
+                      {/* Explicação Técnica do Bypass */}
+                      <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/40 space-y-1 text-xs">
+                        <div className="font-mono font-bold text-sky-800 dark:text-sky-300 flex items-center space-x-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-sky-500" />
+                          <span>Por que a IA da Meta aprova sem banir?</span>
+                        </div>
+                        <p className="text-[11px] text-sky-900 dark:text-sky-200/90 leading-relaxed">
+                          {camouflageData.variations[activeVariationIndex].metaAngleExplanation}
+                        </p>
+                      </div>
                     </div>
                   )}
+                </div>
+
+                {/* Protocolo Operacional de Liberação de Tráfego */}
+                <div className="p-4 rounded-2xl bg-white dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm space-y-2.5">
+                  <div className="text-xs font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center space-x-1.5">
+                    <Zap className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Roteiro de Ativação do Cloaker</span>
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-100 dark:border-white/5 space-y-1">
+                      <div className="font-semibold text-slate-800 dark:text-neutral-200 flex items-center space-x-1.5">
+                        <span className="w-4 h-4 rounded-full bg-sky-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+                        <span>Fase 1: Revisão do Robô (Primeiros 30-60 min)</span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-neutral-400 leading-relaxed pl-5">
+                        O Phantom-X entrega 100% da Whitepage para qualquer visitante ou bot da Meta via HTTP 200 OK sem salto de URL.
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-100 dark:border-white/5 space-y-1">
+                      <div className="font-semibold text-slate-800 dark:text-neutral-200 flex items-center space-x-1.5">
+                        <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                        <span>Fase 2: Ativação Pós-Aprovação</span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-neutral-400 leading-relaxed pl-5">
+                        Ao detectar compradores mobile reais com <code>fbclid</code>, a Blackpage é servida instantaneamente enquanto moderadores continuam camuflados.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

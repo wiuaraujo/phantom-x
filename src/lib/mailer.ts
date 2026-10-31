@@ -1,5 +1,10 @@
 import nodemailer from "nodemailer";
-import { renderVerificationEmailHtml, renderVerificationEmailText } from "./emailService";
+import {
+  renderVerificationEmailHtml,
+  renderVerificationEmailText,
+  renderPasswordResetEmailHtml,
+  renderPasswordResetEmailText,
+} from "./emailService";
 import { sendEmailViaResend, resolveResendApiKey, OFFICIAL_FROM_EMAIL, OFFICIAL_REPLY_TO } from "./resend";
 
 export interface SendEmailResult {
@@ -118,5 +123,92 @@ export async function dispatchVerificationEmail(params: {
     success: false,
     provider: "none",
     error: "Falha na entrega via Resend (HTTP e SMTP Relay). Por favor, verifique a chave de API ou tente novamente.",
+  };
+}
+
+/**
+ * Dispara o e-mail oficial de Recuperação de Senha Phantom-X
+ * Exibe o código de 6 dígitos em caixa de alto contraste e botão de 1 clique para redefinir.
+ */
+export async function dispatchPasswordResetEmail(params: {
+  to: string;
+  name: string;
+  code: string;
+  origin?: string;
+  apiKey?: string;
+}): Promise<SendEmailResult> {
+  const { to, name, code, origin, apiKey } = params;
+  const cleanEmail = to.trim().toLowerCase();
+  const cleanName = name.trim() || "Operador";
+
+  const resolvedOrigin =
+    origin && origin.startsWith("http")
+      ? origin
+      : process.env.NEXT_PUBLIC_APP_URL || "https://phantom-x.pro";
+
+  const html = renderPasswordResetEmailHtml(cleanName, code, resolvedOrigin, cleanEmail);
+  const text = renderPasswordResetEmailText(cleanName, code, resolvedOrigin, cleanEmail);
+  const subject = `🔐 [Phantom-X] Código para Recuperação de Senha: ${code}`;
+
+  // 1 & 2. DISPARO COM RESEND (REST HTTP Nativo + SMTP Relay Fallback)
+  try {
+    const resendResult = await sendEmailViaResend({
+      to: cleanEmail,
+      subject,
+      html,
+      text,
+      from: process.env.RESEND_FROM || OFFICIAL_FROM_EMAIL,
+      replyTo: OFFICIAL_REPLY_TO,
+      apiKey: resolveResendApiKey(apiKey),
+    });
+
+    if (resendResult.success) {
+      console.log(
+        `[Phantom-X Mailer] E-mail de Recuperação de Senha entregue via Resend [${resendResult.method || "auto"}] para ${cleanEmail} (ID: ${resendResult.messageId})`
+      );
+      return {
+        success: true,
+        provider: "resend",
+        messageId: resendResult.messageId,
+      };
+    } else {
+      console.warn(
+        `[Phantom-X Mailer] Resend relatou falha no envio de recuperação: ${resendResult.error}. Verificando transporte SMTP...`
+      );
+    }
+  } catch (err: any) {
+    console.warn(`[Phantom-X Mailer] Exceção no envio de recuperação via Resend: ${err?.message}`);
+  }
+
+  // 3. FALLBACK: TRANSPORTE SMTP CUSTOMIZADO
+  const customTransporter = getCustomSmtpTransporter();
+  if (customTransporter) {
+    try {
+      const from = process.env.SMTP_FROM || `Phantom-X <${process.env.SMTP_USER || "contato@phantom-x.pro"}>`;
+      const info = await customTransporter.sendMail({
+        from,
+        to: cleanEmail,
+        subject,
+        html,
+        text,
+      });
+
+      console.log(
+        `[Phantom-X Mailer] E-mail de Recuperação enviado via SMTP Customizado para ${cleanEmail} (ID: ${info.messageId})`
+      );
+      return {
+        success: true,
+        provider: "smtp",
+        messageId: info.messageId,
+      };
+    } catch (err: any) {
+      console.warn(`[Phantom-X Mailer] Falha no transporte SMTP customizado para recuperação: ${err?.message}`);
+    }
+  }
+
+  return {
+    success: false,
+    provider: "none",
+    error: "Falha na entrega do e-mail de recuperação via Resend e SMTP. Verifique as configurações.",
   };
 }
