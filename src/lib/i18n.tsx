@@ -169,6 +169,9 @@ export interface Translations {
     upgrade: string;
     notifications: string;
     systemEvents: string;
+    noNotificationsTitle: string;
+    noNotificationsDesc: string;
+    clearNotifications: string;
     systemMitigationTitle: string;
     systemMitigationDesc: string;
     trafficPeakTitle: string;
@@ -412,6 +415,9 @@ const translations: Record<Language, Translations> = {
       upgrade: "Fazer Upgrade",
       notifications: "Notificações do Sistema",
       systemEvents: "Eventos do Sistema",
+      noNotificationsTitle: "Nenhuma notificação no momento",
+      noNotificationsDesc: "Eventos de mitigação, alertas de tráfego e avisos de segurança aparecerão aqui quando suas campanhas estiverem ativas.",
+      clearNotifications: "Limpar",
       systemMitigationTitle: "Mitigação de Tráfego Automático",
       systemMitigationDesc: "12 requisições isoladas com sucesso",
       trafficPeakTitle: "Novo pico de acessos (Brasil)",
@@ -652,6 +658,9 @@ const translations: Record<Language, Translations> = {
       upgrade: "Upgrade Plan",
       notifications: "System Notifications",
       systemEvents: "System Events",
+      noNotificationsTitle: "No notifications at the moment",
+      noNotificationsDesc: "Mitigation events, traffic alerts, and security notices will appear here once your campaigns are active.",
+      clearNotifications: "Clear",
       systemMitigationTitle: "Automated Traffic Mitigation",
       systemMitigationDesc: "12 requests isolated successfully",
       trafficPeakTitle: "Traffic peak detected (Global)",
@@ -892,6 +901,9 @@ const translations: Record<Language, Translations> = {
       upgrade: "Actualizar Plan",
       notifications: "Notificaciones del Sistema",
       systemEvents: "Eventos del Sistema",
+      noNotificationsTitle: "No hay notificaciones en este momento",
+      noNotificationsDesc: "Los eventos de mitigación, alertas de tráfico y avisos de seguridad aparecerán aquí cuando sus campañas estén activas.",
+      clearNotifications: "Limpiar",
       systemMitigationTitle: "Mitigación Automática de Tráfico",
       systemMitigationDesc: "12 solicitudes aisladas con éxito",
       trafficPeakTitle: "Pico de tráfico detectado (Global)",
