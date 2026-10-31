@@ -461,9 +461,28 @@ export const TechGlobe: React.FC<{ className?: string; enableZoom?: boolean }> =
 
     let animId: number;
     let clock = new THREE.Clock();
+    let isIntersecting = true;
+    let isDocVisible = typeof document !== "undefined" ? !document.hidden : true;
+
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        isIntersecting = entry.isIntersecting;
+      },
+      { threshold: 0.05 }
+    );
+    visibilityObserver.observe(container);
+
+    const handleVisibility = () => {
+      isDocVisible = !document.hidden;
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
+
+      if (!isIntersecting || !isDocVisible) {
+        return;
+      }
 
       const delta = clock.getDelta();
       const elapsedTime = clock.getElapsedTime();
@@ -505,6 +524,8 @@ export const TechGlobe: React.FC<{ className?: string; enableZoom?: boolean }> =
 
     return () => {
       cancelAnimationFrame(animId);
+      visibilityObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
       themeObserver.disconnect();
       container.removeEventListener("pointerdown", onPointerDown);
       container.removeEventListener("pointermove", onPointerMove);

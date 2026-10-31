@@ -110,8 +110,10 @@ export default function DashboardOverview() {
   useEffect(() => {
     loadData();
     const interval = setInterval(() => {
-      loadData();
-    }, 4000);
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        loadData();
+      }
+    }, 15000);
     return () => clearInterval(interval);
   }, [selectedDomain, selectedCountry, selectedPeriod]);
 

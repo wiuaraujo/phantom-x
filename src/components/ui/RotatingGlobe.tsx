@@ -29,7 +29,24 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
     if (!ctx) return;
 
     let animId: number;
-    const dpr = window.devicePixelRatio || 1;
+    let isIntersecting = true;
+    let isDocumentVisible = typeof document !== "undefined" ? !document.hidden : true;
+
+    // Pausa loop RAF quando elemento está fora da tela ou aba inativa
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isIntersecting = entry.isIntersecting;
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(canvas);
+
+    const handleVisibility = () => {
+      isDocumentVisible = !document.hidden;
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     canvas.width = size * dpr;
     canvas.height = size * dpr;
@@ -38,7 +55,7 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
 
     // Convert lat, lon to 3D Cartesian coordinates on sphere
     const landPoints3D: { x: number; y: number; z: number; isBright: boolean }[] = [];
-    const step = 2; // Step to keep performance 60fps on 2D canvas
+    const step = size <= 180 ? 4 : 3; // Otimizado dinamicamente por tamanho de tela
     for (let i = 0; i < GLOBE_LAND_POINTS.length; i += step) {
       const [lat, lon] = GLOBE_LAND_POINTS[i];
       const phi = (90 - lat) * (Math.PI / 180);
@@ -87,6 +104,11 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
     let pulseTime = 0;
 
     const render = () => {
+      if (!isIntersecting || !isDocumentVisible) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
+
       if (!isDraggingRef.current) {
         if (Math.abs(velocityRef.current.x) > 0.0001 || Math.abs(velocityRef.current.y) > 0.0001) {
           rotYRef.current += velocityRef.current.x;
@@ -184,29 +206,27 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
         ctx.stroke();
       });
 
-      // 4. Render Front-Facing Land Points (Clean Mapa Mundi dots)
-      landPoints3D.forEach((p) => {
+      // 4. Render Front-Facing Land Points (Clean Mapa Mundi dots - batch fill for high FPS)
+      const dotBaseSize = size <= 180 ? 1.3 : 1.6;
+      ctx.fillStyle = isLight ? "rgba(60, 60, 67, 0.7)" : "rgba(180, 180, 190, 0.75)";
+      for (let i = 0; i < landPoints3D.length; i++) {
+        const p = landPoints3D[i];
+        if (p.isBright) continue;
         const rotated = rotatePoint(p);
-        // Only draw points on facing hemisphere
         if (rotated.z > 0) {
-          const px = centerX + rotated.x;
-          const py = centerY + rotated.y;
-          const depthAlpha = Math.min(1, Math.max(0.2, rotated.z / radius));
-          const dotSize = 1.4 + (rotated.z / radius) * 1.1;
-
-          if (isLight) {
-            ctx.fillStyle = p.isBright
-              ? `rgba(10, 10, 12, ${0.9 * depthAlpha})`
-              : `rgba(60, 60, 67, ${0.75 * depthAlpha})`;
-          } else {
-            ctx.fillStyle = p.isBright
-              ? `rgba(255, 255, 255, ${0.95 * depthAlpha})`
-              : `rgba(161, 161, 170, ${0.75 * depthAlpha})`;
-          }
-
-          ctx.fillRect(px - dotSize / 2, py - dotSize / 2, dotSize, dotSize);
+          ctx.fillRect(centerX + rotated.x - dotBaseSize / 2, centerY + rotated.y - dotBaseSize / 2, dotBaseSize, dotBaseSize);
         }
-      });
+      }
+
+      ctx.fillStyle = isLight ? "#0a0a0c" : "#ffffff";
+      for (let i = 0; i < landPoints3D.length; i++) {
+        const p = landPoints3D[i];
+        if (!p.isBright) continue;
+        const rotated = rotatePoint(p);
+        if (rotated.z > 0) {
+          ctx.fillRect(centerX + rotated.x - 1, centerY + rotated.y - 1, 2, 2);
+        }
+      }
 
       // 5. Render Orbital Ring
       ctx.save();
@@ -288,6 +308,8 @@ export const RotatingGlobe: React.FC<RotatingGlobeProps> = ({
 
     return () => {
       cancelAnimationFrame(animId);
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [size]);
 
