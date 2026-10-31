@@ -621,8 +621,23 @@ export const auth = {
 
       // Sincroniza o status real de confirmação de e-mail e plano na sessão ativa
       session.user.emailVerified = matchedUser.emailOtpVerified === true;
-      session.user.plan = matchedUser.plan || "free";
-      session.user.planStatus = matchedUser.planStatus || "trial";
+
+      // Validação estrita de expiração de assinatura de 30 dias
+      const isExpiredByDate =
+        matchedUser.planExpiresAt &&
+        new Date(matchedUser.planExpiresAt).getTime() < Date.now();
+
+      const effectiveStatus = isExpiredByDate
+        ? "expired"
+        : (matchedUser.planStatus || "trial");
+
+      const effectivePlan =
+        effectiveStatus === "canceled" || effectiveStatus === "expired"
+          ? "free"
+          : (matchedUser.plan || "free");
+
+      session.user.plan = effectivePlan;
+      session.user.planStatus = effectiveStatus;
       session.user.planActivatedAt = matchedUser.planActivatedAt || matchedUser.createdAt;
       session.user.planExpiresAt = matchedUser.planExpiresAt || null;
 

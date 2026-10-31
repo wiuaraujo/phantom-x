@@ -17,13 +17,29 @@ export interface UserPlanRecord {
 // Cache global em memória no processo Node.js
 const serverPlanMap = new Map<string, UserPlanRecord>();
 
+function normalizeRecordIfExpired(record: UserPlanRecord): UserPlanRecord {
+  if (
+    record.planSource === "stripe" &&
+    record.planExpiresAt &&
+    new Date(record.planExpiresAt).getTime() < Date.now()
+  ) {
+    return {
+      ...record,
+      planStatus: "expired",
+      isPaid: false,
+    };
+  }
+  return record;
+}
+
 /**
  * Obtém do cache síncrono em memória, se existir
  */
 export function getServerUserPlanSync(userIdOrEmail?: string | null): UserPlanRecord | null {
   if (!userIdOrEmail) return null;
   const key = userIdOrEmail.trim().toLowerCase();
-  return serverPlanMap.get(key) || serverPlanMap.get(userIdOrEmail) || null;
+  const rec = serverPlanMap.get(key) || serverPlanMap.get(userIdOrEmail) || null;
+  return rec ? normalizeRecordIfExpired(rec) : null;
 }
 
 /**
@@ -139,10 +155,10 @@ export async function getServerUserPlan(
 
   // 1. Verifica cache em memória
   if (serverPlanMap.has(key)) {
-    return serverPlanMap.get(key)!;
+    return normalizeRecordIfExpired(serverPlanMap.get(key)!);
   }
   if (serverPlanMap.has(userIdOrEmail)) {
-    return serverPlanMap.get(userIdOrEmail)!;
+    return normalizeRecordIfExpired(serverPlanMap.get(userIdOrEmail)!);
   }
 
   // 2. Consulta no Supabase
@@ -174,7 +190,7 @@ export async function getServerUserPlan(
         };
         serverPlanMap.set(u.id, record);
         if (u.email) serverPlanMap.set(u.email.toLowerCase(), record);
-        return record;
+        return normalizeRecordIfExpired(record);
       }
     } else if (userIdOrEmail.includes("@")) {
       const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
@@ -202,7 +218,7 @@ export async function getServerUserPlan(
         };
         serverPlanMap.set(match.id, record);
         serverPlanMap.set(key, record);
-        return record;
+        return normalizeRecordIfExpired(record);
       }
     }
   } catch (err) {
