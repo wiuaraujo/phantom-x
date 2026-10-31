@@ -206,7 +206,7 @@ export default function AreaPhantomPage() {
             <div className="space-y-4 max-w-3xl">
               {/* Badges de Destaque */}
               <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-900/5 dark:bg-white/[0.06] border border-slate-300 dark:border-white/15 backdrop-blur-md text-[11px] font-mono text-slate-900 dark:text-white font-medium">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-900/5 dark:bg-white/[0.06] border border-slate-300 dark:border-white/15 backdrop-blur-md text-[11px] font-mono text-slate-800 dark:text-white font-semibold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                   <span>PHANTOM-X ACADEMY &amp; MASTERY</span>
                 </div>
@@ -218,16 +218,16 @@ export default function AreaPhantomPage() {
                   <Logo size={36} className="shrink-0" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-950 dark:text-white">
                     Área Phantom-X
                   </h1>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-neutral-400 font-medium mt-0.5">
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-neutral-400 font-medium mt-0.5">
                     Central de Treinamento, Engenharia de Borda e Segredos de Aprovação de Tráfego Pago
                   </p>
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-700 dark:text-neutral-300 leading-relaxed max-w-2xl">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-neutral-300 leading-relaxed max-w-2xl">
                 O Phantom-X foi desenhado para transformar operações de tráfego de alta escala. 
                 Aqui você encontra tudo: desde o setup do primeiro domínio em 3 minutos até as técnicas 
                 avançadas de isolamento de moderadores da Meta, Google Ads e TikTok Ads.
@@ -236,24 +236,24 @@ export default function AreaPhantomPage() {
 
             {/* Quick Stats / Highlights */}
             <div className="grid grid-cols-2 gap-3 lg:w-80 shrink-0">
-              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-neutral-900/80 border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
+              <div className="p-3.5 rounded-2xl bg-white/95 dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold">Entrega de Borda</div>
-                <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">HTTP 200 OK</div>
+                <div className="text-lg font-bold font-mono text-slate-950 dark:text-white mt-0.5">HTTP 200 OK</div>
                 <div className="text-[10px] text-slate-500 dark:text-neutral-500">Sem redirects 301/302</div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-neutral-900/80 border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
+              <div className="p-3.5 rounded-2xl bg-white/95 dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold">Latência Média</div>
-                <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">&lt; 14ms</div>
+                <div className="text-lg font-bold font-mono text-slate-950 dark:text-white mt-0.5">&lt; 14ms</div>
                 <div className="text-[10px] text-slate-500 dark:text-neutral-500">Cloudflare Edge Cluster</div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-neutral-900/80 border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
+              <div className="p-3.5 rounded-2xl bg-white/95 dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold">Camadas Ativas</div>
-                <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">6 Filtros</div>
+                <div className="text-lg font-bold font-mono text-slate-950 dark:text-white mt-0.5">6 Filtros</div>
                 <div className="text-[10px] text-slate-500 dark:text-neutral-500">Hardware &amp; ASNs</div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-neutral-900/80 border border-slate-200/90 dark:border-white/10 shadow-sm backdrop-blur-md">
+              <div className="p-3.5 rounded-2xl bg-white/95 dark:bg-neutral-900/80 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
                 <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 font-semibold">Blindagem</div>
-                <div className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5">Meta / Google</div>
+                <div className="text-lg font-bold font-mono text-slate-950 dark:text-white mt-0.5">Meta / Google</div>
                 <div className="text-[10px] text-slate-500 dark:text-neutral-500">Reviewers isolados</div>
               </div>
             </div>
@@ -261,7 +261,7 @@ export default function AreaPhantomPage() {
 
           {/* Search Box */}
           <div className="relative mt-6 max-w-xl">
-            <Search className="w-4 h-4 text-slate-400 dark:text-neutral-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-slate-500 dark:text-neutral-400 absolute left-3.5 top-3" />
             <input
               type="text"
               value={searchQuery}
