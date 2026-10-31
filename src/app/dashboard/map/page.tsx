@@ -6,16 +6,18 @@ import { TechGlobe } from "@/components/globe/TechGlobe";
 import { store } from "@/lib/store";
 import { getCountryFlag } from "@/lib/geoFlags";
 import { Globe2, Radio, Server, RotateCw } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 export default function GlobalMapPage() {
+  const { t } = useLanguage();
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const geoData = store.getGeoDistribution();
 
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
-        title="Globo de Telemetria 360º"
-        subtitle="Visualização geoespacial esférica 360º em tempo real da rede Phantom-X e latência global"
+        title={t.dashboard.mapTitle}
+        subtitle={t.dashboard.mapSubtitle}
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">

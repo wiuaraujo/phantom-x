@@ -5,6 +5,7 @@ import { Header } from "@/components/dashboard/Header";
 import { store } from "@/lib/store";
 import { TrafficEvent, RiskCategory } from "@/types";
 import { getCountryFlag, LocationBadge } from "@/lib/geoFlags";
+import { useLanguage } from "@/lib/i18n";
 import {
   Play,
   Pause,
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 
 export default function LiveMonitoringPage() {
+  const { t } = useLanguage();
   const [events, setEvents] = useState<TrafficEvent[]>([]);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState<RiskCategory | "all">("all");
@@ -80,8 +82,8 @@ export default function LiveMonitoringPage() {
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
-        title="Monitoramento de Tráfego Ao Vivo"
-        subtitle="Fluxo contínuo de inspeção multi-camada do Phantom-X com entrega transparente HTTP 200 OK"
+        title={t.dashboard.liveTitle}
+        subtitle={t.dashboard.liveSubtitle}
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">

@@ -184,6 +184,50 @@ export interface Translations {
     period24h: string;
     period7d: string;
     period30d: string;
+    // New Comprehensive System Keys
+    overviewTitle: string;
+    overviewSubtitle: string;
+    greetingHello: string;
+    activeVisitors: string;
+    activeVisitorsSub: string;
+    eventsReceived: string;
+    eventsReceivedSub: string;
+    filteredTraffic: string;
+    filteredTrafficSub: string;
+    uniqueSessions: string;
+    uniqueSessionsSub: string;
+    mappedCountries: string;
+    mappedCountriesSub: string;
+    coverageSub: string;
+    trafficTelemetryTitle: string;
+    totalRequests: string;
+    cleanHits: string;
+    threatsBlocked: string;
+    blockRate: string;
+    metricTotal: string;
+    metricClean: string;
+    metricThreats: string;
+    metricShield: string;
+    deviceDistribution: string;
+    deviceDistributionSub: string;
+    deviceMobile: string;
+    deviceDesktop: string;
+    deviceTablet: string;
+    deviceBot: string;
+    topRegions: string;
+    noRegionsYet: string;
+    campaignsTitle: string;
+    campaignsSubtitle: string;
+    domainsTitle: string;
+    domainsSubtitle: string;
+    eventsTitle: string;
+    eventsSubtitle: string;
+    liveTitle: string;
+    liveSubtitle: string;
+    mapTitle: string;
+    mapSubtitle: string;
+    settingsTitle: string;
+    settingsSubtitle: string;
   };
   common: {
     portuguese: string;
@@ -380,6 +424,49 @@ const translations: Record<Language, Translations> = {
       period24h: "24h",
       period7d: "7d",
       period30d: "30d",
+      overviewTitle: "Visão Geral da Operação",
+      overviewSubtitle: "Monitoramento unificado de borda, telemetria global e análise de risco",
+      greetingHello: "Olá",
+      activeVisitors: "Visitantes Ativos",
+      activeVisitorsSub: "Agora em tempo real",
+      eventsReceived: "Eventos Recebidos",
+      eventsReceivedSub: "Últimas 24 horas",
+      filteredTraffic: "Tráfego Filtrado",
+      filteredTrafficSub: "Mitigados e isolados",
+      uniqueSessions: "Sessões Únicas",
+      uniqueSessionsSub: "Volume consolidado",
+      mappedCountries: "Países Mapeados",
+      mappedCountriesSub: "Origem geográfica",
+      coverageSub: "Cobertura cartográfica ativa no cluster",
+      trafficTelemetryTitle: "Telemetria em Tempo Real de Tráfego",
+      totalRequests: "requisições totais",
+      cleanHits: "acessos limpos",
+      threatsBlocked: "bots retidos",
+      blockRate: "taxa de bloqueio",
+      metricTotal: "Volume Total",
+      metricClean: "Tráfego Limpo",
+      metricThreats: "Bots Barrados",
+      metricShield: "Taxa de Blindagem",
+      deviceDistribution: "Distribuição por Dispositivo",
+      deviceDistributionSub: "Categorização de dispositivos e agentes",
+      deviceMobile: "Mobile (Smartphones)",
+      deviceDesktop: "Desktop (Workstations)",
+      deviceTablet: "Tablets & Outros",
+      deviceBot: "Bots / Reviewers Barrados",
+      topRegions: "Principais Regiões",
+      noRegionsYet: "Nenhuma região com tráfego registrado no momento.",
+      campaignsTitle: "Camuflagens & Campanhas",
+      campaignsSubtitle: "Gerenciamento de regras de proxy reverso e proteção de anúncios",
+      domainsTitle: "Domínios & Roteamento",
+      domainsSubtitle: "Conexão de domínios customizados com SSL automático em borda",
+      eventsTitle: "Logs & Auditoria de Tráfego",
+      eventsSubtitle: "Inspeção detalhada de cada requisição e heurística de decisão",
+      liveTitle: "Auditoria Ao Vivo",
+      liveSubtitle: "Monitoramento de tráfego em tempo real com websocket e telemetria",
+      mapTitle: "Globo Global 360º",
+      mapSubtitle: "Visualização cartográfica em 3D dos nós de borda e requisições",
+      settingsTitle: "Configurações da Operação",
+      settingsSubtitle: "Preferências de perfil, chaves de API e integração com Cloudflare",
     },
     common: {
       portuguese: "Português",
@@ -574,6 +661,49 @@ const translations: Record<Language, Translations> = {
       period24h: "24h",
       period7d: "7d",
       period30d: "30d",
+      overviewTitle: "Operations Overview",
+      overviewSubtitle: "Unified edge monitoring, global telemetry, and risk analysis",
+      greetingHello: "Hello",
+      activeVisitors: "Active Visitors",
+      activeVisitorsSub: "Real-time now",
+      eventsReceived: "Events Received",
+      eventsReceivedSub: "Last 24 hours",
+      filteredTraffic: "Filtered Traffic",
+      filteredTrafficSub: "Mitigated and isolated",
+      uniqueSessions: "Unique Sessions",
+      uniqueSessionsSub: "Consolidated volume",
+      mappedCountries: "Mapped Countries",
+      mappedCountriesSub: "Geographic origin",
+      coverageSub: "Active cartographic coverage in cluster",
+      trafficTelemetryTitle: "Real-Time Traffic Telemetry",
+      totalRequests: "total requests",
+      cleanHits: "clean hits",
+      threatsBlocked: "blocked bots",
+      blockRate: "block rate",
+      metricTotal: "Total Volume",
+      metricClean: "Clean Traffic",
+      metricThreats: "Blocked Bots",
+      metricShield: "Shielding Rate",
+      deviceDistribution: "Device Distribution",
+      deviceDistributionSub: "Categorization of devices and agents",
+      deviceMobile: "Mobile (Smartphones)",
+      deviceDesktop: "Desktop (Workstations)",
+      deviceTablet: "Tablets & Others",
+      deviceBot: "Blocked Bots / Reviewers",
+      topRegions: "Top Regions",
+      noRegionsYet: "No region with traffic recorded at the moment.",
+      campaignsTitle: "Cloaking & Campaigns",
+      campaignsSubtitle: "Management of reverse proxy rules and ad protection",
+      domainsTitle: "Domains & Routing",
+      domainsSubtitle: "Custom domain connection with automatic edge SSL",
+      eventsTitle: "Traffic Logs & Auditing",
+      eventsSubtitle: "Detailed inspection of each request and decision heuristic",
+      liveTitle: "Live Audit",
+      liveSubtitle: "Real-time traffic monitoring with websocket and telemetry",
+      mapTitle: "Global 360º Globe",
+      mapSubtitle: "3D cartographic visualization of edge nodes and requests",
+      settingsTitle: "Operations Settings",
+      settingsSubtitle: "Profile preferences, API keys, and Cloudflare integration",
     },
     common: {
       portuguese: "Português",
@@ -768,6 +898,49 @@ const translations: Record<Language, Translations> = {
       period24h: "24h",
       period7d: "7d",
       period30d: "30d",
+      overviewTitle: "Visión General de la Operación",
+      overviewSubtitle: "Monitoreo unificado de borde, telemetría global y análisis de riesgo",
+      greetingHello: "Hola",
+      activeVisitors: "Visitantes Activos",
+      activeVisitorsSub: "Ahora en tiempo real",
+      eventsReceived: "Eventos Recibidos",
+      eventsReceivedSub: "Últimas 24 horas",
+      filteredTraffic: "Tráfico Filtrado",
+      filteredTrafficSub: "Mitigados y aislados",
+      uniqueSessions: "Sesiones Únicas",
+      uniqueSessionsSub: "Volumen consolidado",
+      mappedCountries: "Países Mapeados",
+      mappedCountriesSub: "Origen geográfico",
+      coverageSub: "Cobertura cartográfica activa en el clúster",
+      trafficTelemetryTitle: "Telemetría en Tiempo Real de Tráfico",
+      totalRequests: "solicitudes totales",
+      cleanHits: "accesos limpios",
+      threatsBlocked: "bots retenidos",
+      blockRate: "tasa de bloqueo",
+      metricTotal: "Volumen Total",
+      metricClean: "Tráfico Limpio",
+      metricThreats: "Bots Bloqueados",
+      metricShield: "Tasa de Blindaje",
+      deviceDistribution: "Distribución por Dispositivo",
+      deviceDistributionSub: "Categorización de dispositivos y agentes",
+      deviceMobile: "Móvil (Smartphones)",
+      deviceDesktop: "Escritorio (Workstations)",
+      deviceTablet: "Tabletas y Otros",
+      deviceBot: "Bots / Revisores Bloqueados",
+      topRegions: "Regiones Principales",
+      noRegionsYet: "Ninguna región con tráfico registrado en este momento.",
+      campaignsTitle: "Camuflajes y Campañas",
+      campaignsSubtitle: "Gestión de reglas de proxy inverso y protección de anuncios",
+      domainsTitle: "Dominios y Enrutamiento",
+      domainsSubtitle: "Conexión de dominios personalizados con SSL automático en borde",
+      eventsTitle: "Registros y Auditoría de Tráfico",
+      eventsSubtitle: "Inspección detallada de cada solicitud y heurística de decisión",
+      liveTitle: "Auditoría en Vivo",
+      liveSubtitle: "Monitoreo de tráfico en tiempo real con websocket y telemetría",
+      mapTitle: "Globo Global 360º",
+      mapSubtitle: "Visualización cartográfica en 3D de nodos de borde y solicitudes",
+      settingsTitle: "Configuraciones de la Operación",
+      settingsSubtitle: "Preferencias de perfil, claves de API e integración con Cloudflare",
     },
     common: {
       portuguese: "Português",

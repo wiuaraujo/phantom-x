@@ -133,8 +133,8 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="color-scheme" content="light dark" />
-  <meta name="supported-color-schemes" content="light dark" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
   <title>Confirme sua conta no Phantom-X</title>
   <style type="text/css">
     /* Reset styles */
@@ -146,6 +146,7 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
       width: 100% !important;
       height: 100% !important;
       background-color: #ffffff !important;
+      background: #ffffff !important;
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -160,6 +161,30 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
       outline: none;
       text-decoration: none;
     }
+    /* Anti-inversion Gmail Mobile Styles */
+    .dark-card, .card-cell {
+      background-color: #0c0c0e !important;
+      background: linear-gradient(#0c0c0e, #0c0c0e) !important;
+    }
+    .main-heading {
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important;
+    }
+    .body-text {
+      color: #a1a1aa !important;
+      -webkit-text-fill-color: #a1a1aa !important;
+    }
+    .muted-text {
+      color: #71717a !important;
+      -webkit-text-fill-color: #71717a !important;
+    }
+    .btn-link, .btn-span {
+      background-color: #ffffff !important;
+      background: linear-gradient(#ffffff, #ffffff) !important;
+      color: #000000 !important;
+      -webkit-text-fill-color: #000000 !important;
+    }
+
     /* Mobile responsive adjustments */
     @media only screen and (max-width: 600px) {
       .card-cell {
@@ -187,46 +212,46 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
   </style>
   <![endif]-->
 </head>
-<body bgcolor="#ffffff" style="margin: 0; padding: 0; width: 100% !important; background-color: #ffffff !important; background: #ffffff !important;">
+<body class="body" bgcolor="#ffffff" style="margin: 0; padding: 0; width: 100% !important; background-color: #ffffff !important; background: #ffffff !important;">
 
   <!-- TABELA EXTERNA (FUNDO BRANCO DO GMAIL - QUADRADO MAIOR) -->
-  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="margin: 0; padding: 0; width: 100% !important; background-color: #ffffff !important; background: #ffffff !important;">
+  <table role="presentation" class="outer-table" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="margin: 0; padding: 0; width: 100% !important; background-color: #ffffff !important; background: #ffffff !important;">
     <tr>
-      <td class="outer-cell" align="center" valign="top" style="padding: 40px 15px; background-color: #ffffff !important; background: #ffffff !important;">
+      <td class="outer-cell" align="center" valign="top" bgcolor="#ffffff" style="padding: 40px 15px; background-color: #ffffff !important; background: #ffffff !important;">
         
-        <!-- CARD PRETO CENTRAL (ONDE ESTÃO OS ASSETS, ESCRITA E BOTÃO - MESMO VISUAL DESKTOP E MOBILE) -->
-        <table role="presentation" class="card-table" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#0c0c0e" style="max-width: 520px; width: 100%; margin: 0 auto; background-color: #0c0c0e !important; background: #0c0c0e !important; border: 1px solid #27272a; border-radius: 20px; border-collapse: separate; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+        <!-- CARD PRETO CENTRAL (ONDE ESTÃO OS ASSETS, ESCRITA E BOTÃO - BLINDADO CONTRA INVERSÃO DO GMAIL) -->
+        <table role="presentation" class="card-table dark-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#0c0c0e" style="max-width: 520px; width: 100%; margin: 0 auto; background-color: #0c0c0e !important; background: linear-gradient(#0c0c0e, #0c0c0e) !important; border: 1px solid #27272a; border-radius: 20px; border-collapse: separate; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
           <tr>
-            <td class="card-cell" bgcolor="#0c0c0e" style="padding: 36px 32px; background-color: #0c0c0e !important; background: #0c0c0e !important; border-radius: 20px; text-align: left;">
+            <td class="card-cell dark-card" bgcolor="#0c0c0e" style="padding: 36px 32px; background-color: #0c0c0e !important; background: linear-gradient(#0c0c0e, #0c0c0e) !important; border-radius: 20px; text-align: left;">
               
-              <!-- Logotipo Minimalista Oficial da Phantom -->
+              <!-- Logotipo Oficial da Phantom com moldura sutil para alto contraste -->
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                 <tr>
-                  <td bgcolor="#0c0c0e" style="background-color: #0c0c0e !important; padding: 0;">
-                    <img src="${baseUrl}/logo.png" alt="Phantom-X" width="38" height="38" style="display: block; width: 38px; height: 38px; max-width: 38px; object-fit: contain; border: 0;" />
+                  <td bgcolor="#18181b" style="background-color: #18181b !important; background: linear-gradient(#18181b, #18181b) !important; padding: 6px; border-radius: 10px; border: 1px solid #27272a;">
+                    <img src="${baseUrl}/logo.png" alt="Phantom-X" width="34" height="34" style="display: block; width: 34px; height: 34px; max-width: 34px; object-fit: contain; border: 0;" />
                   </td>
                 </tr>
               </table>
 
               <!-- Saudação Oficial -->
-              <h1 style="margin: 0 0 14px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 22px; font-weight: 700; color: #ffffff !important; line-height: 1.3;">
+              <h1 class="main-heading" style="margin: 0 0 14px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 22px; font-weight: 700; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; line-height: 1.3;">
                 Olá, ${cleanName}
               </h1>
 
               <!-- Texto de Confirmação -->
-              <p style="margin: 0 0 18px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #a1a1aa !important; line-height: 1.5;">
+              <p class="body-text" style="margin: 0 0 18px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #a1a1aa !important; -webkit-text-fill-color: #a1a1aa !important; line-height: 1.5;">
                 Sua conta na plataforma Phantom-X foi criada com sucesso.
               </p>
 
               <!-- Instrução de Ativação -->
-              <p style="margin: 0 0 28px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13px; color: #a1a1aa !important; line-height: 1.6;">
+              <p class="body-text" style="margin: 0 0 28px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13px; color: #a1a1aa !important; -webkit-text-fill-color: #a1a1aa !important; line-height: 1.6;">
                 Para ativar o seu acesso de operador e começar a utilizar a plataforma, confirme o seu e-mail clicando no botão abaixo:
               </p>
 
               <!-- Botão Oficial de Ativação de Conta (Sem código numérico) -->
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0 32px 0;">
                 <tr>
-                  <td align="center" bgcolor="#0c0c0e" style="background-color: #0c0c0e !important; text-align: center;">
+                  <td align="center" bgcolor="#0c0c0e" style="background-color: #0c0c0e !important; background: linear-gradient(#0c0c0e, #0c0c0e) !important; text-align: center;">
                     <!--[if mso]>
                     <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${confirmationUrl}" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="25%" strokecolor="#ffffff" fillcolor="#ffffff">
                       <w:anchorlock/>
@@ -234,8 +259,8 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
                     </v:roundrect>
                     <![endif]-->
                     <!--[if !mso]><!-->
-                    <a href="${confirmationUrl}" target="_blank" rel="noopener noreferrer" class="btn-link" style="display: inline-block; background-color: #ffffff !important; background: #ffffff !important; color: #000000 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 14px; padding: 14px 34px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25); mso-padding-alt: 0;">
-                      <span style="color: #000000 !important; text-decoration: none; font-weight: 700;">Confirmar e Ativar Minha Conta &rarr;</span>
+                    <a href="${confirmationUrl}" target="_blank" rel="noopener noreferrer" class="btn-link white-btn" style="display: inline-block; background-color: #ffffff !important; background: linear-gradient(#ffffff, #ffffff) !important; color: #000000 !important; -webkit-text-fill-color: #000000 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 14px; padding: 14px 34px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25); mso-padding-alt: 0;">
+                      <span class="btn-span" style="color: #000000 !important; -webkit-text-fill-color: #000000 !important; text-decoration: none; font-weight: 700;">Confirmar e Ativar Minha Conta &rarr;</span>
                     </a>
                     <!--<![endif]-->
                   </td>
@@ -243,19 +268,19 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
               </table>
 
               <!-- Aviso de Segurança -->
-              <p style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #71717a !important; line-height: 1.5;">
+              <p class="muted-text" style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #71717a !important; -webkit-text-fill-color: #71717a !important; line-height: 1.5;">
                 Se você não solicitou este cadastro, por favor, ignore esta mensagem.
               </p>
 
               <!-- Divisória Limpa -->
               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top: 24px; border-top: 1px solid #27272a;">
                 <tr>
-                  <td bgcolor="#0c0c0e" style="background-color: #0c0c0e !important; padding-top: 20px;">
-                    <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #ffffff !important; font-weight: 600; line-height: 1.4;">
+                  <td class="dark-card" bgcolor="#0c0c0e" style="background-color: #0c0c0e !important; background: linear-gradient(#0c0c0e, #0c0c0e) !important; padding-top: 20px;">
+                    <p class="main-heading" style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; font-weight: 600; line-height: 1.4;">
                       Um abraço,<br />
                       Equipe Phantom-X.
                     </p>
-                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #71717a !important; margin-top: 4px;">
+                    <div class="muted-text" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; color: #71717a !important; -webkit-text-fill-color: #71717a !important; margin-top: 4px;">
                       Infraestrutura Edge &amp; Cibersegurança de Tráfego
                     </div>
                   </td>
@@ -265,7 +290,7 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
             </td>
           </tr>
         </table>
-        
+
       </td>
     </tr>
   </table>

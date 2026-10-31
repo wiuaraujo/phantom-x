@@ -9,8 +9,10 @@ import { Download, Search, Filter, ShieldCheck, ChevronLeft, ChevronRight, Serve
 import { auth } from "@/lib/auth";
 import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
 import { getPlanDefinition } from "@/lib/plans";
+import { useLanguage } from "@/lib/i18n";
 
 export default function EventsExplorerPage() {
+  const { t } = useLanguage();
   const [events, setEvents] = useState<TrafficEvent[]>([]);
   const [search, setSearch] = useState("");
   const [selectedRisk, setSelectedRisk] = useState<RiskCategory | "all">("all");
@@ -79,8 +81,8 @@ export default function EventsExplorerPage() {
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
-        title="Explorador de Eventos & Telemetria"
-        subtitle="Registro granular de cada requisição processada com auditoria das 6 camadas do Motor Phantom-X"
+        title={t.dashboard.eventsTitle}
+        subtitle={t.dashboard.eventsSubtitle}
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">

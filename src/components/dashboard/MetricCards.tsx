@@ -3,6 +3,7 @@
 import React from "react";
 import { MetricOverview } from "@/types";
 import { Users, Activity, Layers, Globe, ShieldAlert, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 interface MetricCardsProps {
   metrics: MetricOverview;
@@ -10,39 +11,42 @@ interface MetricCardsProps {
 }
 
 export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row" }) => {
+  const { t, language } = useLanguage();
+  const locale = language === "en" ? "en-US" : language === "es" ? "es-ES" : "pt-BR";
+
   const cards = [
     {
-      title: "Visitantes Ativos",
-      value: metrics.activeVisitors.toLocaleString("pt-BR"),
-      label: "Agora em tempo real",
+      title: t.dashboard.activeVisitors,
+      value: metrics.activeVisitors.toLocaleString(locale),
+      label: t.dashboard.activeVisitorsSub,
       growth: metrics.periodGrowth.visitors,
       icon: Users,
     },
     {
-      title: "Eventos Recebidos",
-      value: metrics.totalEvents.toLocaleString("pt-BR"),
-      label: "Últimas 24 horas",
+      title: t.dashboard.eventsReceived,
+      value: metrics.totalEvents.toLocaleString(locale),
+      label: t.dashboard.eventsReceivedSub,
       growth: metrics.periodGrowth.events,
       icon: Activity,
     },
     {
-      title: "Tráfego Filtrado",
-      value: metrics.automatedThreatsBlocked.toLocaleString("pt-BR"),
-      label: "Mitigados e isolados",
+      title: t.dashboard.filteredTraffic,
+      value: metrics.automatedThreatsBlocked.toLocaleString(locale),
+      label: t.dashboard.filteredTrafficSub,
       growth: metrics.periodGrowth.threats,
       icon: ShieldAlert,
     },
     {
-      title: "Sessões Únicas",
-      value: metrics.sessionCount.toLocaleString("pt-BR"),
-      label: "Volume consolidado",
+      title: t.dashboard.uniqueSessions,
+      value: metrics.sessionCount.toLocaleString(locale),
+      label: t.dashboard.uniqueSessionsSub,
       growth: metrics.periodGrowth.sessions,
       icon: Layers,
     },
     {
-      title: "Países Mapeados",
+      title: t.dashboard.mappedCountries,
       value: metrics.uniqueCountries.toString(),
-      label: "Origem geográfica",
+      label: t.dashboard.mappedCountriesSub,
       growth: 0,
       icon: Globe,
     },
@@ -96,7 +100,7 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics, layout = "row
               <span>{cards[4].title}</span>
             </div>
             <div className="text-[10px] text-brand-muted mt-0.5">
-              Cobertura cartográfica ativa no cluster
+              {t.dashboard.coverageSub}
             </div>
           </div>
           <div className="text-2xl font-bold font-sans text-brand-white">

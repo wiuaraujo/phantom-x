@@ -36,6 +36,8 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const session = auth.getSession();
   const { t } = useLanguage();
+  const isAllDomains = (d?: string) => !d || d === "Todos os Domínios" || d === "All Domains" || d === "Todos los Dominios";
+  const formatDomainLabel = (d?: string) => (isAllDomains(d) ? t.dashboard.allDomains : d || t.dashboard.allDomains);
   const { openDrawer } = useDashboardNav();
   const [showNotifications, setShowNotifications] = useState(false);
   const [domainDropdown, setDomainDropdown] = useState(false);
@@ -99,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => setDomainDropdown(!domainDropdown)}
                 className="flex items-center space-x-2 bg-brand-surface hover:bg-brand-hover border border-brand-border px-3 py-1.5 rounded-lg text-xs font-mono text-brand-white transition cursor-pointer"
               >
-                <span className="truncate max-w-[140px]">{selectedDomain}</span>
+                <span className="truncate max-w-[140px]">{formatDomainLabel(selectedDomain)}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-brand-secondary" />
               </button>
 
@@ -116,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
                         selectedDomain === dom ? "text-brand-white font-bold" : "text-brand-secondary"
                       }`}
                     >
-                      <span className="truncate">{dom}</span>
+                      <span className="truncate">{formatDomainLabel(dom)}</span>
                       {selectedDomain === dom && <CheckCircle2 className="w-3.5 h-3.5 text-brand-white" />}
                     </button>
                   ))}

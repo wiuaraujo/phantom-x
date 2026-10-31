@@ -7,6 +7,7 @@ import { Campaign, Domain, CloakerMode } from "@/types";
 import { auth } from "@/lib/auth";
 import { checkCampaignLimit, getPlanDefinition, isCountryAllowedForPlan } from "@/lib/plans";
 import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
+import { useLanguage } from "@/lib/i18n";
 import {
   Plus,
   Trash2,
@@ -39,6 +40,7 @@ const COMMON_GEOS = [
 ];
 
 export default function CampaignsPage() {
+  const { t } = useLanguage();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -159,8 +161,8 @@ export default function CampaignsPage() {
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
-        title="Gestão de Campanhas & Cloaking"
-        subtitle="Roteamento inteligente de tráfego, entrega via Proxy Reverso e filtragem de moderadores"
+        title={t.dashboard.campaignsTitle}
+        subtitle={t.dashboard.campaignsSubtitle}
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">

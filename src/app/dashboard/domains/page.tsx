@@ -8,8 +8,10 @@ import { Plus, CheckCircle2, AlertCircle, RefreshCw, Trash2, Globe2, ShieldCheck
 import { auth } from "@/lib/auth";
 import { checkDomainLimit, getPlanDefinition } from "@/lib/plans";
 import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
+import { useLanguage } from "@/lib/i18n";
 
 export default function DomainsPage() {
+  const { t } = useLanguage();
   const [domains, setDomains] = useState<Domain[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newDomainName, setNewDomainName] = useState("");
@@ -76,8 +78,8 @@ export default function DomainsPage() {
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black">
       <Header
-        title="Gestão de Domínios & DNS"
-        subtitle="Conecte seus domínios customizados para roteamento e certificados TLS automáticos"
+        title={t.dashboard.domainsTitle}
+        subtitle={t.dashboard.domainsSubtitle}
       />
 
       <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">

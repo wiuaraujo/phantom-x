@@ -5,6 +5,7 @@ import { GeoAggregate } from "@/types";
 import { getCountryFlag } from "@/lib/geoFlags";
 import { store } from "@/lib/store";
 import { Activity, ShieldCheck, ShieldAlert, TrendingUp } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 interface TrafficChartsProps {
   timeSeries: { hour: string; events: number; threats: number }[];
@@ -17,6 +18,8 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
   geoData,
   deviceStats = { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
 }) => {
+  const { t, language } = useLanguage();
+  const activeLocale = language === "en" ? "en-US" : language === "es" ? "es-ES" : "pt-BR";
   const [timeframe, setTimeframe] = useState<"24h" | "7d" | "30d">("24h");
   const [metric, setMetric] = useState<"total" | "clean" | "threats" | "efficiency">("total");
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -47,7 +50,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
 
         items.push({
           label: hourLabel,
-          fullDate: `${hourLabel} (${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })})`,
+          fullDate: `${hourLabel} (${d.toLocaleDateString(activeLocale, { day: "2-digit", month: "2-digit" })})`,
           total,
           clean,
           threats,
@@ -61,7 +64,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
     const items = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 3600 * 1000);
-      const dayLabel = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
+      const dayLabel = d.toLocaleDateString(activeLocale, { day: "2-digit", month: "short" }).replace(".", "");
       const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
       const dayEnd = dayStart + 24 * 3600 * 1000;
 
@@ -77,7 +80,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
 
       items.push({
         label: dayLabel,
-        fullDate: d.toLocaleDateString("pt-BR"),
+        fullDate: d.toLocaleDateString(activeLocale),
         total,
         clean,
         threats,
@@ -85,7 +88,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
       });
     }
     return items;
-  }, [timeframe]);
+  }, [timeframe, activeLocale]);
 
   // Dimensionamento do viewBox SVG (mesmo padrão elegante do admin)
   const width = 800;
@@ -160,22 +163,22 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
           <div>
             <div className="text-[11px] font-mono text-brand-secondary uppercase tracking-wider flex items-center space-x-1.5">
               <Activity className="w-3.5 h-3.5 text-brand-white" />
-              <span>Telemetria em Tempo Real de Tráfego</span>
+              <span>{t.dashboard.trafficTelemetryTitle}</span>
             </div>
             <div className="text-xl sm:text-2xl font-bold font-mono text-brand-white mt-1 flex items-baseline space-x-2">
               <span>
                 {metric === "efficiency"
                   ? `${activePoint?.data.efficiency}%`
-                  : activePoint?.val.toLocaleString("pt-BR")}
+                  : activePoint?.val.toLocaleString(activeLocale)}
               </span>
               <span className="text-xs font-normal text-brand-muted">
                 {metric === "total"
-                  ? "requisições totais"
+                  ? t.dashboard.totalRequests
                   : metric === "clean"
-                  ? "acessos limpos"
+                  ? t.dashboard.cleanHits
                   : metric === "threats"
-                  ? "bots retidos"
-                  : "taxa de bloqueio"}
+                  ? t.dashboard.threatsBlocked
+                  : t.dashboard.blockRate}
               </span>
             </div>
           </div>
@@ -201,10 +204,10 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
         {/* Métricas Tabs */}
         <div className="flex flex-wrap items-center gap-1.5 mb-3">
           {[
-            { id: "total", label: "Volume Total", icon: Activity },
-            { id: "clean", label: "Tráfego Limpo", icon: ShieldCheck },
-            { id: "threats", label: "Bots Barrados", icon: ShieldAlert },
-            { id: "efficiency", label: "Taxa de Blindagem", icon: TrendingUp },
+            { id: "total", label: t.dashboard.metricTotal, icon: Activity },
+            { id: "clean", label: t.dashboard.metricClean, icon: ShieldCheck },
+            { id: "threats", label: t.dashboard.metricThreats, icon: ShieldAlert },
+            { id: "efficiency", label: t.dashboard.metricShield, icon: TrendingUp },
           ].map((tab) => {
             const Icon = tab.icon;
             const isSelected = metric === tab.id;
@@ -373,23 +376,23 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
                 <div className="flex justify-between space-x-3 text-neutral-300">
                   <span>Total:</span>
                   <span className="font-bold text-white">
-                    {activePoint.data.total.toLocaleString("pt-BR")}
+                    {activePoint.data.total.toLocaleString(activeLocale)}
                   </span>
                 </div>
                 <div className="flex justify-between space-x-3 text-emerald-400">
-                  <span>Limpos:</span>
+                  <span>{t.dashboard.cleanHits}:</span>
                   <span className="font-bold">
-                    {activePoint.data.clean.toLocaleString("pt-BR")}
+                    {activePoint.data.clean.toLocaleString(activeLocale)}
                   </span>
                 </div>
                 <div className="flex justify-between space-x-3 text-red-400">
-                  <span>Bots:</span>
+                  <span>{t.dashboard.threatsBlocked}:</span>
                   <span className="font-bold">
-                    {activePoint.data.threats.toLocaleString("pt-BR")}
+                    {activePoint.data.threats.toLocaleString(activeLocale)}
                   </span>
                 </div>
                 <div className="flex justify-between space-x-3 text-neutral-400 pt-0.5 border-t border-white/10">
-                  <span>Retenção:</span>
+                  <span>{t.dashboard.blockRate}:</span>
                   <span className="font-bold text-white">
                     {activePoint.data.efficiency}%
                   </span>
@@ -404,16 +407,16 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
       <div className="bg-brand-surface border border-brand-border rounded-2xl p-5 shadow-sm flex flex-col justify-between">
         <div>
           <h3 className="text-sm font-semibold text-brand-white tracking-wide mb-1">
-            Distribuição por Dispositivo
+            {t.dashboard.deviceDistribution}
           </h3>
           <p className="text-xs text-brand-secondary mb-4">
-            Categorização de dispositivos e agentes
+            {t.dashboard.deviceDistributionSub}
           </p>
 
           <div className="space-y-3 font-mono text-xs">
             <div>
               <div className="flex justify-between text-brand-secondary mb-1">
-                <span>Mobile (Smartphones)</span>
+                <span>{t.dashboard.deviceMobile}</span>
                 <span className="text-brand-white font-bold">{deviceStats.mobile}%</span>
               </div>
               <div className="w-full bg-brand-black h-2 rounded-full overflow-hidden border border-brand-borderSubtle">
@@ -426,7 +429,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
 
             <div>
               <div className="flex justify-between text-brand-secondary mb-1">
-                <span>Desktop (Workstations)</span>
+                <span>{t.dashboard.deviceDesktop}</span>
                 <span className="text-brand-white font-bold">{deviceStats.desktop}%</span>
               </div>
               <div className="w-full bg-brand-black h-2 rounded-full overflow-hidden border border-brand-borderSubtle">
@@ -439,7 +442,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
 
             <div>
               <div className="flex justify-between text-brand-secondary mb-1">
-                <span>Tablets & Outros</span>
+                <span>{t.dashboard.deviceTablet}</span>
                 <span className="text-brand-white font-bold">{deviceStats.tablet}%</span>
               </div>
               <div className="w-full bg-brand-black h-2 rounded-full overflow-hidden border border-brand-borderSubtle">
@@ -452,7 +455,7 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
 
             <div>
               <div className="flex justify-between text-brand-secondary mb-1">
-                <span>Bots / Reviewers Barrados</span>
+                <span>{t.dashboard.deviceBot}</span>
                 <span className="text-brand-white font-bold">{deviceStats.bot}%</span>
               </div>
               <div className="w-full bg-brand-black h-2 rounded-full overflow-hidden border border-brand-borderSubtle">
@@ -467,11 +470,11 @@ export const TrafficCharts: React.FC<TrafficChartsProps> = ({
 
         {/* Top Regiões */}
         <div className="pt-4 border-t border-brand-border mt-4">
-          <div className="text-xs font-semibold text-brand-white mb-2">Principais Regiões</div>
+          <div className="text-xs font-semibold text-brand-white mb-2">{t.dashboard.topRegions}</div>
           <div className="space-y-1.5 text-xs font-mono">
             {geoData.length === 0 ? (
               <div className="text-[11px] text-brand-muted py-2">
-                Nenhuma região com tráfego registrado no momento.
+                {t.dashboard.noRegionsYet}
               </div>
             ) : (
               geoData.slice(0, 3).map((g, i) => (

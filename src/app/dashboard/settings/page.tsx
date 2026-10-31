@@ -267,21 +267,21 @@ function SettingsPageContent() {
       <Header
         title={
           activeTab === "cloaker"
-            ? "Configurações do Cloaker"
+            ? t.dashboard.cloakerSettings
             : activeTab === "worker"
-            ? "Cloudflare Worker & Scripts"
+            ? t.dashboard.cloudflareWorker
             : activeTab === "billing"
-            ? "Assinatura & Faturamento Stripe"
-            : "Configurações do Perfil & Conta"
+            ? (language === "en" ? "Subscription & Stripe Billing" : language === "es" ? "Suscripción y Facturación Stripe" : "Assinatura & Faturamento Stripe")
+            : t.dashboard.profileSettings
         }
         subtitle={
           activeTab === "cloaker"
-            ? "Motor de Borda Phantom-X (6 camadas), regras de moderação, Safe/Blackpage e ASNs"
+            ? (language === "en" ? "Phantom-X edge engine (6 layers), moderation rules, Safe/Blackpage and ASNs" : language === "es" ? "Motor de Borde Phantom-X (6 capas), reglas de moderación, Safe/Blackpage y ASNs" : "Motor de Borda Phantom-X (6 camadas), regras de moderação, Safe/Blackpage e ASNs")
             : activeTab === "worker"
-            ? "Código JavaScript compilado pronto para deploy direto na Cloudflare e snippets de borda"
+            ? (language === "en" ? "Compiled JavaScript ready for direct deploy on Cloudflare Workers and edge snippets" : language === "es" ? "Código JavaScript compilado listo para desplegar en Cloudflare y snippets de borde" : "Código JavaScript compilado pronto para deploy direto na Cloudflare e snippets de borda")
             : activeTab === "billing"
-            ? "Gestão do plano contratado, limites operacionais e checkout com pagamentos processados pela Stripe"
-            : "Gerenciamento de perfil do operador, fuso-horário operacional, credenciais de API e sessão"
+            ? (language === "en" ? "Plan management, operational limits, and checkout processed securely by Stripe" : language === "es" ? "Gestión del plan contratado, límites operativos y checkout procesado por Stripe" : "Gestão do plano contratado, limites operacionais e checkout com pagamentos processados pela Stripe")
+            : t.dashboard.settingsSubtitle
         }
       />
 
@@ -300,7 +300,7 @@ function SettingsPageContent() {
             }`}
           >
             <Sliders className="w-3.5 h-3.5 shrink-0" />
-            <span className="whitespace-nowrap">Configurações do Cloaker</span>
+            <span className="whitespace-nowrap">{t.dashboard.cloakerSettings}</span>
           </button>
 
           <button
@@ -313,7 +313,7 @@ function SettingsPageContent() {
             }`}
           >
             <Code className="w-3.5 h-3.5 shrink-0" />
-            <span className="whitespace-nowrap">Cloudflare Worker</span>
+            <span className="whitespace-nowrap">{t.dashboard.cloudflareWorker}</span>
           </button>
 
           <button
@@ -326,7 +326,7 @@ function SettingsPageContent() {
             }`}
           >
             <User className="w-3.5 h-3.5 shrink-0" />
-            <span className="whitespace-nowrap">Configurações do Perfil</span>
+            <span className="whitespace-nowrap">{t.dashboard.profileSettings}</span>
           </button>
 
           <button
@@ -339,7 +339,9 @@ function SettingsPageContent() {
             }`}
           >
             <CreditCard className="w-3.5 h-3.5 shrink-0" />
-            <span className="whitespace-nowrap">Assinatura &amp; Stripe</span>
+            <span className="whitespace-nowrap">
+              {language === "en" ? "Subscription & Stripe" : language === "es" ? "Suscripción y Stripe" : "Assinatura & Stripe"}
+            </span>
           </button>
         </div>
 

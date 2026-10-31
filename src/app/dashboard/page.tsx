@@ -29,14 +29,16 @@ import {
 } from "lucide-react";
 import { UpgradePlanModal } from "@/components/dashboard/UpgradePlanModal";
 import { getPlanDefinition } from "@/lib/plans";
+import { useLanguage } from "@/lib/i18n";
 
 export default function DashboardOverview() {
+  const { t, language } = useLanguage();
   const [selectedDomain, setSelectedDomain] = useState("Todos os Domínios");
   const [selectedPeriod, setSelectedPeriod] = useState("24h");
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   const [session, setSession] = useState(() => auth.getSession());
-  const [greeting, setGreeting] = useState(() => getDashboardGreeting(session?.user));
+  const [greeting, setGreeting] = useState(() => getDashboardGreeting(session?.user, language));
 
   const [metrics, setMetrics] = useState<MetricOverview>(store.getOverviewMetrics());
   const [geoData, setGeoData] = useState<GeoAggregate[]>(store.getGeoDistribution());
@@ -90,7 +92,7 @@ export default function DashboardOverview() {
   const loadData = () => {
     const currentSession = auth.getSession();
     setSession(currentSession);
-    setGreeting(getDashboardGreeting(currentSession?.user));
+    setGreeting(getDashboardGreeting(currentSession?.user, language));
 
     setMetrics(store.getOverviewMetrics());
     setGeoData(store.getGeoDistribution());
@@ -115,7 +117,7 @@ export default function DashboardOverview() {
       }
     }, 15000);
     return () => clearInterval(interval);
-  }, [selectedDomain, selectedCountry, selectedPeriod]);
+  }, [selectedDomain, selectedCountry, selectedPeriod, language]);
 
   const handleSimulateBurst = async () => {
     try {
@@ -139,8 +141,8 @@ export default function DashboardOverview() {
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-brand-black font-sans">
       <Header
-        title="Visão Geral da Operação"
-        subtitle="Monitoramento unificado de borda, telemetria global e análise de risco"
+        title={t.dashboard.overviewTitle}
+        subtitle={t.dashboard.overviewSubtitle}
         domains={availableDomains}
         selectedDomain={selectedDomain}
         onSelectDomain={setSelectedDomain}
@@ -149,17 +151,10 @@ export default function DashboardOverview() {
       />
 
       <div className="p-3 sm:p-6 lg:p-8 space-y-5 sm:space-y-7 max-w-[1600px] w-full mx-auto">
-        {/* 
-          ======================================================================
-          0. CLEAN OPERATIONAL GREETING BANNER
-          "deixe somente olá e o nome da pessoa. Abaixo, pode remover esse centro de
-          comando sincronizado com o fuso horário e tal. Deixar bem clean essa parte."
-          ======================================================================
-        */}
         <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 rounded-2xl bg-brand-surface border border-brand-border shadow-sm">
           <div>
             <h2 className="text-sm sm:text-base font-bold text-brand-white tracking-tight">
-              Olá, {greeting.displayName}!
+              {t.dashboard.greetingHello}, {greeting.displayName}!
             </h2>
           </div>
 
@@ -168,7 +163,7 @@ export default function DashboardOverview() {
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-brand-hover text-brand-secondary hover:text-brand-white border border-brand-border transition text-xs font-mono shrink-0"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>Configurações do Perfil</span>
+            <span>{t.dashboard.profileSettings}</span>
           </Link>
         </div>
 
