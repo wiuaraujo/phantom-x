@@ -172,22 +172,39 @@ export async function POST(req: NextRequest) {
     // Sincroniza plano atual do operador
     const planRecord = await getServerUserPlan(targetUser.id);
 
+    // Consulta dados adicionais atualizados na tabela profiles
+    let profileData: any = null;
+    try {
+      const { data: pData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", targetUser.id)
+        .single();
+      profileData = pData;
+    } catch {}
+
+    const resolvedName = profileData?.name || meta.name || meta.nickname || userEmail.split("@")[0];
+    const resolvedNickname = profileData?.nickname || meta.nickname || (resolvedName ? resolvedName.split(" ")[0] : "Operador");
+    const resolvedPhone = profileData?.phone || meta.phone || meta.phoneRaw || targetUser.phone || "";
+    const resolvedCountryCode = profileData?.phone_country_code || meta.phoneCountryCode || "+55";
+    const resolvedTz = profileData?.timezone || meta.timezone || "America/Sao_Paulo";
+
     const userData = {
       id: targetUser.id,
-      name: meta.name || meta.nickname || userEmail.split("@")[0],
-      nickname: meta.nickname || meta.name?.split(" ")[0] || userEmail.split("@")[0],
+      name: resolvedName,
+      nickname: resolvedNickname,
       email: userEmail,
-      phone: meta.phone || targetUser.phone || "",
-      phoneCountryCode: meta.phoneCountryCode || "+55",
-      role: meta.role || "operator",
-      timezone: meta.timezone || "America/Sao_Paulo",
+      phone: resolvedPhone,
+      phoneCountryCode: resolvedCountryCode,
+      role: profileData?.role || meta.role || "operator",
+      timezone: resolvedTz,
       emailVerified: true,
       plan: planRecord.plan || meta.plan || "free",
       planStatus: planRecord.planStatus || meta.plan_status || "trial",
       planActivatedAt: planRecord.planActivatedAt || targetUser.created_at,
       planExpiresAt: planRecord.planExpiresAt || meta.plan_expires_at || null,
       organizationId: meta.organizationId || `org_${targetUser.id.substring(0, 8)}`,
-      organizationName: meta.organizationName || `${(meta.name || "Operador").split(" ")[0]}'s Workspace`,
+      organizationName: meta.organizationName || `${resolvedNickname}'s Workspace`,
       createdAt: targetUser.created_at,
     };
 

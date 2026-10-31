@@ -68,12 +68,25 @@ export async function GET(req: NextRequest) {
         u.user_metadata?.granted_by ||
         (planSource === "admin" ? "admin" : "system");
 
+      const resolvedPhone =
+        profile?.phone ||
+        u.user_metadata?.phone ||
+        u.user_metadata?.phoneRaw ||
+        u.user_metadata?.canonicalPhone ||
+        u.phone ||
+        "";
+
+      const resolvedNickname =
+        profile?.nickname ||
+        u.user_metadata?.nickname ||
+        (profile?.name ? profile.name.split(" ")[0] : (u.user_metadata?.name ? u.user_metadata.name.split(" ")[0] : ""));
+
       return {
         id: u.id,
         email: u.email || "",
         name: profile?.name || u.user_metadata?.name || email.split("@")[0],
-        nickname: profile?.nickname || u.user_metadata?.nickname || profile?.name?.split(" ")[0] || "Operador",
-        phone: profile?.phone || u.user_metadata?.phone || u.user_metadata?.phoneRaw || u.phone || "—",
+        nickname: resolvedNickname || (profile?.name ? profile.name.split(" ")[0] : "Operador"),
+        phone: resolvedPhone || "",
         phoneCountryCode: profile?.phone_country_code || u.user_metadata?.phoneCountryCode || "+55",
         role: profile?.role || u.user_metadata?.role || "operator",
         timezone: profile?.timezone || u.user_metadata?.timezone || "America/Sao_Paulo",
@@ -368,6 +381,75 @@ export async function POST(req: NextRequest) {
                 ? `Plano suspenso com sucesso. Operador retornado para o Plano Trial gratuito.`
                 : `Plano '${targetPlan.toUpperCase()}' liberado com sucesso pelo Administrador (Plano cortesia/não-faturável no MRR).`,
             planRecord: record,
+          },
+          {
+            headers: {
+              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            },
+          }
+        );
+      }
+
+      // 7. ATUALIZA DADOS CADASTRAIS DO OPERADOR PELO MASTER ADMIN (Nome, Apelido, Telefone)
+      case "update_profile": {
+        if (!targetUserId && !cleanEmail) {
+          return NextResponse.json({ success: false, error: "Identificador do usuário não localizado." }, { status: 404 });
+        }
+
+        const { name, nickname, phone, phoneCountryCode, timezone } = body;
+        const cleanName = (name || "").trim();
+        const cleanNickname = (nickname || "").trim() || (cleanName ? cleanName.split(" ")[0] : "");
+        const cleanPhone = (phone || "").trim();
+        const cleanCode = (phoneCountryCode || "+55").trim();
+
+        if (targetUserId) {
+          try {
+            const { data: uRes } = await supabaseAdmin.auth.admin.getUserById(targetUserId);
+            const existingMetadata = uRes?.user?.user_metadata || {};
+
+            await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+              user_metadata: {
+                ...existingMetadata,
+                name: cleanName || existingMetadata.name,
+                nickname: cleanNickname || existingMetadata.nickname,
+                phone: cleanPhone,
+                phoneRaw: cleanPhone,
+                phoneCountryCode: cleanCode,
+                timezone: timezone || existingMetadata.timezone || "America/Sao_Paulo",
+                updated_at: new Date().toISOString(),
+              },
+            });
+          } catch (e: any) {
+            console.warn("[Admin update_profile] Auth metadata aviso:", e);
+          }
+
+          try {
+            await supabase.from("profiles").upsert({
+              id: targetUserId,
+              email: cleanEmail,
+              name: cleanName,
+              nickname: cleanNickname,
+              phone: cleanPhone || null,
+              phone_country_code: cleanCode,
+              timezone: timezone || "America/Sao_Paulo",
+              updated_at: new Date().toISOString(),
+            });
+          } catch (e: any) {
+            console.warn("[Admin update_profile] Profiles aviso:", e);
+          }
+        }
+
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Dados do operador (nome, apelido, telefone) atualizados com sucesso no cluster.",
+            user: {
+              id: targetUserId,
+              name: cleanName,
+              nickname: cleanNickname,
+              phone: cleanPhone,
+              phoneCountryCode: cleanCode,
+            },
           },
           {
             headers: {

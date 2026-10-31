@@ -35,6 +35,8 @@ import {
   BarChart3,
   TrendingUp,
   Cpu,
+  Pencil,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
@@ -414,6 +416,14 @@ export default function AdminPortalPage() {
   const [targetPlanStatus, setTargetPlanStatus] = useState<"active" | "trial" | "canceled">("active");
   const [savingPlan, setSavingPlan] = useState(false);
 
+  // Edição de Perfil de Operador pelo Master Admin
+  const [editingOperator, setEditingOperator] = useState<OperatorUser | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editNickname, setEditNickname] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editCountryCode, setEditCountryCode] = useState("+55");
+  const [savingEditProfile, setSavingEditProfile] = useState(false);
+
   // Ações em andamento por usuário
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [copiedCodeUser, setCopiedCodeUser] = useState<string | null>(null);
@@ -682,6 +692,43 @@ export default function AdminPortalPage() {
     setSelectedUserForPlan(null);
   };
 
+  const handleSaveEditProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOperator) return;
+    setSavingEditProfile(true);
+
+    const userToUpdate = editingOperator;
+    const cleanName = editName.trim();
+    const cleanNickname = editNickname.trim() || (cleanName ? cleanName.split(" ")[0] : "Operador");
+    const cleanPhone = editPhone.trim();
+    const cleanCode = editCountryCode.trim() || "+55";
+
+    // Atualização otimista imediata na tabela
+    setOperators((prev) =>
+      prev.map((u) =>
+        u.id === userToUpdate.id
+          ? {
+              ...u,
+              name: cleanName || u.name,
+              nickname: cleanNickname,
+              phone: cleanPhone,
+              phoneCountryCode: cleanCode,
+            }
+          : u
+      )
+    );
+
+    await handleUserAction("update_profile", userToUpdate, {
+      name: cleanName,
+      nickname: cleanNickname,
+      phone: cleanPhone,
+      phoneCountryCode: cleanCode,
+    });
+
+    setSavingEditProfile(false);
+    setEditingOperator(null);
+  };
+
   const handleToggleKillSwitch = async () => {
     const confirm = window.confirm(
       killSwitchActive
@@ -741,11 +788,25 @@ export default function AdminPortalPage() {
   };
 
   const filteredOperators = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    const qDigits = searchQuery.replace(/\D/g, "");
+
     return operators.filter((u) => {
+      const uName = (u.name || "").toLowerCase();
+      const uNick = (u.nickname || "").toLowerCase();
+      const uEmail = (u.email || "").toLowerCase();
+      const uPhone = (u.phone || "").toLowerCase();
+      const uPhoneDigits = (u.phone || "").replace(/\D/g, "");
+      const uId = (u.id || "").toLowerCase();
+
       const matchesSearch =
-        u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.phone.includes(searchQuery);
+        !q ||
+        uName.includes(q) ||
+        uNick.includes(q) ||
+        uEmail.includes(q) ||
+        uPhone.includes(q) ||
+        (qDigits && uPhoneDigits.includes(qDigits)) ||
+        uId.includes(q);
 
       if (!matchesSearch) return false;
 
@@ -1227,21 +1288,35 @@ export default function AdminPortalPage() {
                             {/* Operador */}
                             <td className="py-3 px-4">
                               <div className="flex items-center space-x-2.5">
-                                <div className="w-7 h-7 rounded-lg bg-neutral-800 border border-white/10 flex items-center justify-center font-bold text-white text-xs">
-                                  {user.name.charAt(0).toUpperCase()}
+                                <div className="w-7 h-7 rounded-lg bg-neutral-800 border border-white/10 flex items-center justify-center font-bold text-white text-xs shrink-0">
+                                  {(user.name || user.email || "?").charAt(0).toUpperCase()}
                                 </div>
-                                <div>
-                                  <div className="font-medium text-white">{user.name}</div>
-                                  <div className="text-[10px] text-neutral-500 font-mono">ID: {user.id.slice(0, 8)}...</div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center space-x-1.5 flex-wrap">
+                                    <span className="font-medium text-white truncate">{user.name || "Sem nome"}</span>
+                                    {user.nickname && (
+                                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-neutral-300 font-mono border border-white/10" title="Apelido do Operador">
+                                        @{user.nickname}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[10px] text-neutral-500 font-mono truncate">ID: {user.id.slice(0, 8)}...</div>
                                 </div>
                               </div>
                             </td>
 
                             {/* E-mail & Telefone */}
                             <td className="py-3 px-4">
-                              <div className="text-neutral-200">{user.email}</div>
-                              <div className="text-[10px] text-neutral-500 mt-0.5">
-                                {user.phoneCountryCode} {user.phone}
+                              <div className="text-neutral-200 truncate">{user.email}</div>
+                              <div className="text-[10px] mt-0.5 flex items-center space-x-1.5">
+                                <Phone className="w-3 h-3 text-neutral-400 shrink-0" />
+                                {user.phone ? (
+                                  <span className="text-neutral-300 font-mono font-medium">
+                                    {user.phoneCountryCode ? `${user.phoneCountryCode} ` : ""}{user.phone}
+                                  </span>
+                                ) : (
+                                  <span className="text-neutral-500 italic">Sem telefone</span>
+                                )}
                               </div>
                             </td>
 
@@ -1343,6 +1418,21 @@ export default function AdminPortalPage() {
                                   title="Liberar ou Alterar Plano"
                                 >
                                   Plano
+                                </button>
+
+                                {/* Editar Dados Cadastrais */}
+                                <button
+                                  onClick={() => {
+                                    setEditingOperator(user);
+                                    setEditName(user.name || "");
+                                    setEditNickname(user.nickname || (user.name ? user.name.split(" ")[0] : ""));
+                                    setEditPhone(user.phone || "");
+                                    setEditCountryCode(user.phoneCountryCode || "+55");
+                                  }}
+                                  className="p-1 rounded bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white transition border border-white/10 cursor-pointer"
+                                  title="Editar Dados (Nome, Apelido, Telefone)"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
                                 </button>
 
                                 {/* Gerar OTP */}
@@ -1830,6 +1920,97 @@ export default function AdminPortalPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Modal de Edição de Perfil e Dados do Operador */}
+      {editingOperator && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <form
+            onSubmit={handleSaveEditProfile}
+            className="w-full max-w-md bg-[#0c0c0e] border border-neutral-800 rounded-2xl p-6 shadow-2xl font-mono text-xs space-y-4"
+          >
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <div className="flex items-center space-x-2">
+                <User className="w-4 h-4 text-white" />
+                <h3 className="text-sm font-semibold text-white font-poppins">Editar Dados do Operador</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingOperator(null)}
+                className="text-neutral-400 hover:text-white p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-3 rounded-lg bg-black/50 border border-white/[0.06] text-neutral-400 text-[11px]">
+              <div>E-mail da Conta: <strong className="text-white">{editingOperator.email}</strong></div>
+              <div className="text-[10px] text-neutral-500 mt-0.5">ID: {editingOperator.id}</div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[10px] text-neutral-400 uppercase mb-1">Nome Completo:</label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Nome do operador"
+                  className="w-full px-3 py-2 rounded-lg bg-black/60 border border-neutral-800 text-white focus:outline-none focus:border-white transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] text-neutral-400 uppercase mb-1">Apelido (Exibição / Saudação):</label>
+                <input
+                  type="text"
+                  value={editNickname}
+                  onChange={(e) => setEditNickname(e.target.value)}
+                  placeholder="Apelido de exibição"
+                  className="w-full px-3 py-2 rounded-lg bg-black/60 border border-neutral-800 text-white focus:outline-none focus:border-white transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] text-neutral-400 uppercase mb-1">Telefone (WhatsApp):</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={editCountryCode}
+                    onChange={(e) => setEditCountryCode(e.target.value)}
+                    placeholder="+55"
+                    className="w-16 px-2.5 py-2 rounded-lg bg-black/60 border border-neutral-800 text-white text-center focus:outline-none focus:border-white transition font-mono"
+                  />
+                  <input
+                    type="tel"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    placeholder="(11) 99999-9999"
+                    className="flex-1 px-3 py-2 rounded-lg bg-black/60 border border-neutral-800 text-white focus:outline-none focus:border-white transition font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-white/[0.08]">
+              <button
+                type="button"
+                onClick={() => setEditingOperator(null)}
+                className="px-3 py-1.5 rounded-lg bg-neutral-900 border border-white/10 text-neutral-300 hover:text-white"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={savingEditProfile}
+                className="px-4 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-semibold text-xs uppercase tracking-wider transition cursor-pointer disabled:opacity-50"
+              >
+                {savingEditProfile ? "Salvando..." : "Salvar Alterações"}
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

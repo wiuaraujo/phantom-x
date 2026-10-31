@@ -758,25 +758,26 @@ export const auth = {
 
   /**
    * Atualiza o perfil e configurações da conta do usuário autenticado
+   * Sincroniza tanto o cofre local de sessão quanto o cluster central Supabase (Auth + Profiles)
    */
-  updateCurrentUserProfile(data: {
+  async updateCurrentUserProfile(data: {
     name?: string;
     nickname?: string;
     timezone?: string;
     phone?: string;
     phoneCountryCode?: string;
-  }): {
+  }): Promise<{
     success: boolean;
     user?: User;
     error?: string;
-  } {
+  }> {
     if (typeof window === "undefined") return { success: false, error: "Ambiente inválido" };
     const session = this.getSession();
     if (!session) return { success: false, error: "Usuário não autenticado" };
 
     const users = this.getUsers();
-    const idx = users.findIndex((u) => u.id === session.user.id);
-    if (idx === -1) return { success: false, error: "Usuário não encontrado" };
+    const idx = users.findIndex((u) => u.id === session.user.id || u.email.toLowerCase() === session.user.email.toLowerCase());
+    if (idx === -1) return { success: false, error: "Usuário não encontrado no cofre de dados" };
 
     const user = users[idx];
     if (data.name && data.name.trim().length >= 2) {
@@ -795,6 +796,7 @@ export const auth = {
         const conflict = users.some(
           (u) =>
             u.id !== user.id &&
+            u.email.toLowerCase() !== user.email.toLowerCase() &&
             u.phone &&
             arePhoneNumbersEqual(u.phone, u.phoneCountryCode, cleanNewPhone, newCountryCode)
         );
@@ -826,7 +828,91 @@ export const auth = {
     session.user = updatedUser;
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
 
+    // SINCRONIZAÇÃO EM TEMPO REAL COM O CLUSTER BACKEND SUPABASE (Auth user_metadata + profiles table)
+    try {
+      const res = await fetch("/api/v1/auth/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+          nickname: user.nickname,
+          phone: user.phone,
+          phoneCountryCode: user.phoneCountryCode,
+          timezone: user.timezone,
+        }),
+      });
+
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok || resData.success === false) {
+        if (resData.error && resData.error.includes("telefone")) {
+          return {
+            success: false,
+            error: resData.error,
+          };
+        }
+      }
+    } catch (apiErr) {
+      console.warn("[Auth] Aviso ao sincronizar perfil com o backend:", apiErr);
+    }
+
     return { success: true, user: updatedUser };
+  },
+
+  /**
+   * Sincroniza dados cadastrais atualizados diretamente do cluster backend
+   */
+  async syncProfileFromServer(): Promise<User | null> {
+    if (typeof window === "undefined") return null;
+    const session = this.getSession();
+    if (!session?.user?.id && !session?.user?.email) return null;
+
+    try {
+      const query = session.user.id
+        ? `userId=${encodeURIComponent(session.user.id)}`
+        : `email=${encodeURIComponent(session.user.email)}`;
+
+      const res = await fetch(`/api/v1/auth/profile?${query}`, {
+        headers: { "Cache-Control": "no-cache" },
+      });
+      const data = await res.json();
+
+      if (data.success && data.user) {
+        const users = this.getUsers();
+        const idx = users.findIndex(
+          (u) => u.id === session.user.id || u.email.toLowerCase() === session.user.email.toLowerCase()
+        );
+
+        const newName = data.user.name || session.user.name;
+        const newNickname = data.user.nickname || session.user.nickname;
+        const newPhone = data.user.phone !== undefined ? data.user.phone : session.user.phone;
+        const newCode = data.user.phoneCountryCode || session.user.phoneCountryCode;
+        const newTz = data.user.timezone || session.user.timezone;
+
+        if (idx !== -1) {
+          users[idx].name = newName;
+          users[idx].nickname = newNickname;
+          users[idx].phone = newPhone;
+          users[idx].phoneCountryCode = newCode;
+          users[idx].timezone = newTz;
+          this.saveUsers(users);
+        }
+
+        session.user.name = newName;
+        session.user.nickname = newNickname;
+        session.user.phone = newPhone;
+        session.user.phoneCountryCode = newCode;
+        session.user.timezone = newTz;
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+
+        return session.user;
+      }
+    } catch (e) {
+      console.warn("[Auth] syncProfileFromServer aviso:", e);
+    }
+
+    return session.user;
   },
 
   /**

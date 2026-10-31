@@ -128,6 +128,28 @@ function SettingsPageContent() {
     return COUNTRY_CALLING_CODES.find((c) => c.code === code) || DEFAULT_COUNTRY_CALLING_CODE;
   });
   const [profileSavedSuccess, setProfileSavedSuccess] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileError, setProfileError] = useState("");
+
+  // Sincroniza dados oficiais do perfil do cluster Supabase no carregamento da tela
+  useEffect(() => {
+    let active = true;
+    auth.syncProfileFromServer().then((u) => {
+      if (active && u) {
+        if (u.name) setProfileName(u.name);
+        if (u.nickname) setProfileNickname(u.nickname);
+        if (u.timezone) setProfileTimezone(u.timezone);
+        if (u.phone !== undefined) setProfilePhone(u.phone);
+        if (u.phoneCountryCode) {
+          const matched = COUNTRY_CALLING_CODES.find((c) => c.code === u.phoneCountryCode);
+          if (matched) setProfileCountry(matched);
+        }
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // API Key & Telemetry state
   const [copiedKey, setCopiedKey] = useState(false);
@@ -143,18 +165,31 @@ function SettingsPageContent() {
   const [generatedWorkerScript, setGeneratedWorkerScript] = useState("");
   const [generatedClientSnippet, setGeneratedClientSnippet] = useState("");
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = auth.updateCurrentUserProfile({
-      name: profileName,
-      nickname: profileNickname,
-      timezone: profileTimezone,
-      phone: profilePhone,
-      phoneCountryCode: profileCountry.code,
-    });
-    if (res.success) {
-      setProfileSavedSuccess(true);
-      setTimeout(() => setProfileSavedSuccess(false), 3000);
+    setSavingProfile(true);
+    setProfileError("");
+    setProfileSavedSuccess(false);
+
+    try {
+      const res = await auth.updateCurrentUserProfile({
+        name: profileName,
+        nickname: profileNickname,
+        timezone: profileTimezone,
+        phone: profilePhone,
+        phoneCountryCode: profileCountry.code,
+      });
+
+      if (res.success) {
+        setProfileSavedSuccess(true);
+        setTimeout(() => setProfileSavedSuccess(false), 4000);
+      } else {
+        setProfileError(res.error || "Não foi possível salvar o perfil.");
+      }
+    } catch (err: any) {
+      setProfileError(err?.message || "Erro inesperado ao salvar alterações de perfil.");
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -906,10 +941,17 @@ function SettingsPageContent() {
                 {profileSavedSuccess && (
                   <span className="text-xs text-white font-semibold flex items-center space-x-1.5 bg-neutral-900 px-3 py-1 rounded-lg border border-neutral-700 animate-in fade-in">
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Perfil salvo com sucesso!</span>
+                    <span>Perfil salvo e sincronizado com sucesso!</span>
                   </span>
                 )}
               </div>
+
+              {profileError && (
+                <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-red-300 text-xs font-mono flex items-center space-x-2 animate-in fade-in">
+                  <ShieldAlert className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{profileError}</span>
+                </div>
+              )}
 
               <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1054,10 +1096,15 @@ function SettingsPageContent() {
                   </div>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition flex items-center justify-center space-x-2 shrink-0 font-sans shadow-sm"
+                    disabled={savingProfile}
+                    className="px-4 py-2 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition flex items-center justify-center space-x-2 shrink-0 font-sans shadow-sm disabled:opacity-50 cursor-pointer"
                   >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Salvar Perfil</span>
+                    {savingProfile ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-brand-white" />
+                    ) : (
+                      <Check className="w-3.5 h-3.5" />
+                    )}
+                    <span>{savingProfile ? "Salvando no Cluster..." : "Salvar Perfil"}</span>
                   </button>
                 </div>
               </form>
