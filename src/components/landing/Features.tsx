@@ -9,51 +9,53 @@ import {
   MonitorCheck,
   Zap,
   ArrowUpRight,
+  Wand2,
+  Globe2,
 } from "lucide-react";
 
 export const Features: React.FC = () => {
   const features = [
     {
-      title: "Proxy Reverso Transparente (HTTP 200 OK)",
+      title: "Proxy Reverso de Borda (HTTP 200 OK)",
       description:
-        "Elimine redirecionamentos 301/302 suspeitos para crawlers. O Cloudflare Worker busca e injeta a página de oferta diretamente no mesmo domínio, preservando a barra de navegação, cookies e parâmetros de conversão.",
+        "Elimine redirecionamentos 301/302 suspeitos para crawlers. A borda injeta a oferta diretamente no mesmo domínio com HTTP 200 OK, preservando cookies, parâmetros fbclid/UTMs e eliminando qualquer rastro de JavaScript.",
       icon: ArrowRightLeft,
       tag: "Reverse Proxy 200",
     },
     {
+      title: "Auditor Pré-Voo de Criativos (Creative Shield)",
+      description:
+        "Audite copies, roteiros e títulos contra mais de 50 diretrizes da Meta e Google Ads antes de subir o anúncio. Higienização semântica em 1 clique e sincronização de Whitepage para evitar ban por Burla de Sistemas.",
+      icon: Wand2,
+      tag: "Creative Shield",
+    },
+    {
+      title: "Geolocalização de Borda & ISPs Nacionais",
+      description:
+        "Leitura nativa de cabeçalhos Edge (Cloudflare e Vercel) com mapeamento in-memory de ASNs de provedores brasileiros (Claro, Vivo, TIM). Telemetria geográfica de alta precisão conectada ao Globo 360º em tempo real.",
+      icon: Globe2,
+      tag: "Edge Geo-IP",
+    },
+    {
       title: "Filtro de ASN & Datacenters de Moderação",
       description:
-        "Blacklist em memória dos Autonomous System Numbers (ASNs) de servidores da Meta (AS32934), Google (AS15169), AWS (AS16509), Hetzner, DigitalOcean e ferramentas de espionagem (AdPlexity, SpyFu).",
+        "Isolamento automático de Autonomous System Numbers (ASNs) de servidores da Meta (AS32934), Google (AS15169), AWS (AS16509) e ferramentas de espionagem de concorrentes (AdHeart, Dropispy, SpyFu).",
       icon: Cpu,
       tag: "ASN Intelligence",
     },
     {
-      title: "Validação Estrita de Tokens de Tráfego Pago",
+      title: "Telemetria de Hardware Client-Side (GPU WebGL)",
       description:
-        "Exigência de clique verificado. Qualquer acesso direto, robô explorador ou requisição sem token legítimo (fbclid ou utm_source) é imediatamente direcionado à Whitepage de conformidade institucional.",
-      icon: Fingerprint,
-      tag: "Token Attribution",
-    },
-    {
-      title: "Threat Intelligence em Tempo Real",
-      description:
-        "Consulta resiliente de reputação de IP com fallback gracioso. Identifique e barre instantaneamente redes Tor, VPNs comerciais, proxies residenciais de crawlers e nós de saída suspeitos.",
-      icon: ShieldCheck,
-      tag: "Threat Intel",
-    },
-    {
-      title: "Fingerprint Client-Side de Hardware (GPU WebGL)",
-      description:
-        "Camada 7 de telemetria no navegador do visitante. Detecta renderizadores de software virtuais (SwiftShader, llvmpipe), ambientes headless (navigator.webdriver) e hash Canvas 2D.",
+        "Camada 7 de telemetria no navegador do visitante. Detecta renderizadores de software virtuais de moderadores (SwiftShader, llvmpipe), navegadores headless automatizados (navigator.webdriver) e hash Canvas 2D.",
       icon: MonitorCheck,
       tag: "Hardware GPU",
     },
     {
-      title: "Gerador Instantâneo de Cloudflare Worker",
+      title: "Área Phantom-X & Edge Engine V2.4",
       description:
-        "Compile e baixe o código JavaScript completo do Worker com 1 clique diretamente do console operacional. Código otimizado, sem dependências externas, pronto para implantação no Cloudflare Workers.",
+        "Central com simulador interativo de inspeção de tráfego, tutoriais de contingência passo a passo e gerador de Cloudflare Worker com 1 clique, sem necessidade de servidores VPS caros ou complexos.",
       icon: Zap,
-      tag: "Edge Engine",
+      tag: "Área Phantom-X",
     },
   ];
 

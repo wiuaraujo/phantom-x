@@ -47,7 +47,7 @@ export const Hero: React.FC = () => {
               <span className="text-xs font-mono font-bold text-brand-white">&lt; 14ms Latência</span>
             </div>
             <p className="text-[11px] text-brand-secondary leading-snug">
-              Processamento na borda global sem redirects lentos 301/302.
+              Processamento em borda global com geolocalização e roteamento instantâneo.
             </p>
           </div>
 
@@ -56,10 +56,10 @@ export const Hero: React.FC = () => {
               <div className="w-5 h-5 rounded-md bg-brand-hover flex items-center justify-center text-brand-white">
                 <Shield className="w-3 h-3 text-brand-white" />
               </div>
-              <span className="text-xs font-mono font-bold text-brand-white">Zero Footprint</span>
+              <span className="text-xs font-mono font-bold text-brand-white">Creative Shield</span>
             </div>
             <p className="text-[11px] text-brand-secondary leading-snug">
-              Assinatura estéril, no-store e sanitização total de headers upstream.
+              Auditoria pré-voo de criativos e proteção contra reprovações de políticas.
             </p>
           </div>
 
@@ -71,7 +71,7 @@ export const Hero: React.FC = () => {
               <span className="text-xs font-mono font-bold text-brand-white">Proxy Reverso 200 OK</span>
             </div>
             <p className="text-[11px] text-brand-secondary leading-snug">
-              Oferta servida no mesmo domínio com fbclid e UTMs preservados.
+              Oferta servida no mesmo domínio com fbclid, UTMs e zero rastros de JS.
             </p>
           </div>
         </div>
