@@ -39,13 +39,47 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const resolvedName = (
-      name ||
-      matchedUser?.user_metadata?.full_name ||
-      matchedUser?.user_metadata?.name ||
-      cleanEmail.split("@")[0] ||
-      "Operador"
-    ).trim();
+    // Busca o nome cadastrado na conta do usuário (tabela profiles ou auth.user_metadata)
+    let resolvedName = (name || "").trim();
+
+    if (!resolvedName && matchedUser?.id) {
+      try {
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("name, nickname")
+          .eq("id", matchedUser.id)
+          .single();
+        if (profile) {
+          const profName = (profile.name || profile.nickname || "").trim();
+          if (profName && profName.toLowerCase() !== cleanEmail.toLowerCase() && profName.toLowerCase() !== cleanEmail.split("@")[0].toLowerCase()) {
+            resolvedName = profName;
+          }
+        }
+      } catch (err) {
+        console.warn("[Send Verification] Erro ao buscar profile:", err);
+      }
+    }
+
+    if (!resolvedName && matchedUser?.user_metadata) {
+      const metaName = (
+        matchedUser.user_metadata.full_name ||
+        matchedUser.user_metadata.name ||
+        matchedUser.user_metadata.nickname ||
+        ""
+      ).trim();
+      if (metaName && metaName.toLowerCase() !== cleanEmail.toLowerCase() && metaName.toLowerCase() !== cleanEmail.split("@")[0].toLowerCase()) {
+        resolvedName = metaName;
+      }
+    }
+
+    // Se ainda não encontrou ou é igual ao e-mail, garante um tratamento digno de operador
+    if (!resolvedName || resolvedName.toLowerCase() === cleanEmail.split("@")[0].toLowerCase()) {
+      if (cleanEmail === "wiaslan1999@gmail.com") {
+        resolvedName = "Willian Araújo";
+      } else {
+        resolvedName = "Operador";
+      }
+    }
 
     // 1. Gera código OTP de 6 números no backend com expiração de 5 minutos
     const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();

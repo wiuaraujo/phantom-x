@@ -164,7 +164,7 @@ export function renderVerificationEmailHtml(name: string, code: string, origin?:
     /* Anti-inversion Gmail Mobile Styles */
     .dark-card, .card-cell {
       background-color: #0c0c0e !important;
-      background: linear-gradient(#0c0c0e, #0c0c0e) !important;
+      background: linear-gradient(180deg, #151518 0%, #09090b 100%) !important;
     }
     .main-heading {
       color: #ffffff !important;
@@ -387,7 +387,7 @@ export function renderPasswordResetEmailHtml(name: string, code: string, origin?
     }
     .dark-card, .card-cell {
       background-color: #0c0c0e !important;
-      background: linear-gradient(#0c0c0e, #0c0c0e) !important;
+      background: linear-gradient(180deg, #151518 0%, #09090b 100%) !important;
     }
     .main-heading {
       color: #ffffff !important;
@@ -435,10 +435,10 @@ export function renderPasswordResetEmailHtml(name: string, code: string, origin?
     <tr>
       <td class="outer-cell" align="center" valign="top" bgcolor="#ffffff" style="padding: 40px 15px; background-color: #ffffff !important; background: #ffffff !important;">
         
-        <!-- CARD PRETO CENTRAL -->
-        <table role="presentation" class="card-table dark-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#0c0c0e" style="max-width: 520px; width: 100%; margin: 0 auto; background-color: #0c0c0e !important; background: linear-gradient(#0c0c0e, #0c0c0e) !important; border: 1px solid #27272a; border-radius: 20px; border-collapse: separate; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+        <!-- CARD PRETO CENTRAL COM DEGRADÊ LEVE -->
+        <table role="presentation" class="card-table dark-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#0c0c0e" style="max-width: 520px; width: 100%; margin: 0 auto; background-color: #0c0c0e !important; background: linear-gradient(180deg, #151518 0%, #09090b 100%) !important; border: 1px solid #27272a; border-radius: 20px; border-collapse: separate; box-shadow: 0 12px 40px rgba(0,0,0,0.45);">
           <tr>
-            <td class="card-cell dark-card" bgcolor="#0c0c0e" style="padding: 36px 32px; background-color: #0c0c0e !important; background: linear-gradient(#0c0c0e, #0c0c0e) !important; border-radius: 20px; text-align: left;">
+            <td class="card-cell dark-card" bgcolor="#0c0c0e" style="padding: 36px 32px; background-color: #0c0c0e !important; background: linear-gradient(180deg, #151518 0%, #09090b 100%) !important; border-radius: 20px; text-align: left;">
               
               <!-- Logotipo Oficial da Phantom -->
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
@@ -449,10 +449,16 @@ export function renderPasswordResetEmailHtml(name: string, code: string, origin?
                 </tr>
               </table>
 
-              <!-- Badge de Segurança -->
-              <div style="display: inline-block; padding: 4px 10px; background-color: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 6px; font-family: monospace; font-size: 11px; color: #38bdf8 !important; -webkit-text-fill-color: #38bdf8 !important; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
-                Recuperação de Acesso
-              </div>
+              <!-- Badge de Segurança em Preto com Degradê Leve (Sem Azul) -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
+                <tr>
+                  <td bgcolor="#1c1c20" style="background-color: #1c1c20 !important; background: linear-gradient(180deg, #222228 0%, #16161a 100%) !important; border: 1px solid #33333a; border-radius: 8px; padding: 5px 12px;">
+                    <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; font-size: 11px; font-weight: 600; color: #e4e4e7 !important; -webkit-text-fill-color: #e4e4e7 !important; text-transform: uppercase; letter-spacing: 1px;">
+                      Recuperação de Acesso
+                    </span>
+                  </td>
+                </tr>
+              </table>
 
               <!-- Saudação Oficial -->
               <h1 class="main-heading" style="margin: 0 0 14px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 22px; font-weight: 700; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; line-height: 1.3;">
@@ -464,11 +470,11 @@ export function renderPasswordResetEmailHtml(name: string, code: string, origin?
                 Recebemos uma solicitação para redefinir a senha de acesso da sua conta de operador na plataforma <strong>Phantom-X</strong>.
               </p>
 
-              <!-- CAIXA DO CÓDIGO DE 6 DÍGITOS EM DESTAQUE -->
+              <!-- CAIXA DO CÓDIGO DE 6 DÍGITOS EM PRETO COM DEGRADÊ LEVE (SEM AZUL) -->
               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin: 24px 0 24px 0;">
                 <tr>
-                  <td align="center" bgcolor="#18181b" style="background-color: #18181b !important; background: linear-gradient(#18181b, #18181b) !important; border: 2px solid #38bdf8; border-radius: 14px; padding: 20px 24px; text-align: center;">
-                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #38bdf8 !important; -webkit-text-fill-color: #38bdf8 !important; margin-bottom: 8px;">
+                  <td align="center" bgcolor="#141417" style="background-color: #141417 !important; background: linear-gradient(180deg, #1b1b20 0%, #0f0f13 100%) !important; border: 1px solid #383840; border-radius: 14px; padding: 22px 24px; text-align: center; box-shadow: 0 6px 24px rgba(0,0,0,0.35);">
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #a1a1aa !important; -webkit-text-fill-color: #a1a1aa !important; margin-bottom: 8px;">
                       Seu Código de Recuperação de 6 Dígitos
                     </div>
                     <div style="font-family: 'JetBrains Mono', Courier, monospace, monospace; font-size: 34px; font-weight: 800; letter-spacing: 10px; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; margin-left: 10px;">
