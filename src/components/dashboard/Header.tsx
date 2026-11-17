@@ -279,18 +279,6 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          {/* Admin Badge Shortcut (Minimalist) */}
-          {(session?.user?.role === "admin" || session?.user?.email?.toLowerCase() === "wiuaraujo@gmail.com") && (
-            <Link
-              href="/admin"
-              className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-[10px] font-mono text-red-400 hover:bg-red-500/20 transition font-bold"
-              title="Acessar Painel Master Admin"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-              <span>ADMIN</span>
-            </Link>
-          )}
-
           {/* Theme Toggle */}
           <ThemeToggle />
 

@@ -88,7 +88,7 @@ function SidebarContent() {
   const currentTab = searchParams?.get("tab");
   const isAdmin = session?.user?.role === "admin" || session?.user?.email?.toLowerCase() === "wiuaraujo@gmail.com";
 
-  // Grupos de Navegação Minimalistas (Conforme Image 2 / Resend)
+  // Grupos de Navegação Minimalistas (Painel Admin isolado fora do front)
   const navGroups = [
     {
       id: "telemetry",
@@ -118,7 +118,6 @@ function SidebarContent() {
         { label: t.dashboard.cloudflareWorker, href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
         { label: t.dashboard.cloakerSettings, href: "/dashboard/settings?tab=cloaker", icon: Sliders },
         { label: t.dashboard.profileSettings, href: "/dashboard/settings?tab=profile", icon: User },
-        ...(isAdmin ? [{ label: t.dashboard.adminPanel, href: "/admin", icon: ShieldCheck, badge: "Master" }] : []),
       ],
     },
   ];
@@ -212,16 +211,6 @@ function SidebarContent() {
                   <Code className="w-3.5 h-3.5 text-neutral-400" />
                   <span>Cloudflare Worker</span>
                 </Link>
-                {isAdmin && (
-                  <Link
-                    href="/admin"
-                    onClick={() => setShowUserMenu(false)}
-                    className="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 border border-red-500/20 transition font-semibold"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
-                    <span>Painel Admin Master</span>
-                  </Link>
-                )}
                 <div className="border-t border-neutral-800/60 my-1" />
                 <button
                   onClick={handleLogout}

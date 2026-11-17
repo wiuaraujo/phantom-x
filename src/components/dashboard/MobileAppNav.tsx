@@ -70,7 +70,6 @@ function MobileAppNavContent() {
     { label: "Cloudflare Worker", href: "/dashboard/settings?tab=worker", icon: Code, badge: "Edge" },
     { label: "Configurações do Cloaker", href: "/dashboard/settings?tab=cloaker", icon: Sliders },
     { label: "Configurações do Perfil", href: "/dashboard/settings?tab=profile", icon: User },
-    ...(isAdmin ? [{ label: "Painel Admin Master", href: "/admin", icon: ShieldCheck, badge: "Master" }] : []),
   ];
 
   const isMoreActive =

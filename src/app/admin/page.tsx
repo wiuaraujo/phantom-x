@@ -441,51 +441,30 @@ export default function AdminPortalPage() {
   const [testingEmail, setTestingEmail] = useState(false);
   const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
-  // 1. Verificação de Sessão Master
+  // 1. Verificação Estrita de Sessão Master (Rota Isolada fora do front)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const u = auth.getSession()?.user;
-      setActivePlatformUser(u);
-      if (u?.email) setAdminEmailInput(u.email);
+      setAdminEmailInput("admin@phantom.security");
 
       const stored = localStorage.getItem(ADMIN_STORAGE_SESSION);
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          if (parsed && parsed.token && Date.now() < new Date(parsed.expiresAt).getTime()) {
+          if (
+            parsed &&
+            parsed.token &&
+            parsed.token.startsWith("px_master_") &&
+            parsed.email === "admin@phantom.security" &&
+            Date.now() < new Date(parsed.expiresAt).getTime()
+          ) {
             setIsAdminAuth(true);
             return;
           }
         } catch {}
       }
 
-      if (u && (u.role === "admin" || u.email?.toLowerCase() === "wiuaraujo@gmail.com")) {
-        const session = {
-          token: `px_master_${Date.now().toString(36)}`,
-          role: "master_administrator",
-          name: u.name || "Administrador Master",
-          email: u.email,
-          authenticatedAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
-        };
-        localStorage.setItem(ADMIN_STORAGE_SESSION, JSON.stringify(session));
-        setIsAdminAuth(true);
-        return;
-      }
-
-      fetch("/api/v1/admin/system", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "check_session" }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success && data.isAdmin && data.adminSession) {
-            localStorage.setItem(ADMIN_STORAGE_SESSION, JSON.stringify(data.adminSession));
-            setIsAdminAuth(true);
-          }
-        })
-        .catch(() => {});
+      // NUNCA auto-loga por sessão de usuário comum do dashboard
+      setIsAdminAuth(false);
     }
   }, []);
 
