@@ -15,6 +15,11 @@ export type CloakerDetectedLayer =
   | "platform_token"
   | "client_hints"
   | "threat_intelligence"
+  | "referrer_validation"
+  | "reviewer_country"
+  | "vpn_detection"
+  | "behavioral_filter"
+  | "warmup_pacing"
   | "clean_traffic";
 
 export interface PhantomCloakerConfig {
@@ -35,6 +40,21 @@ export interface PhantomCloakerConfig {
   blockHeadless: boolean;
   blockSwiftShader: boolean;
   clientAction: "redirect_whitepage" | "log_only";
+  // Camada 7: Validação de Referrer (origem obrigatória de rede social)
+  exigirReferrer?: boolean;
+  referrerWhitelist?: string[];
+  // Camada 8: Bloqueio de Países de Revisores
+  reviewerCountries?: string[];
+  bloquearReviewerCountries?: boolean;
+  // Camada 9: Warmup / Drip Pacing (atraso de ativação)
+  warmupEnabled?: boolean;
+  warmupClicks?: number;
+  // Camada 10: Detecção de VPN/Proxy por ASN
+  bloquearVpnAsns?: boolean;
+  vpnBlockedAsns?: number[];
+  // Camada 11: Filtro Comportamental (engajamento humano)
+  engagementGateEnabled?: boolean;
+  engagementGateDelayMs?: number;
 }
 
 // Compatibilidade de tipo
