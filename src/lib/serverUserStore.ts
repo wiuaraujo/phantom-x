@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { PlanId } from "@/types";
+import { formatPhoneNumber } from "./countryCodes";
 
 export interface ServerUser {
   id: string;
@@ -11,7 +12,7 @@ export interface ServerUser {
   phone?: string;
   phoneCountryCode?: string;
   passwordHash?: string;
-  passwordPlain?: string; // fallback seguro para garantir acesso sem bloqueios
+  passwordPlain?: string;
   salt?: string;
   role: "admin" | "operator";
   timezone: string;
@@ -29,6 +30,7 @@ export interface ServerUser {
 
 const PEPPER = "phantom_x_cybersecurity_layer_2026";
 const PERSISTENT_FILE_PATH = "/tmp/phantom_server_users.json";
+const DELETED_FILE_PATH = "/tmp/phantom_deleted_users.json";
 
 function hashWithSalt(password: string, salt: string): string {
   return crypto.createHash("sha256").update(`${password}:${salt}:${PEPPER}`).digest("hex");
@@ -38,14 +40,17 @@ function hashSimple(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex");
 }
 
-// 🛡️ Contas Oficiais e Usuários Pré-Registrados
-const SEED_USERS: ServerUser[] = [
+// Conjunto de usuários excluídos pelo Master Admin (Tombstones permanentes)
+const deletedUsersSet = new Set<string>();
+
+// 🛡️ Contas Oficiais Iniciais
+const INITIAL_SEED_USERS: ServerUser[] = [
   {
     id: "440519d7-1cf1-499f-acbb-ec12857009c8",
     name: "Willian Araújo",
     nickname: "Will",
     email: "wiaslan1999@gmail.com",
-    phone: "11999999999",
+    phone: "",
     phoneCountryCode: "+55",
     role: "admin",
     timezone: "America/Sao_Paulo",
@@ -65,7 +70,7 @@ const SEED_USERS: ServerUser[] = [
     name: "Willian Araújo",
     nickname: "Will",
     email: "wiuaraujo@gmail.com",
-    phone: "11999999999",
+    phone: "",
     phoneCountryCode: "+55",
     role: "admin",
     timezone: "America/Sao_Paulo",
@@ -122,8 +127,25 @@ const SEED_USERS: ServerUser[] = [
   },
 ];
 
-// Mapa em memória persistido no processo Node.js
 const serverUsersMap = new Map<string, ServerUser>();
+
+function loadDeletedFromFile() {
+  try {
+    if (fs.existsSync(DELETED_FILE_PATH)) {
+      const content = fs.readFileSync(DELETED_FILE_PATH, "utf8");
+      const list = JSON.parse(content);
+      if (Array.isArray(list)) {
+        list.forEach((item) => deletedUsersSet.add(String(item).toLowerCase()));
+      }
+    }
+  } catch {}
+}
+
+function saveDeletedToFile() {
+  try {
+    fs.writeFileSync(DELETED_FILE_PATH, JSON.stringify(Array.from(deletedUsersSet)), "utf8");
+  } catch {}
+}
 
 function loadFromFile() {
   try {
@@ -132,6 +154,7 @@ function loadFromFile() {
       const list = JSON.parse(content);
       if (Array.isArray(list)) {
         list.forEach((u) => {
+          if (isUserDeleted(u.id) || isUserDeleted(u.email)) return;
           if (u.id) serverUsersMap.set(u.id, u);
           if (u.email) serverUsersMap.set(u.email.toLowerCase(), u);
         });
@@ -144,21 +167,34 @@ function loadFromFile() {
 
 function saveToFile() {
   try {
-    const uniqueUsers = Array.from(new Set(serverUsersMap.values()));
+    const uniqueUsers = Array.from(new Set(serverUsersMap.values())).filter(
+      (u) => !isUserDeleted(u.id) && !isUserDeleted(u.email)
+    );
     fs.writeFileSync(PERSISTENT_FILE_PATH, JSON.stringify(uniqueUsers, null, 2), "utf8");
   } catch (err) {
     console.warn("[serverUserStore] saveToFile warning:", err);
   }
 }
 
-// Inicializa com os usuários semente
-SEED_USERS.forEach((u) => {
-  serverUsersMap.set(u.id, u);
-  serverUsersMap.set(u.email.toLowerCase(), u);
+// 1. Carrega lista de excluídos
+loadDeletedFromFile();
+
+// 2. Inicializa seeds apenas se não tiverem sido excluídos
+INITIAL_SEED_USERS.forEach((u) => {
+  if (!isUserDeleted(u.id) && !isUserDeleted(u.email)) {
+    serverUsersMap.set(u.id, u);
+    serverUsersMap.set(u.email.toLowerCase(), u);
+  }
 });
 
-// Tenta carregar dados existentes em disco
+// 3. Carrega do arquivo persistido
 loadFromFile();
+
+export function isUserDeleted(idOrEmail?: string | null): boolean {
+  if (!idOrEmail) return false;
+  const clean = idOrEmail.trim().toLowerCase();
+  return deletedUsersSet.has(clean) || deletedUsersSet.has(idOrEmail);
+}
 
 /**
  * Localiza usuário no cofre do servidor por ID, E-mail, Username ou Telefone
@@ -167,12 +203,18 @@ export function findServerUser(identifier: string): ServerUser | null {
   if (!identifier) return null;
   const clean = identifier.trim().toLowerCase();
 
+  if (isUserDeleted(clean) || isUserDeleted(identifier)) return null;
+
   // 1. Busca direta por e-mail ou ID
   if (serverUsersMap.has(clean)) {
-    return serverUsersMap.get(clean)!;
+    const u = serverUsersMap.get(clean)!;
+    if (isUserDeleted(u.id) || isUserDeleted(u.email)) return null;
+    return u;
   }
   if (serverUsersMap.has(identifier)) {
-    return serverUsersMap.get(identifier)!;
+    const u = serverUsersMap.get(identifier)!;
+    if (isUserDeleted(u.id) || isUserDeleted(u.email)) return null;
+    return u;
   }
 
   // 2. Busca iterativa por username ou telefone
@@ -180,6 +222,7 @@ export function findServerUser(identifier: string): ServerUser | null {
   const allUsers = Array.from(serverUsersMap.values());
   for (let i = 0; i < allUsers.length; i++) {
     const user = allUsers[i];
+    if (isUserDeleted(user.id) || isUserDeleted(user.email)) continue;
     if (user.email.toLowerCase() === clean) return user;
     if (user.nickname.toLowerCase() === clean) return user;
     if (user.email.split("@")[0].toLowerCase() === clean) return user;
@@ -199,6 +242,12 @@ export function findServerUser(identifier: string): ServerUser | null {
  */
 export function saveServerUser(data: Partial<ServerUser> & { email: string }): ServerUser {
   const cleanEmail = data.email.trim().toLowerCase();
+  
+  // Se estiver na lista de deletados e for um novo signup explícito, remove da lista de deletados
+  deletedUsersSet.delete(cleanEmail);
+  if (data.id) deletedUsersSet.delete(data.id.toLowerCase());
+  saveDeletedToFile();
+
   const existing = findServerUser(cleanEmail);
 
   const now = new Date().toISOString();
@@ -206,13 +255,18 @@ export function saveServerUser(data: Partial<ServerUser> & { email: string }): S
   const cleanName = (data.name || existing?.name || cleanEmail.split("@")[0]).trim();
   const nickname = (data.nickname || existing?.nickname || cleanName.split(" ")[0]).trim();
 
+  // Formatação consistente de telefone
+  const rawPhone = data.phone !== undefined ? data.phone : (existing?.phone ?? "");
+  const phoneCountryCode = data.phoneCountryCode ?? existing?.phoneCountryCode ?? "+55";
+  const formattedPhone = rawPhone ? formatPhoneNumber(rawPhone, phoneCountryCode) : "";
+
   const user: ServerUser = {
     id,
     name: cleanName,
     nickname,
     email: cleanEmail,
-    phone: data.phone ?? existing?.phone ?? "",
-    phoneCountryCode: data.phoneCountryCode ?? existing?.phoneCountryCode ?? "+55",
+    phone: formattedPhone,
+    phoneCountryCode,
     passwordHash: data.passwordHash ?? existing?.passwordHash,
     passwordPlain: data.passwordPlain ?? existing?.passwordPlain,
     salt: data.salt ?? existing?.salt,
@@ -235,6 +289,31 @@ export function saveServerUser(data: Partial<ServerUser> & { email: string }): S
   saveToFile();
 
   return user;
+}
+
+/**
+ * Exclui permanentemente o usuário do cofre (NUNCA MAIS VOLTA)
+ */
+export function deleteServerUser(idOrEmail: string): boolean {
+  if (!idOrEmail) return false;
+  const clean = idOrEmail.trim().toLowerCase();
+
+  // Localiza usuário para obter id e e-mail juntos
+  const user = findServerUser(clean);
+  if (user) {
+    deletedUsersSet.add(user.id.toLowerCase());
+    deletedUsersSet.add(user.email.toLowerCase());
+    serverUsersMap.delete(user.id);
+    serverUsersMap.delete(user.email.toLowerCase());
+  } else {
+    deletedUsersSet.add(clean);
+    serverUsersMap.delete(clean);
+    serverUsersMap.delete(idOrEmail);
+  }
+
+  saveDeletedToFile();
+  saveToFile();
+  return true;
 }
 
 /**
@@ -299,7 +378,7 @@ export function updateUserPassword(emailOrId: string, newPassword: string): bool
   user.passwordHash = passwordHash;
   user.passwordPlain = newPassword;
   user.updatedAt = new Date().toISOString();
-  user.emailVerified = true; // Redefinir senha também valida o e-mail
+  user.emailVerified = true;
 
   serverUsersMap.set(user.id, user);
   serverUsersMap.set(user.email.toLowerCase(), user);
@@ -308,12 +387,14 @@ export function updateUserPassword(emailOrId: string, newPassword: string): bool
 }
 
 /**
- * Retorna todos os usuários registrados
+ * Retorna todos os usuários registrados NÃO excluídos
  */
 export function getAllServerUsers(): ServerUser[] {
   const unique = new Map<string, ServerUser>();
   Array.from(serverUsersMap.values()).forEach((u) => {
-    unique.set(u.id, u);
+    if (!isUserDeleted(u.id) && !isUserDeleted(u.email)) {
+      unique.set(u.id, u);
+    }
   });
   return Array.from(unique.values());
 }

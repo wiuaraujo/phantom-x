@@ -1310,9 +1310,11 @@ export default function AdminPortalPage() {
                               <div className="text-neutral-200 truncate">{user.email}</div>
                               <div className="text-[10px] mt-0.5 flex items-center space-x-1.5">
                                 <Phone className="w-3 h-3 text-neutral-400 shrink-0" />
-                                {user.phone ? (
+                                {user.phone && user.phone.trim() ? (
                                   <span className="text-neutral-300 font-mono font-medium">
-                                    {user.phoneCountryCode ? `${user.phoneCountryCode} ` : ""}{user.phone}
+                                    {user.phone.trim().startsWith("+")
+                                      ? user.phone.trim()
+                                      : `${user.phoneCountryCode || "+55"} ${user.phone.trim()}`}
                                   </span>
                                 ) : (
                                   <span className="text-neutral-500 italic">Sem telefone</span>
