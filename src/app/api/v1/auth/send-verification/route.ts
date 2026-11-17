@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { setServerOtp } from "@/lib/serverOtpStore";
 import { dispatchVerificationEmail, dispatchPasswordResetEmail } from "@/lib/mailer";
+import { findServerUser } from "@/lib/serverUserStore";
 
 export const dynamic = "force-dynamic";
 
@@ -20,16 +21,20 @@ export async function POST(req: NextRequest) {
     const cleanEmail = email.trim().toLowerCase();
     const isPasswordReset = type === "password_reset";
 
-    // Se for recuperação de senha, verifica primeiro se o usuário existe no Supabase
-    let matchedUser: any = null;
+    // 1. Busca primeiro no Cofre do Servidor (Garantia Resiliente)
+    const localUser = findServerUser(cleanEmail);
+
+    // 2. Busca também no Supabase Auth (se disponível)
+    let matchedSupabaseUser: any = null;
     try {
       const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
-      matchedUser = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
+      matchedSupabaseUser = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
     } catch (e: any) {
       console.warn(`[Send Verification] Erro ao listar usuários no Supabase: ${e?.message}`);
     }
 
-    if (isPasswordReset && !matchedUser) {
+    // Se for recuperação de senha e não existir em nenhuma base
+    if (isPasswordReset && !localUser && !matchedSupabaseUser) {
       return NextResponse.json(
         {
           success: false,
@@ -39,49 +44,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Busca o nome cadastrado na conta do usuário (tabela profiles ou auth.user_metadata)
+    // 3. Resolve o nome do usuário para o e-mail
     let resolvedName = (name || "").trim();
 
-    if (!resolvedName && matchedUser?.id) {
+    if (!resolvedName && localUser?.name) {
+      resolvedName = localUser.name;
+    }
+
+    if (!resolvedName && matchedSupabaseUser?.id) {
       try {
         const { data: profile } = await supabaseAdmin
           .from("profiles")
           .select("name, nickname")
-          .eq("id", matchedUser.id)
+          .eq("id", matchedSupabaseUser.id)
           .single();
-        if (profile) {
-          const profName = (profile.name || profile.nickname || "").trim();
-          if (profName && profName.toLowerCase() !== cleanEmail.toLowerCase() && profName.toLowerCase() !== cleanEmail.split("@")[0].toLowerCase()) {
-            resolvedName = profName;
-          }
+        if (profile?.name) {
+          resolvedName = profile.name;
         }
-      } catch (err) {
-        console.warn("[Send Verification] Erro ao buscar profile:", err);
-      }
+      } catch {}
     }
 
-    if (!resolvedName && matchedUser?.user_metadata) {
-      const metaName = (
-        matchedUser.user_metadata.full_name ||
-        matchedUser.user_metadata.name ||
-        matchedUser.user_metadata.nickname ||
-        ""
-      ).trim();
-      if (metaName && metaName.toLowerCase() !== cleanEmail.toLowerCase() && metaName.toLowerCase() !== cleanEmail.split("@")[0].toLowerCase()) {
-        resolvedName = metaName;
-      }
+    if (!resolvedName && matchedSupabaseUser?.user_metadata?.name) {
+      resolvedName = matchedSupabaseUser.user_metadata.name;
     }
 
-    // Se ainda não encontrou ou é igual ao e-mail, garante um tratamento digno de operador
     if (!resolvedName || resolvedName.toLowerCase() === cleanEmail.split("@")[0].toLowerCase()) {
-      if (cleanEmail === "wiaslan1999@gmail.com") {
+      if (cleanEmail === "wiaslan1999@gmail.com" || cleanEmail === "wiuaraujo@gmail.com") {
         resolvedName = "Willian Araújo";
       } else {
         resolvedName = "Operador";
       }
     }
 
-    // 1. Gera código OTP de 6 números no backend com expiração de 5 minutos
+    // 4. Gera código OTP de 6 números no backend com expiração de 5 minutos
     const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const record = setServerOtp(cleanEmail, resolvedName, randomOtp);
 
@@ -89,7 +84,7 @@ export async function POST(req: NextRequest) {
     let emailProviderUsed = "resend";
     let emailError: string | null = null;
 
-    // 2. Disparo Oficial (Password Reset ou Confirmação de Cadastro)
+    // 5. Disparo Oficial (Password Reset ou Confirmação de Cadastro)
     const origin = req.headers.get("origin") || req.nextUrl.origin || undefined;
 
     try {
@@ -127,31 +122,12 @@ export async function POST(req: NextRequest) {
       emailError = e?.message;
     }
 
-    // 3. Fallback adicional via Supabase APENAS para verificação de cadastro (NUNCA para reset de senha)
-    if (!emailSent && !isPasswordReset) {
+    // 6. Salva o OTP e expiração no metadata do usuário no Supabase se existir
+    if (matchedSupabaseUser) {
       try {
-        const { error: sbErr } = await supabase.auth.signInWithOtp({
-          email: cleanEmail,
-          options: {
-            shouldCreateUser: true,
-          },
-        });
-
-        if (!sbErr) {
-          emailSent = true;
-          emailProviderUsed = "supabase";
-        }
-      } catch (e: any) {
-        console.warn(`[Supabase Auth Fallback] Exceção: ${e?.message}`);
-      }
-    }
-
-    // 4. Salva o OTP e expiração no metadata do usuário no Supabase se existir
-    if (matchedUser) {
-      try {
-        await supabaseAdmin.auth.admin.updateUserById(matchedUser.id, {
+        await supabaseAdmin.auth.admin.updateUserById(matchedSupabaseUser.id, {
           user_metadata: {
-            ...matchedUser.user_metadata,
+            ...matchedSupabaseUser.user_metadata,
             email_otp: record.code,
             email_otp_expires_at: record.expiresAt,
             last_otp_type: type,

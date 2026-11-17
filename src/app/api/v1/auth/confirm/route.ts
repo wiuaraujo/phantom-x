@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyServerOtp } from "@/lib/serverOtpStore";
 import { supabaseAdmin } from "@/lib/supabase";
+import { saveServerUser } from "@/lib/serverUserStore";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,13 @@ export async function GET(req: NextRequest) {
         // Se expirou mas é a validação de clique pelo Gmail, ainda podemos aceitar se o e-mail existir
       }
     }
+
+    // Atualiza status no Cofre Resiliente do Servidor
+    saveServerUser({
+      email: cleanEmail,
+      emailVerified: true,
+      emailConfirmedAt: new Date().toISOString(),
+    });
 
     // Atualiza metadados no Supabase Auth
     try {

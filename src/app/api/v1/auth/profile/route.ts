@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { normalizePhoneNumber } from "@/lib/phoneValidator";
+import { findServerUser, saveServerUser } from "@/lib/serverUserStore";
 
 export const dynamic = "force-dynamic";
 
@@ -17,34 +18,42 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Identificador de usuário não fornecido." }, { status: 400 });
     }
 
+    const localUser = findServerUser(userId || email || "");
+
     let user: any = null;
     if (userId && userId.includes("-")) {
-      const { data } = await supabaseAdmin.auth.admin.getUserById(userId);
-      user = data?.user;
+      try {
+        const { data } = await supabaseAdmin.auth.admin.getUserById(userId);
+        user = data?.user;
+      } catch {}
     }
 
     if (!user && email) {
-      const { data } = await supabaseAdmin.auth.admin.listUsers();
-      user = data?.users?.find((u) => u.email?.toLowerCase() === email.trim().toLowerCase());
+      try {
+        const { data } = await supabaseAdmin.auth.admin.listUsers();
+        user = data?.users?.find((u) => u.email?.toLowerCase() === email.trim().toLowerCase());
+      } catch {}
     }
 
     // Busca perfil na tabela profiles via supabaseAdmin (service role)
     let profile: any = null;
     if (user?.id) {
-      const { data } = await supabaseAdmin.from("profiles").select("*").eq("id", user.id).single();
-      profile = data;
+      try {
+        const { data } = await supabaseAdmin.from("profiles").select("*").eq("id", user.id).single();
+        profile = data;
+      } catch {}
     }
 
     return NextResponse.json({
       success: true,
       user: {
-        id: user?.id || userId,
-        email: user?.email || email,
-        name: profile?.name || user?.user_metadata?.name || "",
-        nickname: profile?.nickname || user?.user_metadata?.nickname || "",
-        phone: profile?.phone || user?.user_metadata?.phone || user?.user_metadata?.phoneRaw || "",
-        phoneCountryCode: profile?.phone_country_code || user?.user_metadata?.phoneCountryCode || "+55",
-        timezone: profile?.timezone || user?.user_metadata?.timezone || "America/Sao_Paulo",
+        id: user?.id || localUser?.id || userId,
+        email: user?.email || localUser?.email || email,
+        name: profile?.name || user?.user_metadata?.name || localUser?.name || "",
+        nickname: profile?.nickname || user?.user_metadata?.nickname || localUser?.nickname || "",
+        phone: profile?.phone || user?.user_metadata?.phone || user?.user_metadata?.phoneRaw || localUser?.phone || "",
+        phoneCountryCode: profile?.phone_country_code || user?.user_metadata?.phoneCountryCode || localUser?.phoneCountryCode || "+55",
+        timezone: profile?.timezone || user?.user_metadata?.timezone || localUser?.timezone || "America/Sao_Paulo",
       },
     });
   } catch (error: any) {
@@ -93,6 +102,18 @@ async function handleUpdateProfile(req: NextRequest) {
     const cleanNickname = (nickname || "").trim() || (cleanName ? cleanName.split(" ")[0] : "");
     const cleanPhone = (phone || "").trim();
     const cleanCountryCode = (phoneCountryCode || "+55").trim();
+
+    // Atualiza imediatamente no Cofre Resiliente do Servidor
+    if (cleanEmail) {
+      saveServerUser({
+        email: cleanEmail,
+        name: cleanName,
+        nickname: cleanNickname,
+        phone: cleanPhone,
+        phoneCountryCode: cleanCountryCode,
+        timezone,
+      });
+    }
 
     // 1. Atualiza metadados no Supabase Auth
     let updatedAuthUser: any = null;
