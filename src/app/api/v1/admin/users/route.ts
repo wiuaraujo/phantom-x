@@ -4,11 +4,19 @@ import { getServerOtp, setServerOtp, clearServerOtp } from "@/lib/serverOtpStore
 import { setServerUserPlan, getServerUserPlanSync, removeServerUserPlan } from "@/lib/serverPlanStore";
 import { getAllServerUsers, findServerUser, saveServerUser, deleteServerUser, isUserDeleted } from "@/lib/serverUserStore";
 import { formatPhoneNumber } from "@/lib/countryCodes";
+import { verifyMasterAdminAuth } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
+  if (!verifyMasterAdminAuth(req)) {
+    return NextResponse.json(
+      { success: false, error: "Acesso não autorizado ao Console de Governança Master." },
+      { status: 401 }
+    );
+  }
+
   try {
     const usersMap = new Map<string, any>();
 
@@ -169,6 +177,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!verifyMasterAdminAuth(req)) {
+    return NextResponse.json(
+      { success: false, error: "Acesso não autorizado ao Console de Governança Master." },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { action, userId, email, role } = body;

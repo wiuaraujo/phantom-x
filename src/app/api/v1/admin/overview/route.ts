@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { store } from "@/lib/store";
 import { getServerUserPlanSync } from "@/lib/serverPlanStore";
+import { verifyMasterAdminAuth } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
+  if (!verifyMasterAdminAuth(req)) {
+    return NextResponse.json(
+      { success: false, error: "Acesso não autorizado ao Console de Governança Master." },
+      { status: 401 }
+    );
+  }
+
   try {
     let supabaseStatus = "disconnected";
     let supabaseLatencyMs = 0;

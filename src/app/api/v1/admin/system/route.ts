@@ -1,35 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { dispatchVerificationEmail } from "@/lib/mailer";
 import { resolveResendApiKey } from "@/lib/resend";
+import {
+  ALLOWED_ADMIN_EMAILS,
+  AUTHORIZED_MASTER_KEYS,
+  verifyMasterAdminAuth,
+} from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
 let globalKillSwitchActive = false;
 
-// Chaves mestras autorizadas para o Painel Admin Independente
-const AUTHORIZED_MASTER_KEYS = [
-  "Analivia@13@#",
-  "PhantomX@2026!",
-  "admin",
-  "master_px_secret_key_2026",
-];
-
 export async function GET(req: NextRequest) {
-  // Verifica se o usuário possui cookie de sessão administrativa ativo
-  let isOperatorAdmin = false;
-  let adminEmail = "admin@phantom-x.pro";
-
-  const cookieToken = req.cookies.get("phantom_token")?.value;
-  if (cookieToken) {
-    try {
-      const decoded = JSON.parse(Buffer.from(cookieToken, "base64").toString("utf-8"));
-      if (decoded && (decoded.role === "admin" || decoded.email?.toLowerCase() === "wiuaraujo@gmail.com")) {
-        isOperatorAdmin = true;
-        adminEmail = decoded.email;
-      }
-    } catch {}
-  }
+  // O console admin requer token mestre legítimo
+  const isOperatorAdmin = verifyMasterAdminAuth(req);
+  const adminEmail = isOperatorAdmin ? "admin@phantom.security" : null;
 
   const resolvedKey = resolveResendApiKey();
   const hasResend = Boolean(resolvedKey);
@@ -41,7 +26,7 @@ export async function GET(req: NextRequest) {
     adminEmail,
     data: {
       globalKillSwitchActive,
-      edgeEngineVersion: "Phantom-X Edge Core v2.4",
+      edgeEngineVersion: "Phantom-X Edge Core v2.4 (Isolated Security)",
       cloakerMode: globalKillSwitchActive ? "EMERGENCY_SAFE_ALL" : "ACTIVE_FILTERING",
       timestamp: new Date().toISOString(),
       emailService: {
@@ -57,108 +42,102 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
     const { action, passkey, email, password } = body;
 
-    // 0. VERIFICAÇÃO AUTOMÁTICA DE SESSÃO ADMIN ATIVA (VIA COOKIE)
+    // 0. VERIFICAÇÃO ESTREITA DE SESSÃO ADMIN ATIVA (VIA TOKEN px_master_)
     if (action === "check_session") {
-      const cookieToken = req.cookies.get("phantom_token")?.value;
-      if (cookieToken) {
-        try {
-          const decoded = JSON.parse(Buffer.from(cookieToken, "base64").toString("utf-8"));
-          if (decoded && (decoded.role === "admin" || decoded.email?.toLowerCase() === "wiuaraujo@gmail.com")) {
-            const adminToken = `px_master_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
-            return NextResponse.json({
-              success: true,
-              isAdmin: true,
-              message: "Sessão de Administrador detectada automaticamente.",
-              adminSession: {
-                token: adminToken,
-                role: "master_administrator",
-                name: decoded.name || "Administrador Master",
-                email: decoded.email,
-                authenticatedAt: new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
-              },
-            });
-          }
-        } catch {}
+      const isAuth = verifyMasterAdminAuth(req);
+      if (!isAuth) {
+        return NextResponse.json({ success: false, isAdmin: false });
       }
 
-      return NextResponse.json({ success: false, isAdmin: false });
-    }
-
-    // 1. AUTENTICAÇÃO MESTRE PARA O PAINEL ADMIN
-    if (action === "auth_admin") {
-      const input = (passkey || password || "").trim();
-      let isAuthorized = AUTHORIZED_MASTER_KEYS.includes(input);
-      let resolvedEmail = email || "admin@phantom-x.pro";
-      let resolvedName = "Engenheiro Chefe de Operações";
-
-      // Se não bateu com a chave mestra direta, tenta validar via credenciais do Supabase
-      if (!isAuthorized && input) {
-        const candidateEmail = email?.trim() || "wiuaraujo@gmail.com";
-        try {
-          const { data: authData, error: aErr } = await supabase.auth.signInWithPassword({
-            email: candidateEmail,
-            password: input,
-          });
-
-          if (!aErr && authData?.user) {
-            const userRole = authData.user.user_metadata?.role || "admin";
-            if (userRole === "admin" || candidateEmail.toLowerCase() === "wiuaraujo@gmail.com") {
-              isAuthorized = true;
-              resolvedEmail = authData.user.email || candidateEmail;
-              resolvedName = authData.user.user_metadata?.name || "Administrador Master";
-            }
-          }
-        } catch {}
-      }
-
-      // Também verifica se tem cookie de admin ativo no momento do envio
-      if (!isAuthorized) {
-        const cookieToken = req.cookies.get("phantom_token")?.value;
-        if (cookieToken) {
-          try {
-            const decoded = JSON.parse(Buffer.from(cookieToken, "base64").toString("utf-8"));
-            if (decoded && (decoded.role === "admin" || decoded.email?.toLowerCase() === "wiuaraujo@gmail.com")) {
-              isAuthorized = true;
-              resolvedEmail = decoded.email;
-              resolvedName = decoded.name || "Administrador Master";
-            }
-          } catch {}
-        }
-      }
-
-      if (!isAuthorized) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Credenciais de Acesso Inválidas. Insira a Chave Mestra ou a Senha da sua Conta de Administrador.",
-          },
-          { status: 401 }
-        );
-      }
-
-      // Gera token de sessão administrativa
-      const adminToken = `px_master_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
-
+      const cookieToken =
+        req.cookies.get("phantom_admin_token")?.value ||
+        req.headers.get("x-phantom-admin-token") ||
+        "";
       return NextResponse.json({
         success: true,
-        message: "Acesso Mestre Concedido ao Centro de Governança Phantom-X.",
+        isAdmin: true,
+        message: "Sessão de Master Administrador ativa e validada.",
         adminSession: {
-          token: adminToken,
+          token: cookieToken.startsWith("px_master_")
+            ? cookieToken
+            : `px_master_${Date.now().toString(36)}`,
           role: "master_administrator",
-          name: resolvedName,
-          email: resolvedEmail,
+          name: "Master Administrator",
+          email: "admin@phantom.security",
           authenticatedAt: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
         },
       });
     }
 
-    // 2. TOGGLE DO KILL-SWITCH DE EMERGÊNCIA GLOBAL
+    // 1. AUTENTICAÇÃO MESTRE PARA O PAINEL ADMIN (ROTA E E-MAIL EXCLUSIVOS)
+    if (action === "auth_admin") {
+      const cleanEmail = (email || "").trim().toLowerCase();
+
+      // Bloqueio rigoroso: apenas e-mails mestres oficiais da Phantom Security podem acessar
+      if (!ALLOWED_ADMIN_EMAILS.includes(cleanEmail)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Acesso restrito. Este e-mail não possui autorização de Master Admin.",
+          },
+          { status: 403 }
+        );
+      }
+
+      const input = (passkey || password || "").trim();
+      const isAuthorized = AUTHORIZED_MASTER_KEYS.includes(input);
+
+      if (!isAuthorized) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Credenciais de Acesso Inválidas. Insira a Chave Mestra autorizada para o console.",
+          },
+          { status: 401 }
+        );
+      }
+
+      // Gera token de sessão mestre de alta entropia
+      const adminToken = `px_master_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 10)}`;
+
+      const response = NextResponse.json({
+        success: true,
+        message: "Acesso Mestre Concedido ao Centro de Governança Phantom-X.",
+        adminSession: {
+          token: adminToken,
+          role: "master_administrator",
+          name: "Phantom Security Chief",
+          email: cleanEmail,
+          authenticatedAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+        },
+      });
+
+      // Define cookie exclusivo do Master Admin
+      response.cookies.set("phantom_admin_token", adminToken, {
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 24 * 3600,
+      });
+
+      return response;
+    }
+
+    // 2. TOGGLE DO KILL-SWITCH DE EMERGÊNCIA GLOBAL (REQUER AUTH MASTER)
     if (action === "toggle_killswitch") {
+      if (!verifyMasterAdminAuth(req)) {
+        return NextResponse.json(
+          { success: false, error: "Acesso não autorizado. Chave mestre necessária." },
+          { status: 403 }
+        );
+      }
+
       globalKillSwitchActive = !globalKillSwitchActive;
       return NextResponse.json({
         success: true,
@@ -169,16 +148,23 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 3. TESTE DE DISPARO DE E-MAIL (RESEND / SMTP)
+    // 3. TESTE DE DISPARO DE E-MAIL (RESEND / SMTP) (REQUER AUTH MASTER)
     if (action === "test_email") {
-      const targetEmail = body.to || email || "wiuaraujo@gmail.com";
-      const origin = req.headers.get("origin") || req.nextUrl.origin || "https://phantom-x.pro";
+      if (!verifyMasterAdminAuth(req)) {
+        return NextResponse.json(
+          { success: false, error: "Acesso não autorizado. Chave mestre necessária." },
+          { status: 403 }
+        );
+      }
+
+      const targetEmail = body.to || email || "admin@phantom.security";
+      const origin =
+        req.headers.get("origin") || req.nextUrl.origin || "https://phantom-x.pro";
       const providedKey = body.resendApiKey || body.apiKey;
 
       if (providedKey && typeof providedKey === "string" && providedKey.trim().startsWith("re_")) {
         process.env.RESEND_API_KEY = providedKey.trim();
         try {
-          // Atualiza também no .env.local se estiver rodando localmente
           const fs = await import("fs");
           const path = await import("path");
           const envPath = path.resolve(process.cwd(), ".env.local");

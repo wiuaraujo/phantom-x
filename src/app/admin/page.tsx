@@ -395,7 +395,6 @@ export default function AdminPortalPage() {
   const [isAdminAuth, setIsAdminAuth] = useState(false);
   const [passkeyInput, setPasskeyInput] = useState("");
   const [adminEmailInput, setAdminEmailInput] = useState("");
-  const [activePlatformUser, setActivePlatformUser] = useState<any>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
 
@@ -517,22 +516,43 @@ export default function AdminPortalPage() {
     };
   }, [operators]);
 
+  // Cabeçalhos autenticados para as APIs restritas do Console Master
+  const getAdminHeaders = (extraHeaders: Record<string, string> = {}) => {
+    let token = "";
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(ADMIN_STORAGE_SESSION);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          token = parsed?.token || "";
+        }
+      } catch {}
+    }
+    return {
+      "Content-Type": "application/json",
+      "x-phantom-admin-token": token,
+      Authorization: `Bearer ${token}`,
+      ...extraHeaders,
+    };
+  };
+
   const loadDashboardData = async () => {
     setLoadingData(true);
     try {
       const timestamp = Date.now();
+      const headers = getAdminHeaders({ "Cache-Control": "no-cache", Pragma: "no-cache" });
       const [overviewRes, usersRes, sysRes] = await Promise.all([
         fetch(`/api/v1/admin/overview?_t=${timestamp}`, {
           cache: "no-store",
-          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+          headers,
         }),
         fetch(`/api/v1/admin/users?_t=${timestamp}`, {
           cache: "no-store",
-          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+          headers,
         }),
         fetch(`/api/v1/admin/system?_t=${timestamp}`, {
           cache: "no-store",
-          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+          headers,
         }),
       ]);
 
@@ -594,6 +614,9 @@ export default function AdminPortalPage() {
 
   const handleAdminLogout = () => {
     localStorage.removeItem(ADMIN_STORAGE_SESSION);
+    if (typeof document !== "undefined") {
+      document.cookie = "phantom_admin_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
     setIsAdminAuth(false);
   };
 
@@ -615,7 +638,7 @@ export default function AdminPortalPage() {
     try {
       const res = await fetch("/api/v1/admin/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders(),
         body: JSON.stringify({
           action,
           userId: user.id,
@@ -719,7 +742,7 @@ export default function AdminPortalPage() {
     try {
       const res = await fetch("/api/v1/admin/system", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ action: "toggle_killswitch" }),
       });
       const data = await res.json();
@@ -738,7 +761,7 @@ export default function AdminPortalPage() {
     try {
       const res = await fetch("/api/v1/admin/system", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders(),
         body: JSON.stringify({
           action: "test_email",
           to: testEmailTarget,
@@ -824,42 +847,15 @@ export default function AdminPortalPage() {
           )}
 
           <form onSubmit={handleAdminLogin} className="space-y-3.5">
-            {activePlatformUser && activePlatformUser.role === "admin" && (
-              <div className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 text-xs font-mono flex items-center justify-between">
-                <div className="truncate mr-2">
-                  <span className="text-neutral-500 block text-[10px] uppercase">Conta Ativa:</span>
-                  <span className="text-white truncate block">{activePlatformUser.email}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const session = {
-                      token: `px_master_${Date.now().toString(36)}`,
-                      role: "master_administrator",
-                      name: activePlatformUser.name || "Administrador Master",
-                      email: activePlatformUser.email,
-                      authenticatedAt: new Date().toISOString(),
-                      expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
-                    };
-                    localStorage.setItem(ADMIN_STORAGE_SESSION, JSON.stringify(session));
-                    setIsAdminAuth(true);
-                  }}
-                  className="px-2.5 py-1.5 rounded-lg bg-white text-black font-semibold text-[10px] uppercase shrink-0 hover:bg-neutral-200 transition cursor-pointer"
-                >
-                  Entrar
-                </button>
-              </div>
-            )}
-
             <div>
               <label className="block text-[10px] font-mono uppercase text-neutral-400 mb-1">
-                E-mail de Administrador
+                E-mail de Administrador Master
               </label>
               <input
                 type="email"
                 value={adminEmailInput}
                 onChange={(e) => setAdminEmailInput(e.target.value)}
-                placeholder="seu.email@exemplo.com"
+                placeholder="admin@phantom.security"
                 className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-neutral-800 text-white placeholder-neutral-600 text-xs font-mono focus:outline-none focus:border-white transition"
               />
             </div>

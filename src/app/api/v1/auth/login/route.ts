@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     // 1. Verificação Especial Master Admin
     if (cleanId === MASTER_ADMIN_EMAIL) {
-      if (password === "PhantomAdmin#2026" || password === "AdminMaster#2026" || password === "admin123") {
+      if (password === "PhantomAdmin#2026" || password === "AdminMaster#2026" || password === "Analivia@13@#") {
         const adminUser = {
           id: "usr_px_admin_master",
           name: "Phantom Security Chief",
@@ -177,7 +177,9 @@ export async function POST(req: NextRequest) {
     const resolvedPhone = profileData?.phone || localUser?.phone || meta.phone || meta.phoneRaw || targetUser?.phone || "";
     const resolvedCountryCode = profileData?.phone_country_code || localUser?.phoneCountryCode || meta.phoneCountryCode || "+55";
     const resolvedTz = profileData?.timezone || localUser?.timezone || meta.timezone || "America/Sao_Paulo";
-    const resolvedRole = profileData?.role || localUser?.role || meta.role || (cleanId.includes("admin") || cleanId === "wiaslan1999@gmail.com" || cleanId === "wiuaraujo@gmail.com" ? "admin" : "operator");
+    // Segurança Estrita: Apenas e-mails oficiais de Master Admin possuem role admin; todos os outros são estritamente operadores
+    const ALLOWED_ADMIN_EMAILS = [MASTER_ADMIN_EMAIL, "admin@phantom-x.pro"];
+    const resolvedRole = ALLOWED_ADMIN_EMAILS.includes(cleanId) ? "admin" : "operator";
     const resolvedPlan = planRecord.plan || localUser?.plan || meta.plan || "free";
     const resolvedPlanStatus = planRecord.planStatus || localUser?.planStatus || meta.plan_status || "active";
 
