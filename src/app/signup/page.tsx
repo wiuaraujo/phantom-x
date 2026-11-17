@@ -93,16 +93,9 @@ function SignupFormInner() {
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = name.trim();
 
-    // 1. Validação preventiva de e-mail já existente
+    // 1. Validação preventiva de telefone já cadastrado em outra conta
     const existingUsers = auth.getUsers();
-    if (existingUsers.some((u) => u.email.toLowerCase() === cleanEmail)) {
-      setError(t.signup.existingAccountError);
-      setIsExistingUser(true);
-      return;
-    }
-
-    // 2. Validação preventiva de telefone já cadastrado no cofre
-    if (existingUsers.some((u) => u.phone && arePhoneNumbersEqual(u.phone, u.phoneCountryCode, phone, selectedCountry.code))) {
+    if (existingUsers.some((u) => u.phone && u.email.toLowerCase() !== cleanEmail && arePhoneNumbersEqual(u.phone, u.phoneCountryCode, phone, selectedCountry.code))) {
       setError(t.signup.phoneAlreadyRegistered);
       setIsExistingUser(true);
       return;
@@ -114,7 +107,7 @@ function SignupFormInner() {
       return;
     }
 
-    // 3. Validação Estrita de Complexidade da Senha (A-Z, a-z, 0-9, símbolos, bloqueio só números)
+    // 2. Validação Estrita de Complexidade da Senha (A-Z, a-z, 0-9, símbolos, bloqueio só números)
     if (!pwdValidation.isValid) {
       setError(pwdValidation.errors[0] || t.auth.passwordMinLength);
       return;
@@ -156,7 +149,17 @@ function SignupFormInner() {
         return;
       }
 
-      setShowVerificationModal(true);
+      // Se a conta já nasceu ativada com sessão pronta, entra direto!
+      if (result.session) {
+        router.push("/dashboard");
+        return;
+      }
+
+      if (result.requiresEmailVerification) {
+        setShowVerificationModal(true);
+      } else {
+        router.push("/dashboard");
+      }
     } catch {
       setError(t.auth.authError);
     } finally {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { verifyServerOtp } from "@/lib/serverOtpStore";
 import { validatePasswordSecurity } from "@/lib/passwordValidator";
+import { findServerUser, updateUserPassword } from "@/lib/serverUserStore";
 
 export const dynamic = "force-dynamic";
 
@@ -18,24 +19,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Localiza o usuário no Supabase Auth
-    const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
-    const existing = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
+    // 1. Valida se o usuário existe em alguma base (Cofre Local ou Supabase)
+    const localUser = findServerUser(cleanEmail);
+    let supabaseUser: any = null;
+    try {
+      const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
+      supabaseUser = userList?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
+    } catch {}
 
-    if (!existing) {
+    if (!localUser && !supabaseUser) {
       return NextResponse.json(
         { success: false, error: "Usuário não localizado no sistema." },
         { status: 404 }
       );
     }
 
-    // 2. Valida o código OTP (Memória Server OTP Store OU Fallback Supabase Metadata)
+    // 2. Valida o código OTP
     const otpResult = verifyServerOtp(cleanEmail, cleanCode);
     let isCodeValid = otpResult.success;
 
-    if (!isCodeValid) {
-      const metaOtp = existing.user_metadata?.email_otp;
-      const metaExpires = existing.user_metadata?.email_otp_expires_at;
+    if (!isCodeValid && supabaseUser) {
+      const metaOtp = supabaseUser.user_metadata?.email_otp;
+      const metaExpires = supabaseUser.user_metadata?.email_otp_expires_at;
       const now = Date.now();
 
       if (metaOtp && metaOtp.toString() === cleanCode && metaExpires && now <= Number(metaExpires)) {
@@ -67,18 +72,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4. Atualiza a senha no Supabase Auth
-    await supabaseAdmin.auth.admin.updateUserById(existing.id, {
-      password: newPassword,
-      email_confirm: true,
-      user_metadata: {
-        ...existing.user_metadata,
-        email_verified: true,
-        email_otp: null,
-        email_otp_expires_at: null,
-        password_updated_at: new Date().toISOString(),
-      },
-    });
+    // 4. Atualiza a senha no Cofre do Servidor (Garantia Imediata de Acesso)
+    updateUserPassword(cleanEmail, newPassword);
+
+    // 5. Tenta atualizar também no Supabase Auth
+    if (supabaseUser) {
+      try {
+        await supabaseAdmin.auth.admin.updateUserById(supabaseUser.id, {
+          password: newPassword,
+          email_confirm: true,
+          user_metadata: {
+            ...supabaseUser.user_metadata,
+            email_verified: true,
+            email_otp: null,
+            email_otp_expires_at: null,
+            password_updated_at: new Date().toISOString(),
+          },
+        });
+      } catch (sbErr) {
+        console.warn("[Reset Password] Supabase update warning:", sbErr);
+      }
+    }
 
     return NextResponse.json({
       success: true,

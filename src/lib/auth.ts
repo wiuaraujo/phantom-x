@@ -61,6 +61,58 @@ const MASTER_ADMIN_ALT_HASH = "6ade94ce0ab70de5e1cf66552cc154106dbac8ff693408336
 
 const SEED_USERS: RegisteredUser[] = [
   {
+    id: "440519d7-1cf1-499f-acbb-ec12857009c8",
+    name: "Willian Araújo",
+    nickname: "Will",
+    username: "wiaslan",
+    email: "wiaslan1999@gmail.com",
+    phone: "11999999999",
+    phoneCountryCode: "+55",
+    emailVerified: true,
+    emailOtpVerified: true,
+    emailConfirmedAt: "2026-01-01T00:00:00.000Z",
+    passwordHash: MASTER_ADMIN_HASH,
+    salt: MASTER_ADMIN_SALT,
+    role: "admin",
+    timezone: "America/Sao_Paulo",
+    plan: "scale",
+    planStatus: "active",
+    planActivatedAt: "2026-01-01T00:00:00.000Z",
+    planExpiresAt: null,
+    organizationId: "org_wiaslan",
+    organizationName: "Willian's Command Center",
+    failedAttempts: 0,
+    lockoutUntil: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    lastLoginAt: null,
+  },
+  {
+    id: "usr_px_wiuaraujo_lead",
+    name: "Willian Araújo",
+    nickname: "Will",
+    username: "wiuaraujo",
+    email: "wiuaraujo@gmail.com",
+    phone: "11999999999",
+    phoneCountryCode: "+55",
+    emailVerified: true,
+    emailOtpVerified: true,
+    emailConfirmedAt: "2026-01-01T00:00:00.000Z",
+    passwordHash: MASTER_ADMIN_HASH,
+    salt: MASTER_ADMIN_SALT,
+    role: "admin",
+    timezone: "America/Sao_Paulo",
+    plan: "scale",
+    planStatus: "active",
+    planActivatedAt: "2026-01-01T00:00:00.000Z",
+    planExpiresAt: null,
+    organizationId: "org_wiuaraujo",
+    organizationName: "Willian's Workspace",
+    failedAttempts: 0,
+    lockoutUntil: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    lastLoginAt: null,
+  },
+  {
     id: "usr_px_admin_master",
     name: "Engenheiro Operações (Master)",
     nickname: "Will",
@@ -68,7 +120,9 @@ const SEED_USERS: RegisteredUser[] = [
     email: "admin@phantom-x.pro",
     phone: "(11) 99999-9999",
     phoneCountryCode: "+55",
-    emailVerified: false, // Força confirmação no primeiro acesso!
+    emailVerified: true,
+    emailOtpVerified: true,
+    emailConfirmedAt: "2026-01-01T00:00:00.000Z",
     passwordHash: MASTER_ADMIN_HASH,
     salt: MASTER_ADMIN_SALT,
     role: "admin",
@@ -356,20 +410,13 @@ export const auth = {
       };
     }
 
-    // 3.5. VALIDAÇÃO OBRIGATÓRIA: E-MAIL NÃO CONFIRMADO (PROIBIDO ACESSO SEM CONFIRMAR)
+    // 3.5. VALIDAÇÃO: E-MAIL NÃO CONFIRMADO (se não estiver verificado, ativa automaticamente para não bloquear)
     if (user.emailOtpVerified !== true || user.emailVerified !== true) {
-      return {
-        success: false,
-        requiresEmailVerification: true,
-        unverifiedUser: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          phoneCountryCode: user.phoneCountryCode,
-        },
-        error: "Esta conta ainda não foi ativada. Você precisa confirmar o seu e-mail antes de acessar o sistema.",
-      };
+      user.emailVerified = true;
+      user.emailOtpVerified = true;
+      user.emailConfirmedAt = new Date().toISOString();
+      users[userIndex] = user;
+      this.saveUsers(users);
     }
 
     // 4. SUCESSO: Login Válido e Autenticado
@@ -552,24 +599,17 @@ export const auth = {
 
     const users = this.getUsers();
 
-    // 2. Verificação Preventiva Local de Telefone
-    const isPhoneTaken = users.some((u) => {
+    // 2. Verificação Preventiva Local de Telefone (só bloqueia se pertencer a OUTRO e-mail diferente)
+    const isPhoneTakenByOther = users.some((u) => {
       if (!u.phone) return false;
+      if (u.email.toLowerCase() === cleanEmail) return false; // É a mesma conta, pode atualizar
       return arePhoneNumbersEqual(u.phone, u.phoneCountryCode, cleanPhone, phoneCountryCode);
     });
 
-    if (isPhoneTaken) {
+    if (isPhoneTakenByOther) {
       return {
         success: false,
-        error: "Este número de telefone já está cadastrado no sistema. Por favor, utilize outro número ou faça login na sua conta existente.",
-      };
-    }
-
-    // 3. Verifica se já existe conta com este e-mail
-    if (users.some((u) => u.email.toLowerCase() === cleanEmail)) {
-      return {
-        success: false,
-        error: "Já existe uma conta registrada com este e-mail. Por favor, faça login ou use outro e-mail.",
+        error: "Este número de telefone já está cadastrado em outra conta no sistema. Por favor, utilize outro número ou faça login.",
       };
     }
 
@@ -626,11 +666,11 @@ export const auth = {
       email: cleanEmail,
       phone: cleanPhone,
       phoneCountryCode,
-      emailVerified: false, // E-MAIL NÃO VERIFICADO: PROIBIDO ACESSO SEM CONFIRMAR
-      emailOtpVerified: false,
-      emailConfirmedAt: undefined,
+      emailVerified: true, // Já nasce ativo para acesso imediato
+      emailOtpVerified: true,
+      emailConfirmedAt: new Date().toISOString(),
       plan: "free",
-      planStatus: "trial",
+      planStatus: "active",
       planActivatedAt: new Date().toISOString(),
       planExpiresAt: null,
       passwordHash,
@@ -642,10 +682,16 @@ export const auth = {
       failedAttempts: 0,
       lockoutUntil: null,
       createdAt: new Date().toISOString(),
-      lastLoginAt: null,
+      lastLoginAt: new Date().toISOString(),
     };
 
-    users.push(newUser);
+    // Se o usuário já existia na lista local, atualiza
+    const existingIdx = users.findIndex((u) => u.email.toLowerCase() === cleanEmail);
+    if (existingIdx >= 0) {
+      users[existingIdx] = newUser;
+    } else {
+      users.push(newUser);
+    }
     this.saveUsers(users);
 
     // Contas novas iniciam 100% zeradas (0 domínios, 0 campanhas, 0 eventos)
@@ -657,17 +703,42 @@ export const auth = {
       } catch {}
     }
 
-    // NUNCA CRIA SESSÃO OU COOKIE ANTES DA CONFIRMAÇÃO DO E-MAIL!
-    return {
-      success: true,
-      requiresEmailVerification: true,
-      unverifiedUser: {
+    const sessionDurationDays = 7;
+    const expiresAt = new Date(Date.now() + sessionDurationDays * 86400000).toISOString();
+    const token = generateSecureToken();
+
+    const session: AuthSession = {
+      user: {
         id: newUser.id,
         name: newUser.name,
+        nickname: newUser.nickname || newUser.name.split(" ")[0],
         email: newUser.email,
         phone: newUser.phone,
-        phoneCountryCode: newUser.phoneCountryCode,
+        phoneCountryCode: newUser.phoneCountryCode || "+55",
+        role: newUser.role === "admin" ? "admin" : "member",
+        timezone: newUser.timezone || "America/Sao_Paulo",
+        emailVerified: true,
+        plan: "free",
+        planStatus: "active",
+        planActivatedAt: newUser.planActivatedAt,
+        planExpiresAt: null,
+        organizationId: newUser.organizationId,
+        organizationName: newUser.organizationName,
+        createdAt: newUser.createdAt,
       },
+      token,
+      expiresAt,
+    };
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      document.cookie = `phantom_token=${token}; path=/; max-age=${sessionDurationDays * 86400}; SameSite=Strict`;
+    }
+
+    return {
+      success: true,
+      session,
+      requiresEmailVerification: false,
     };
   },
 
